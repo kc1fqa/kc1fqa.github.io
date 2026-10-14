@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC1FQA · Coming Soon</title>
+<meta name="description" content="KC1FQA amateur radio station. Site coming soon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<style>
+  :root {
+    --bg: #070b0d;
+    --fg: #e6f2ec;
+    --dim: #6f8a80;
+    --accent: #33ff99;
+    --accent-2: #ffb347;
+    --line: rgba(51, 255, 153, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  canvas#waterfall {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0.55;
+  }
+  .scan {
+    position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 2px 3px);
+  }
+  .vignette {
+    position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(7,11,13,0) 30%, rgba(7,11,13,0.92) 100%);
+  }
+  main {
+    position: relative; z-index: 2;
+    min-height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px 16px;
+    text-align: center;
+  }
+  .status {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    color: var(--accent-2);
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .led {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 10px var(--accent-2);
+    transition: opacity 0.05s;
+  }
+  .led.off { opacity: 0.15; box-shadow: none; }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(3.4rem, 17vw, 10rem);
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    text-shadow: 0 0 24px rgba(51,255,153,0.35), 0 0 2px rgba(51,255,153,0.8);
+  }
+  h1 .digit { color: var(--accent); }
+  .morse {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--dim);
+    font-size: clamp(0.7rem, 2.6vw, 1rem);
+    letter-spacing: 0.15em;
+    margin-top: 14px;
+    word-spacing: 0.6em;
+  }
+  .morse span.on { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+  .tag {
+    margin-top: 34px;
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    font-weight: 500;
+  }
+  .sub {
+    margin-top: 8px;
+    color: var(--dim);
+    font-size: 0.95rem;
+  }
+  .panel {
+    margin-top: 38px;
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .readout {
+    border: 1px solid var(--line);
+    background: rgba(7,11,13,0.7);
+    padding: 10px 16px;
+    border-radius: 6px;
+    min-width: 140px;
+  }
+  .readout .k { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--dim); }
+  .readout .v { font-size: 1.15rem; color: var(--accent); margin-top: 4px; }
+  footer {
+    position: fixed; bottom: 14px; left: 0; right: 0; z-index: 2;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--dim);
+    letter-spacing: 0.2em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    canvas#waterfall { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="waterfall" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<main>
+  <div class="status"><span class="led" id="led"></span>STANDING BY</div>
+  <h1>KC<span class="digit">1</span>FQA</h1>
+  <div class="morse" id="morse" aria-label="KC1FQA in Morse code"></div>
+  <p class="tag">Station coming on the air soon.</p>
+  <p class="sub">Amateur radio · New England</p>
+
+  <div class="panel">
+    <div class="readout"><div class="k">UTC</div><div class="v" id="utc">--:--:--</div></div>
+    <div class="readout"><div class="k">LOCAL</div><div class="v" id="local">--:--:--</div></div>
+  </div>
+</main>
+
+<footer>73 DE KC1FQA</footer>
+
+<script>
+  // Clocks
+  const pad = n => String(n).padStart(2, "0");
+  function tick() {
+    const d = new Date();
+    document.getElementById("utc").textContent =
+      pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds());
+    document.getElementById("local").textContent =
+      pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Morse readout, keyed in real time (~15 WPM)
+  const code = { K:"-.-", C:"-.-.", "1":".----", F:"..-.", Q:"--.-", A:".-" };
+  const call = "KC1FQA";
+  const morseEl = document.getElementById("morse");
+  const led = document.getElementById("led");
+  const spans = [];
+  call.split("").forEach((ch, i) => {
+    const s = document.createElement("span");
+    s.textContent = code[ch].replace(/\./g, "·").replace(/-/g, "–");
+    morseEl.appendChild(s);
+    if (i < call.length - 1) morseEl.appendChild(document.createTextNode(" "));
+    spans.push(s);
+  });
+  const unit = 80;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function key() {
+    while (true) {
+      for (let i = 0; i < call.length; i++) {
+        spans[i].classList.add("on");
+        for (const el of code[call[i]]) {
+          led.classList.remove("off");
+          await sleep(el === "." ? unit : unit * 3);
+          led.classList.add("off");
+          await sleep(unit);
+        }
+        spans[i].classList.remove("on");
+        await sleep(unit * 2);
+      }
+      await sleep(unit * 25);
+    }
+  }
+  led.classList.add("off");
+  key();
+
+  // Waterfall display
+  const cv = document.getElementById("waterfall");
+  const ctx = cv.getContext("2d");
+  let W, H;
+  function resize() {
+    W = cv.width = Math.floor(window.innerWidth / 3);
+    H = cv.height = Math.floor(window.innerHeight / 3);
+  }
+  resize(); window.addEventListener("resize", resize);
+
+  const signals = [
+    { f: 0.22, w: 0.006, drift: 0.00002, on: t => Math.sin(t / 40) > 0.2 },
+    { f: 0.48, w: 0.012, drift: -0.00001, on: t => (t % 220) < 140 },
+    { f: 0.71, w: 0.004, drift: 0.00003, on: t => Math.sin(t / 9) > 0 },
+    { f: 0.86, w: 0.02, drift: 0, on: t => (t % 400) < 90 },
+  ];
+  function color(v) {
+    // dark → teal → green → amber
+    const r = Math.min(255, Math.max(0, (v - 0.6) * 640));
+    const g = Math.min(255, v * 330);
+    const b = Math.min(255, 70 + v * 120 - Math.max(0, v - 0.5) * 300);
+    return [r, g, Math.max(0, b)];
+  }
+  let t = 0;
+  function frame() {
+    ctx.drawImage(cv, 0, 0, W, H - 1, 0, 1, W, H - 1);
+    const row = ctx.createImageData(W, 1);
+    for (let x = 0; x < W; x++) {
+      const fx = x / W;
+      let v = Math.random() * 0.22;
+      for (const s of signals) {
+        if (!s.on(t)) continue;
+        const d = (fx - s.f) / s.w;
+        v += Math.exp(-d * d) * (0.75 + Math.random() * 0.25);
+      }
+      const [r, g, b] = color(Math.min(1, v));
+      const i = x * 4;
+      row.data[i] = r; row.data[i + 1] = g; row.data[i + 2] = b; row.data[i + 3] = 255;
+    }
+    ctx.putImageData(row, 0, 0);
+    for (const s of signals) { s.f += s.drift; if (s.f > 0.95 || s.f < 0.05) s.drift *= -1; }
+    t++;
+    requestAnimationFrame(frame);
+  }
+  ctx.fillStyle = "#070b0d"; ctx.fillRect(0, 0, W, H);
+  frame();
+</script>
+</body>
+</html>
