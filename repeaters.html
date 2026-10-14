@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC1FQA · Local 2m Repeaters</title>
+<meta name="description" content="The five closest 2 meter repeaters to Windsor, CT, with frequencies, offsets, tones and a map.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<style>
+  :root {
+    --bg: #070b0d;
+    --panel: #0c1316;
+    --fg: #e6f2ec;
+    --dim: #7d978d;
+    --accent: #33ff99;
+    --accent-2: #ffb347;
+    --line: rgba(51, 255, 153, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 16px 48px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding-bottom: 18px; border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    font-weight: 700; font-size: 1.5rem; letter-spacing: 0.06em;
+    color: var(--fg); text-decoration: none;
+    text-shadow: 0 0 14px rgba(51,255,153,0.35);
+  }
+  .brand .digit { color: var(--accent); }
+  .back {
+    font-family: "JetBrains Mono", monospace; font-size: 0.75rem;
+    letter-spacing: 0.2em; color: var(--dim); text-decoration: none;
+  }
+  .back:hover { color: var(--accent); }
+
+  .eyebrow {
+    margin-top: 30px;
+    font-family: "JetBrains Mono", monospace; font-size: 0.75rem;
+    letter-spacing: 0.25em; color: var(--accent-2);
+  }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 6px; }
+  .lede { color: var(--dim); margin-top: 10px; max-width: 60ch; }
+
+  .layout {
+    display: grid; gap: 18px; margin-top: 26px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 860px) {
+    .layout { grid-template-columns: 1.15fr 1fr; align-items: start; }
+    #map { position: sticky; top: 16px; }
+  }
+
+  #map {
+    height: 420px; width: 100%;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--panel);
+  }
+
+  .list { list-style: none; display: grid; gap: 10px; }
+  .rpt {
+    display: grid; grid-template-columns: 34px 1fr auto; gap: 12px;
+    align-items: start;
+    background: var(--panel);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px; cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .rpt:hover, .rpt:focus-visible, .rpt.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(51,255,153,0.18);
+    outline: none;
+  }
+  .num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 0.85rem;
+    color: var(--bg); background: var(--accent);
+  }
+  .freq { font-family: "JetBrains Mono", monospace; font-size: 1.35rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .where { font-size: 0.95rem; margin-top: 2px; }
+  .where .call { color: var(--dim); font-family: "JetBrains Mono", monospace; font-size: 0.8rem; margin-left: 6px; }
+  .specs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-family: "JetBrains Mono", monospace; font-size: 0.72rem;
+    border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; color: var(--fg);
+  }
+  .chip b { color: var(--dim); font-weight: 400; margin-right: 4px; }
+  .note { font-size: 0.8rem; color: var(--dim); margin-top: 6px; }
+  .dist { text-align: right; font-family: "JetBrains Mono", monospace; }
+  .dist .v { font-size: 1.05rem; color: var(--fg); }
+  .dist .k { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--dim); }
+
+  .aside {
+    margin-top: 22px; padding: 14px 16px;
+    border-left: 3px solid var(--accent-2);
+    background: var(--panel); border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+  }
+  .aside strong { color: var(--accent-2); }
+  .fine { margin-top: 18px; font-size: 0.8rem; color: var(--dim); }
+  .fine a { color: var(--dim); }
+  footer {
+    margin-top: 40px; text-align: center;
+    font-family: "JetBrains Mono", monospace; font-size: 0.75rem;
+    letter-spacing: 0.2em; color: var(--dim);
+  }
+
+  /* Leaflet theming */
+  .leaflet-container { font-family: "Space Grotesk", system-ui, sans-serif; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--panel); color: var(--fg);
+    border: 1px solid var(--line);
+  }
+  .leaflet-popup-content { margin: 10px 14px; }
+  .leaflet-popup-content .pf { font-family: "JetBrains Mono", monospace; color: var(--accent); font-weight: 700; font-size: 1.05rem; }
+  .leaflet-popup-content .ps { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; color: var(--dim); }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--dim); }
+  .leaflet-control-attribution { background: rgba(7,11,13,0.75) !important; color: var(--dim); }
+  .leaflet-control-attribution a { color: var(--dim); }
+  .pin {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--bg);
+    font: 700 13px "JetBrains Mono", monospace;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent), 0 0 14px rgba(51,255,153,0.6);
+  }
+  .home {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent-2); border: 2px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent-2), 0 0 16px rgba(255,179,71,0.7);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+    <a class="back" href="/">← HOME</a>
+  </header>
+
+  <div class="eyebrow">2 METER · FM</div>
+  <h1>Closest repeaters to Windsor, CT</h1>
+  <p class="lede">The five nearest on-air 2m voice repeaters. All use the standard 600 kHz split. Tap a repeater to find it on the map.</p>
+
+  <div class="layout">
+    <div id="map" role="region" aria-label="Map of nearby repeaters"></div>
+    <div>
+      <ol class="list" id="list"></ol>
+
+      <div class="aside">
+        <strong>D-STAR:</strong> the nearest D-STAR machine is <span class="mono">W1HQ 147.390 +</span> in Newington, at ARRL HQ, about 10.5 mi away.
+      </div>
+
+      <p class="fine">
+        Distances are straight-line from Windsor town center, and pins mark the repeater's town or site, so they're approximate.
+        Data is from <a href="https://www.repeaterbook.com/" rel="noopener">RepeaterBook</a> and the
+        <a href="https://www.nerepeaters.com/" rel="noopener">New England Repeater Directory</a>, checked October 2026.
+        Repeaters change, so confirm tones before keying up.
+      </p>
+    </div>
+  </div>
+
+  <footer>73 DE KC1FQA</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  const HOME = { name: "Windsor, CT", lat: 41.8526, lng: -72.6437 };
+
+  const REPEATERS = [
+    { freq: "146.640", off: "−0.6", tone: "141.3", call: "W1HDN", town: "Hartford", lat: 41.7658, lng: -72.6734 },
+    { freq: "146.820", off: "−0.6", tone: "None", call: "W1CWA", town: "Bloomfield · Talcott Mtn", lat: 41.8390, lng: -72.7960,
+      note: "Carrier squelch, so no tone is needed." },
+    { freq: "145.330", off: "−0.6", tone: "88.5", call: "N1TUP", town: "Manchester", lat: 41.7759, lng: -72.5215 },
+    { freq: "146.790", off: "−0.6", tone: "82.5", call: "W1HDN", town: "Vernon", lat: 41.8365, lng: -72.4795,
+      note: "IRLP node 4159. Also in Vernon: W1HDN 145.410 (PL 141.3) and W1BRS 145.110 (PL 77.0)." },
+    { freq: "146.745", off: "−0.6", tone: "82.5", call: "W1HDN", town: "Avon", lat: 41.7900, lng: -72.8000 },
+  ];
+
+  function miles(a, b) {
+    const r = x => x * Math.PI / 180;
+    const dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 3958.8 * 2 * Math.asin(Math.sqrt(h));
+  }
+  REPEATERS.forEach(rp => rp.dist = miles(HOME, rp));
+  REPEATERS.sort((a, b) => a.dist - b.dist);
+
+  // List
+  const list = document.getElementById("list");
+  const items = [];
+  REPEATERS.forEach((rp, i) => {
+    const li = document.createElement("li");
+    li.className = "rpt";
+    li.tabIndex = 0;
+    li.innerHTML = `
+      <div class="num">${i + 1}</div>
+      <div>
+        <div class="freq">${rp.freq}</div>
+        <div class="where">${rp.town}<span class="call">${rp.call}</span></div>
+        <div class="specs">
+          <span class="chip"><b>OFFSET</b>${rp.off}</span>
+          <span class="chip"><b>PL</b>${rp.tone}</span>
+        </div>
+        ${rp.note ? `<div class="note">${rp.note}</div>` : ""}
+      </div>
+      <div class="dist"><div class="v">${rp.dist.toFixed(1)}</div><div class="k">MI</div></div>`;
+    list.appendChild(li);
+    items.push(li);
+  });
+
+  // Map
+  if (window.L) {
+    const map = L.map("map", { scrollWheelZoom: false });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd", maxZoom: 18,
+    }).addTo(map);
+
+    L.marker([HOME.lat, HOME.lng], {
+      icon: L.divIcon({ className: "", html: '<div class="home"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }),
+      title: HOME.name,
+    }).addTo(map).bindPopup(`<div class="pf">KC1FQA</div><div class="ps">${HOME.name}</div>`);
+
+    const markers = REPEATERS.map((rp, i) => {
+      L.polyline([[HOME.lat, HOME.lng], [rp.lat, rp.lng]], {
+        color: "#33ff99", weight: 1, opacity: 0.35, dashArray: "4 6",
+      }).addTo(map);
+      return L.marker([rp.lat, rp.lng], {
+        icon: L.divIcon({ className: "", html: `<div class="pin">${i + 1}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }),
+        title: `${rp.freq} ${rp.call}`,
+      }).addTo(map).bindPopup(
+        `<div class="pf">${rp.freq} ${rp.off}</div>
+         <div>${rp.town}</div>
+         <div class="ps">${rp.call} · PL ${rp.tone} · ${rp.dist.toFixed(1)} mi</div>`
+      );
+    });
+
+    const bounds = L.latLngBounds([[HOME.lat, HOME.lng], ...REPEATERS.map(r => [r.lat, r.lng])]);
+    map.fitBounds(bounds, { padding: [30, 30] });
+
+    function select(i) {
+      items.forEach((el, j) => el.classList.toggle("active", i === j));
+      markers[i].openPopup();
+      map.panTo(markers[i].getLatLng());
+      if (window.innerWidth < 860) document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    items.forEach((el, i) => {
+      el.addEventListener("click", () => select(i));
+      el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(i); } });
+    });
+    markers.forEach((m, i) => m.on("click", () => items.forEach((el, j) => el.classList.toggle("active", i === j))));
+  } else {
+    document.getElementById("map").innerHTML =
+      '<p style="padding:16px;color:#7d978d">The map couldn\'t load, but the list still works.</p>';
+  }
+</script>
+</body>
+</html>
