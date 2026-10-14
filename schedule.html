@@ -1,0 +1,622 @@
+<title>Connecticut Lodge Meeting Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working reference — header with the week's upcoming communications, then filter bar, then lodges grouped by night of the week. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#18213a; --muted:#5b6478; --line:#dde1ea;
+  --blue:#1f3a7a; --blue-soft:#e6ecf8; --gold:#9a7417; --gold-soft:#f6edd6; --warn:#a4481c;
+  --f-display:"Cinzel","Trajan Pro",Georgia,serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1422; --surface:#171e31; --ink:#e6e9f2; --muted:#9aa3b8; --line:#2a3350;
+  --blue:#9db6f0; --blue-soft:#1f2b4a; --gold:#e0b852; --gold-soft:#33291a; --warn:#f0936a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1422; --surface:#171e31; --ink:#e6e9f2; --muted:#9aa3b8; --line:#2a3350;
+  --blue:#9db6f0; --blue-soft:#1f2b4a; --gold:#e0b852; --gold-soft:#33291a; --warn:#f0936a; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:flex;flex-direction:column;gap:24px}
+header h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,4vw,2.2rem);letter-spacing:.04em;margin:0;color:var(--blue);text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:68ch}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:700}
+h2{font-family:var(--f-display);font-size:1.05rem;letter-spacing:.06em;margin:0;color:var(--ink)}
+.week{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.week-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.week-nav{display:flex;gap:6px}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{border-top:3px solid var(--line);padding-top:6px;min-width:0}
+.day.today{border-top-color:var(--gold)}
+.day .d{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.day .d b{color:var(--ink);font-family:var(--f-mono);font-weight:500;margin-left:4px}
+.day ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.82rem}
+.day li{line-height:1.25}
+.day li .t{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);display:block}
+.day .none{color:var(--muted);font-size:.8rem;font-style:italic}
+@media (max-width:760px){.days{grid-template-columns:1fr}.day{display:grid;grid-template-columns:5.5rem 1fr;gap:8px;border-top-width:1px}.day ul{margin:0}}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+input[type=search],select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+input[type=search]{flex:1 1 220px;min-width:0}
+button{cursor:pointer}
+button:hover{border-color:var(--blue)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 11px;border-radius:999px;font-size:.85rem}
+.chip[aria-pressed="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.count{color:var(--muted);font-size:.85rem}
+.group{display:flex;flex-direction:column;gap:8px}
+.group h2{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.group h2 span{font-family:var(--f-body);font-size:.8rem;color:var(--muted);letter-spacing:0;font-weight:400}
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:3.2rem minmax(0,1.5fr) minmax(0,1.6fr) minmax(0,1fr);gap:4px 14px;padding:10px 4px;border-bottom:1px solid var(--line);align-items:baseline}
+.no{font-family:var(--f-mono);color:var(--gold);font-weight:500;font-variant-numeric:tabular-nums}
+.name a{color:var(--ink);font-weight:700;text-decoration:none}
+.name a:hover{color:var(--blue);text-decoration:underline}
+.name .loc{color:var(--muted);font-size:.85rem;display:block}
+.sched{font-weight:600}
+.sched .time{font-family:var(--f-mono);font-weight:400;font-size:.85rem;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-start}
+.pill{font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--blue-soft);color:var(--blue);white-space:nowrap}
+.pill.dark{background:var(--gold-soft);color:var(--gold)}
+.pill.yr{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.note{grid-column:2 / -1;font-size:.82rem;color:var(--warn)}
+@media (max-width:640px){.row{grid-template-columns:2.6rem minmax(0,1fr)}.sched,.meta{grid-column:2}}
+footer{color:var(--muted);font-size:.82rem;max-width:75ch}
+footer a{color:var(--blue)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Grand Lodge of Connecticut, A.F. &amp; A.M.</div>
+  <h1>Lodge Meeting Schedule</h1>
+  <p>Stated communications for every active constituent lodge, as listed in the Grand Lodge lodge locator. Search by name, number or town, or filter by night.</p>
+</header>
+
+<section class="week" id="weekbox" aria-labelledby="wk" hidden>
+  <div class="week-head">
+    <h2 id="wk">Upcoming communications</h2>
+    <div class="week-nav"><button id="prev" type="button" aria-label="Previous week">‹ Prev</button><button id="this" type="button">This week</button><button id="next" type="button" aria-label="Next week">Next ›</button></div>
+  </div>
+  <div class="days" id="days"></div>
+</section>
+
+<section class="filters" id="filterbox" aria-label="Filters" hidden>
+  <input type="search" id="q" placeholder="Search lodge, number or town" aria-label="Search lodges">
+  <select id="dist" aria-label="District"><option value="">All districts</option></select>
+  <select id="sort" aria-label="Group by"><option value="day">Group by night</option><option value="num">List by number</option><option value="dist">Group by district</option></select>
+  <div class="chips" id="chips" role="group" aria-label="Meeting night"></div>
+  <span class="count" id="count">85 lodges</span>
+</section>
+
+<main id="list">
+<section class="group"><h2>Monday<span>17 lodges</span></h2><div class="rows"><div class="row"><div class="no">4</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/4" target="_blank" rel="noopener">Wyllys St. John's Lodge No. 4</a><span class="loc">West Hartford · District 6A</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">9</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/9" target="_blank" rel="noopener">Compass Lodge No. 9</a><span class="loc">Wallingford · District 4A</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No meeting on Labor Day.</div></div><div class="row"><div class="no">17</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/17" target="_blank" rel="noopener">Federal Lodge No. 17</a><span class="loc">Watertown · District 3A</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">Dark on holidays. Locator lists no time for the 3rd Monday.</div></div><div class="row"><div class="no">19</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/19" target="_blank" rel="noopener">Washington Lodge No. 19</a><span class="loc">Monroe · District 1C</span></div>
+  <div class="sched">2nd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round</span></div>
+  </div><div class="row"><div class="no">33</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/33" target="_blank" rel="noopener">Friendship Lodge No. 33</a><span class="loc">Southington · District 5B</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">36</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/36" target="_blank" rel="noopener">Valley Lodge No. 36</a><span class="loc">Simsbury · District 5A</span></div>
+  <div class="sched">1st Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">49</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/49" target="_blank" rel="noopener">Jerusalem Lodge No. 49</a><span class="loc">Ridgefield · District 2B</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">70</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/70" target="_blank" rel="noopener">Washington Lodge No. 70</a><span class="loc">Windsor · District 6A</span></div>
+  <div class="sched">2nd & 4th Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">76</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/76" target="_blank" rel="noopener">Liberty Continental Lodge No. 76</a><span class="loc">Waterbury · District 3B</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">77</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/77" target="_blank" rel="noopener">Meridian Lodge No. 77</a><span class="loc">Meriden · District 4B</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round</span></div>
+  </div><div class="row"><div class="no">88</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/88" target="_blank" rel="noopener">Hartford Evergreen Lodge No. 88</a><span class="loc">South Windsor · District 6B</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">Dark on legal/religious holidays and the week of Grand Lodge session.</div></div><div class="row"><div class="no">101</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/101" target="_blank" rel="noopener">Evening Star Lodge No. 101</a><span class="loc">Unionville · District 5A</span></div>
+  <div class="sched">2nd & 4th Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">112</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/112" target="_blank" rel="noopener">Anchor Lodge No. 112</a><span class="loc">East Hampton · District 7A</span></div>
+  <div class="sched">2nd & 4th Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">115</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/115" target="_blank" rel="noopener">Annawon Lodge No. 115</a><span class="loc">West Haven · District 4A</span></div>
+  <div class="sched">2nd & 4th Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">116</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/116" target="_blank" rel="noopener">Oxoboxo Lodge No. 116</a><span class="loc">Montville · District 8A</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">131</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/131" target="_blank" rel="noopener">Solar Lodge No. 131</a><span class="loc">Colchester · District 7A</span></div>
+  <div class="sched">1st & 3rd Monday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">Skips Labor Day and Memorial Day.</div></div><div class="row"><div class="no">144</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/144" target="_blank" rel="noopener">Daytime Lodge No. 144</a><span class="loc">Stratford · District 1C</span></div>
+  <div class="sched">2nd Monday <span class="time">· 9:30 AM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div></div></section>
+<section class="group"><h2>Tuesday<span>22 lodges</span></h2><div class="rows"><div class="row"><div class="no">8</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/8" target="_blank" rel="noopener">America St. John's Lodge No. 8</a><span class="loc">Stratford · District 1C</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">12</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/12" target="_blank" rel="noopener">King Hiram Lodge No. 12</a><span class="loc">Shelton · District 3B</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">14</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/14" target="_blank" rel="noopener">Frederick Franklin Lodge No. 14</a><span class="loc">Plainville · District 5B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">21</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/21" target="_blank" rel="noopener">St. Peter's Lodge No. 21</a><span class="loc">New Milford · District 2A</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">28</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/28" target="_blank" rel="noopener">Composite Lodge No. 28</a><span class="loc">Suffield · District 6A</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">29</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/29" target="_blank" rel="noopener">Village Lodge No. 29</a><span class="loc">Collinsville · District 5A</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">38</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/38" target="_blank" rel="noopener">St. Alban's Lodge No. 38</a><span class="loc">Branford · District 4A</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">40</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/40" target="_blank" rel="noopener">Union Lodge No. 40</a><span class="loc">Danbury · District 2B</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">55</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/55" target="_blank" rel="noopener">Seneca Lodge No. 55</a><span class="loc">Winsted · District 3A</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· time not listed</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round (reduced summer)</span></div>
+  <div class="note">June–August: 1st Tuesday only. Locator lists no start time.</div></div><div class="row"><div class="no">57</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/57" target="_blank" rel="noopener">Coastal Lodge No. 57</a><span class="loc">Stonington · District 8B</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">67</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/67" target="_blank" rel="noopener">Harmony Lodge No. 67</a><span class="loc">New Canaan · District 1A</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 8:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">69</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/69" target="_blank" rel="noopener">Fayette Lodge No. 69</a><span class="loc">Ellington · District 9B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">73</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/73" target="_blank" rel="noopener">Manchester Lodge No. 73</a><span class="loc">Manchester · District 6B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">78</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/78" target="_blank" rel="noopener">Shepherd Salem Lodge No. 78</a><span class="loc">Naugatuck · District 3B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">85</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/85" target="_blank" rel="noopener">Acacia Lodge No. 85</a><span class="loc">Cos Cob · District 1A</span></div>
+  <div class="sched">4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">87</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/87" target="_blank" rel="noopener">Madison Lodge No. 87</a><span class="loc">Madison · District 4B</span></div>
+  <div class="sched">2nd Tuesday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">95</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/95" target="_blank" rel="noopener">Jeptha Lodge No. 95</a><span class="loc">Clinton · District 7B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 4th Tuesday meeting in December.</div></div><div class="row"><div class="no">102</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/102" target="_blank" rel="noopener">Brainard Lodge No. 102</a><span class="loc">Niantic · District 8B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">4th Tuesday in December and July/August meetings only if the lodge votes to hold them.</div></div><div class="row"><div class="no">104</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/104" target="_blank" rel="noopener">Corinthian Lodge No. 104</a><span class="loc">Stratford · District 1B</span></div>
+  <div class="sched">2nd & 4th Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">110</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/110" target="_blank" rel="noopener">Ionic Lodge No. 110</a><span class="loc">North Windham · District 9B</span></div>
+  <div class="sched">2nd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">113</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/113" target="_blank" rel="noopener">Moosup Lodge No. 113</a><span class="loc">Moosup · District 9A</span></div>
+  <div class="sched">1st Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">148</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/148" target="_blank" rel="noopener">Unity Lodge No. 148</a><span class="loc">New Britain · District 5B</span></div>
+  <div class="sched">1st & 3rd Tuesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 3rd Tuesday in April, June, November or December.</div></div></div></section>
+<section class="group"><h2>Wednesday<span>23 lodges</span></h2><div class="rows"><div class="row"><div class="no">2</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/2" target="_blank" rel="noopener">St. John's Lodge No. 2</a><span class="loc">Meriden · District 7B</span></div>
+  <div class="sched">2nd & 4th Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">5</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/5" target="_blank" rel="noopener">Union Lodge No. 5</a><span class="loc">Darien · District 1A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round</span></div>
+  </div><div class="row"><div class="no">7</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/7" target="_blank" rel="noopener">King Solomon's Lodge No. 7</a><span class="loc">Woodbury · District 3A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">10</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/10" target="_blank" rel="noopener">Wooster Lodge No. 10</a><span class="loc">Colchester · District 8A</span></div>
+  <div class="sched">2nd & 4th Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">11</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/11" target="_blank" rel="noopener">St. Paul's Lodge No. 11</a><span class="loc">Litchfield · District 3A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">One summer communication in July/August, on the Wednesday before the full moon.</div></div><div class="row"><div class="no">13</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/13" target="_blank" rel="noopener">Montgomery Lodge No. 13</a><span class="loc">Lakeville · District 2A</span></div>
+  <div class="sched">3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug, Dec</span></div>
+  </div><div class="row"><div class="no">15</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/15" target="_blank" rel="noopener">Moriah Lodge No. 15</a><span class="loc">Brooklyn · District 9A</span></div>
+  <div class="sched">2nd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">18</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/18" target="_blank" rel="noopener">Hiram Lodge No. 18</a><span class="loc">Sandy Hook · District 2B</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">25</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/25" target="_blank" rel="noopener">Columbia Lodge No. 25</a><span class="loc">South Glastonbury · District 6B</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">30</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/30" target="_blank" rel="noopener">Day Spring Lodge No. 30</a><span class="loc">Cheshire · District 4C</span></div>
+  <div class="sched">1st Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">34</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/34" target="_blank" rel="noopener">Somerset St. James Lodge No. 34</a><span class="loc">Preston · District 8A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">39</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/39" target="_blank" rel="noopener">Ark Lodge No. 39</a><span class="loc">Danbury · District 2B</span></div>
+  <div class="sched">2nd & 4th Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 4th Wednesday meeting in November or December.</div></div><div class="row"><div class="no">43</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/43" target="_blank" rel="noopener">Estuary Lodge No. 43</a><span class="loc">Old Saybrook · District 7B</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 1st Wednesday in February; no 3rd Wednesday in January.</div></div><div class="row"><div class="no">63</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/103" target="_blank" rel="noopener">Corinthian Lodge No. 63</a><span class="loc">North Haven · District 4B</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round (reduced summer)</span></div>
+  <div class="note">3rd Wednesday year-round; no 1st Wednesday June–August.</div></div><div class="row"><div class="no">64</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/64" target="_blank" rel="noopener">St. Andrew's Lodge No. 64</a><span class="loc">Winsted · District 3A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Aug, Sep</span></div>
+  </div><div class="row"><div class="no">66</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/66" target="_blank" rel="noopener">Widow's Son Lodge No. 66</a><span class="loc">Branford · District 4B</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">79</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/79" target="_blank" rel="noopener">Wooster Lodge No. 79</a><span class="loc">New Haven · District 4B</span></div>
+  <div class="sched">2nd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">97</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/97" target="_blank" rel="noopener">Center Lodge No. 97</a><span class="loc">Meriden · District 4C</span></div>
+  <div class="sched">2nd & 4th Wednesday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">December: 2nd Wednesday only.</div></div><div class="row"><div class="no">107</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/107" target="_blank" rel="noopener">Ivanhoe Lodge No. 107</a><span class="loc">Darien · District 1A</span></div>
+  <div class="sched">2nd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round</span></div>
+  </div><div class="row"><div class="no">119</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/119" target="_blank" rel="noopener">Granite Lodge No. 119</a><span class="loc">Haddam · District 7B</span></div>
+  <div class="sched">2nd & 4th Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">125</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/125" target="_blank" rel="noopener">Cosmopolitan Lodge No. 125</a><span class="loc">New Haven · District 4A</span></div>
+  <div class="sched">1st & 3rd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">128</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/128" target="_blank" rel="noopener">Hospitality Lodge No. 128</a><span class="loc">Wethersfield · District 5B</span></div>
+  <div class="sched">2nd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">142</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/142" target="_blank" rel="noopener">Ashlar Aspetuck Lodge No. 142</a><span class="loc">Easton · District 1C</span></div>
+  <div class="sched">2nd Wednesday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div></div></section>
+<section class="group"><h2>Thursday<span>17 lodges</span></h2><div class="rows"><div class="row"><div class="no">1</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/1" target="_blank" rel="noopener">Hiram Lodge No. 1</a><span class="loc">New Haven · District 4A</span></div>
+  <div class="sched">2nd & 4th Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Aug</span></div>
+  </div><div class="row"><div class="no">3</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/3" target="_blank" rel="noopener">Fidelity St. John's Lodge No. 3</a><span class="loc">Fairfield · District 1B</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">6</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/6" target="_blank" rel="noopener">Old Well St. John's Lodge No. 6</a><span class="loc">Norwalk · District 1B</span></div>
+  <div class="sched">1st Thursday <span class="time">· 7:45 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">Listed at 7:30 PM with a note that the meeting starts at 7:45 PM.</div></div><div class="row"><div class="no">16</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/16" target="_blank" rel="noopener">Temple Lodge No. 16</a><span class="loc">Cheshire · District 4A</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">22</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/22" target="_blank" rel="noopener">Trumbull Lodge No. 22</a><span class="loc">New Haven · District 4C</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round (reduced summer)</span></div>
+  </div><div class="row"><div class="no">31</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/31" target="_blank" rel="noopener">Union Lodge No. 31</a><span class="loc">Niantic · District 8B</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round (reduced summer)</span></div>
+  <div class="note">July and August: 1st Thursday only.</div></div><div class="row"><div class="no">42</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/42" target="_blank" rel="noopener">Harmony Lodge No. 42</a><span class="loc">Waterbury · District 3B</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">47</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/47" target="_blank" rel="noopener">Morning Star Lodge No. 47</a><span class="loc">Shelton · District 3B</span></div>
+  <div class="sched">3rd Thursday, 1st Saturday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">51</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/51" target="_blank" rel="noopener">Warren Lodge No. 51</a><span class="loc">Portland · District 7A</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">60</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/60" target="_blank" rel="noopener">Wolcott Lodge No. 60</a><span class="loc">Stafford Springs · District 9B</span></div>
+  <div class="sched">1st Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">65</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/65" target="_blank" rel="noopener">Temple Lodge No. 65</a><span class="loc">Westport · District 1B</span></div>
+  <div class="sched">2nd & 4th Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 2nd Thursday meeting in November or December.</div></div><div class="row"><div class="no">81</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/81" target="_blank" rel="noopener">Washington Lodge No. 81</a><span class="loc">Cromwell · District 7A</span></div>
+  <div class="sched">2nd & 4th Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">120</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/120" target="_blank" rel="noopener">Bay View Lodge No. 120</a><span class="loc">Niantic · District 8B</span></div>
+  <div class="sched">2nd & 4th Thursday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  <div class="note">No 4th Thursday meeting in November or December.</div></div><div class="row"><div class="no">140</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/140" target="_blank" rel="noopener">Sequin Level Lodge No. 140</a><span class="loc">Newington · District 5A</span></div>
+  <div class="sched">3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill yr">Meets year-round</span></div>
+  <div class="note">Stated communication 3rd Thursday year-round, including July and August. 2nd Thursday is the Craftsmen's Club social, 7:00 PM.</div></div><div class="row"><div class="no">145</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/145" target="_blank" rel="noopener">Friendship Tuscan Lodge No. 145</a><span class="loc">Manchester · District 6B</span></div>
+  <div class="sched">1st & 3rd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">146</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/146" target="_blank" rel="noopener">Wolcott Lodge No. 146</a><span class="loc">Wolcott · District 5A</span></div>
+  <div class="sched">2nd Thursday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">150</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/150" target="_blank" rel="noopener">Purity Lodge No. 150</a><span class="loc">Mystic · District 8A</span></div>
+  <div class="sched">2nd Thursday <span class="time">· 7:00 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div></div></section>
+<section class="group"><h2>Friday<span>2 lodges</span></h2><div class="rows"><div class="row"><div class="no">89</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/89" target="_blank" rel="noopener">Ansantawae Lodge No. 89</a><span class="loc">Milford · District 4C</span></div>
+  <div class="sched">1st & 3rd Friday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">122</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/122" target="_blank" rel="noopener">Corner Stone Quinebaug Lodge No. 122</a><span class="loc">Thompson · District 9A</span></div>
+  <div class="sched">2nd Friday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div></div></section>
+<section class="group"><h2>Saturday<span>3 lodges</span></h2><div class="rows"><div class="row"><div class="no">24</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/24" target="_blank" rel="noopener">Uriel Lodge No. 24</a><span class="loc">Merrow · District 9B</span></div>
+  <div class="sched">2nd Saturday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">47</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/47" target="_blank" rel="noopener">Morning Star Lodge No. 47</a><span class="loc">Shelton · District 3B</span></div>
+  <div class="sched">3rd Thursday, 1st Saturday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div><div class="row"><div class="no">149</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/149" target="_blank" rel="noopener">Universal Fraternity Lodge No. 149</a><span class="loc">Stratford · District 1B</span></div>
+  <div class="sched">3rd Saturday <span class="time">· 7:30 PM</span></div>
+  <div class="meta"><span class="pill dark">Dark Jul, Aug</span></div>
+  </div></div></section>
+<section class="group"><h2>Moon lodges<span>2 lodges</span></h2><div class="rows"><div class="row"><div class="no">46</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/46" target="_blank" rel="noopener">Putnam Lodge No. 46</a><span class="loc">South Woodstock · District 9A</span></div>
+  <div class="sched">Moon lodge <span class="time">· see note</span></div>
+  <div class="meta"></div>
+  <div class="note">Moon lodge: Saturday on or before the full moon at 10:00 AM. Dark April, June, September and December.</div></div><div class="row"><div class="no">48</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/48" target="_blank" rel="noopener">St. Luke's Lodge No. 48</a><span class="loc">Kent · District 2A</span></div>
+  <div class="sched">Moon lodge <span class="time">· see note</span></div>
+  <div class="meta"></div>
+  <div class="note">Moon lodge: Thursdays at 7:30 PM on dates set each year (no meetings July–August). The locator still shows the 2023 dates, so check with the lodge.</div></div></div></section>
+</main>
+
+<footer>
+  Compiled from the Grand Lodge of Connecticut lodge locator (ct.grandview.systems) on 5 October 2026. Lodge numbers link to each lodge's locator page. "Dark" means no stated communication that month. Lodges sometimes reschedule for holidays, degree work or Grand Lodge events, so confirm with the lodge secretary before travelling to visit. Harmony No. 20, Adelphi Momauguin No. 63 and Oriental Evergreen No. 114 still have locator pages but list no meetings or address, and are left off.
+</footer>
+</div>
+
+<script>
+const DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const JA=[7,8];
+// [number, name, town, district, locatorId, meetings[[ordinal, dow, "HH:MM", darkMonths, label]], note]
+const L=[
+[1,"Hiram","New Haven","4A",1,[[2,4,"19:30",[8]],[4,4,"19:30",[8]]]],
+[2,"St. John's","Meriden","7B",2,[[2,3,"19:30",JA],[4,3,"19:30",JA]]],
+[3,"Fidelity St. John's","Fairfield","1B",3,[[1,4,"19:30",JA],[3,4,"19:30",JA]]],
+[4,"Wyllys St. John's","West Hartford","6A",4,[[1,1,"19:30",JA],[3,1,"19:30",JA]]],
+[5,"Union","Darien","1A",5,[[1,3,"19:30",[]],[3,3,"19:30",[]]]],
+[6,"Old Well St. John's","Norwalk","1B",6,[[1,4,"19:45",JA]],"Listed at 7:30 PM with a note that the meeting starts at 7:45 PM."],
+[7,"King Solomon's","Woodbury","3A",7,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[8,"America St. John's","Stratford","1C",8,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[9,"Compass","Wallingford","4A",9,[[1,1,"19:00",JA],[3,1,"19:00",JA]],"No meeting on Labor Day."],
+[10,"Wooster","Colchester","8A",10,[[2,3,"19:30",JA],[4,3,"19:30",JA]]],
+[11,"St. Paul's","Litchfield","3A",11,[[1,3,"19:30",JA],[3,3,"19:30",JA]],"One summer communication in July/August, on the Wednesday before the full moon."],
+[12,"King Hiram","Shelton","3B",12,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[13,"Montgomery","Lakeville","2A",13,[[3,3,"19:30",[7,8,12]]]],
+[14,"Frederick Franklin","Plainville","5B",14,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[15,"Moriah","Brooklyn","9A",15,[[2,3,"19:30",JA]]],
+[16,"Temple","Cheshire","4A",16,[[1,4,"19:30",JA],[3,4,"19:30",JA]]],
+[17,"Federal","Watertown","3A",17,[[1,1,"19:30",JA],[3,1,"19:30",JA]],"Dark on holidays. Locator lists no time for the 3rd Monday."],
+[18,"Hiram","Sandy Hook","2B",18,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[19,"Washington","Monroe","1C",19,[[2,1,"19:30",[]]]],
+[21,"St. Peter's","New Milford","2A",21,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[22,"Trumbull","New Haven","4C",22,[[1,4,"19:30",[]],[3,4,"19:30",JA]]],
+[24,"Uriel","Merrow","9B",24,[[2,6,"19:30",JA]]],
+[25,"Columbia","South Glastonbury","6B",25,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[28,"Composite","Suffield","6A",28,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[29,"Village","Collinsville","5A",29,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[30,"Day Spring","Cheshire","4C",30,[[1,3,"19:30",JA]]],
+[31,"Union","Niantic","8B",31,[[1,4,"19:30",[]],[3,4,"19:30",JA]],"July and August: 1st Thursday only."],
+[33,"Friendship","Southington","5B",33,[[1,1,"19:30",JA],[3,1,"19:30",JA]]],
+[34,"Somerset St. James","Preston","8A",34,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[36,"Valley","Simsbury","5A",36,[[1,1,"19:30",JA]]],
+[38,"St. Alban's","Branford","4A",38,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[39,"Ark","Danbury","2B",39,[[2,3,"19:30",JA],[4,3,"19:30",[7,8,11,12]]],"No 4th Wednesday meeting in November or December."],
+[40,"Union","Danbury","2B",40,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[42,"Harmony","Waterbury","3B",42,[[1,4,"19:30",JA],[3,4,"19:30",JA]]],
+[43,"Estuary","Old Saybrook","7B",43,[[1,3,"19:30",[2,7,8]],[3,3,"19:30",[1,7,8]]],"No 1st Wednesday in February; no 3rd Wednesday in January."],
+[46,"Putnam","South Woodstock","9A",46,[],"Moon lodge: Saturday on or before the full moon at 10:00 AM. Dark April, June, September and December."],
+[47,"Morning Star","Shelton","3B",47,[[3,4,"19:30",JA],[1,6,"19:30",JA]]],
+[48,"St. Luke's","Kent","2A",48,[],"Moon lodge: Thursdays at 7:30 PM on dates set each year (no meetings July–August). The locator still shows the 2023 dates, so check with the lodge."],
+[49,"Jerusalem","Ridgefield","2B",49,[[1,1,"19:30",JA],[3,1,"19:30",JA]]],
+[51,"Warren","Portland","7A",51,[[1,4,"19:30",JA],[3,4,"19:30",JA]]],
+[55,"Seneca","Winsted","3A",55,[[1,2,"",[]],[3,2,"",[6,7,8]]],"June–August: 1st Tuesday only. Locator lists no start time."],
+[57,"Coastal","Stonington","8B",57,[[1,2,"19:30",JA],[3,2,"19:30",JA]]],
+[60,"Wolcott","Stafford Springs","9B",60,[[1,4,"19:30",JA]]],
+[63,"Corinthian","North Haven","4B",103,[[1,3,"19:30",[6,7,8]],[3,3,"19:30",[]]],"3rd Wednesday year-round; no 1st Wednesday June–August."],
+[64,"St. Andrew's","Winsted","3A",64,[[1,3,"19:30",[8,9]],[3,3,"19:30",[8,9]]]],
+[65,"Temple","Westport","1B",65,[[2,4,"19:30",[7,8,11,12]],[4,4,"19:30",JA]],"No 2nd Thursday meeting in November or December."],
+[66,"Widow's Son","Branford","4B",66,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[67,"Harmony","New Canaan","1A",67,[[1,2,"20:00",JA],[3,2,"20:00",JA]]],
+[69,"Fayette","Ellington","9B",69,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[70,"Washington","Windsor","6A",70,[[2,1,"19:30",JA],[4,1,"19:30",JA]]],
+[73,"Manchester","Manchester","6B",73,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[76,"Liberty Continental","Waterbury","3B",76,[[1,1,"19:30",JA],[3,1,"19:30",JA]]],
+[77,"Meridian","Meriden","4B",77,[[1,1,"19:00",[]],[3,1,"19:00",[]]]],
+[78,"Shepherd Salem","Naugatuck","3B",78,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[79,"Wooster","New Haven","4B",79,[[2,3,"19:30",JA]]],
+[81,"Washington","Cromwell","7A",81,[[2,4,"19:30",JA],[4,4,"19:30",JA]]],
+[85,"Acacia","Cos Cob","1A",85,[[4,2,"19:30",JA]]],
+[87,"Madison","Madison","4B",87,[[2,2,"19:00",JA]]],
+[88,"Hartford Evergreen","South Windsor","6B",88,[[1,1,"19:30",JA],[3,1,"19:30",JA]],"Dark on legal/religious holidays and the week of Grand Lodge session."],
+[89,"Ansantawae","Milford","4C",89,[[1,5,"19:30",JA],[3,5,"19:30",JA]]],
+[95,"Jeptha","Clinton","7B",95,[[2,2,"19:30",JA],[4,2,"19:30",[7,8,12]]],"No 4th Tuesday meeting in December."],
+[97,"Center","Meriden","4C",97,[[2,3,"19:00",JA],[4,3,"19:00",[7,8,12]]],"December: 2nd Wednesday only."],
+[101,"Evening Star","Unionville","5A",101,[[2,1,"19:30",JA],[4,1,"19:30",JA]]],
+[102,"Brainard","Niantic","8B",102,[[2,2,"19:30",JA],[4,2,"19:30",JA]],"4th Tuesday in December and July/August meetings only if the lodge votes to hold them."],
+[104,"Corinthian","Stratford","1B",104,[[2,2,"19:30",JA],[4,2,"19:30",JA]]],
+[107,"Ivanhoe","Darien","1A",107,[[2,3,"19:30",[]]]],
+[110,"Ionic","North Windham","9B",110,[[2,2,"19:30",JA]]],
+[112,"Anchor","East Hampton","7A",112,[[2,1,"19:30",JA],[4,1,"19:30",JA]]],
+[113,"Moosup","Moosup","9A",113,[[1,2,"19:30",JA]]],
+[115,"Annawon","West Haven","4A",115,[[2,1,"19:30",JA],[4,1,"19:30",JA]]],
+[116,"Oxoboxo","Montville","8A",116,[[1,1,"19:00",JA],[3,1,"19:00",JA]]],
+[119,"Granite","Haddam","7B",119,[[2,3,"19:30",JA],[4,3,"19:30",JA]]],
+[120,"Bay View","Niantic","8B",120,[[2,4,"19:00",JA],[4,4,"19:00",[7,8,11,12]]],"No 4th Thursday meeting in November or December."],
+[122,"Corner Stone Quinebaug","Thompson","9A",122,[[2,5,"19:30",JA]]],
+[125,"Cosmopolitan","New Haven","4A",125,[[1,3,"19:30",JA],[3,3,"19:30",JA]]],
+[128,"Hospitality","Wethersfield","5B",128,[[2,3,"19:30",JA]]],
+[131,"Solar","Colchester","7A",131,[[1,1,"19:30",JA],[3,1,"19:30",JA]],"Skips Labor Day and Memorial Day."],
+[140,"Sequin Level","Newington","5A",140,[[3,4,"19:30",[]],[2,4,"19:00",[],"social"]],"Stated communication 3rd Thursday year-round, including July and August. 2nd Thursday is the Craftsmen's Club social, 7:00 PM."],
+[142,"Ashlar Aspetuck","Easton","1C",142,[[2,3,"19:30",JA]]],
+[144,"Daytime","Stratford","1C",144,[[2,1,"09:30",JA]]],
+[145,"Friendship Tuscan","Manchester","6B",145,[[1,4,"19:30",JA],[3,4,"19:30",JA]]],
+[146,"Wolcott","Wolcott","5A",146,[[2,4,"19:30",JA]]],
+[148,"Unity","New Britain","5B",148,[[1,2,"19:30",JA],[3,2,"19:30",[4,6,7,8,11,12]]],"No 3rd Tuesday in April, June, November or December."],
+[149,"Universal Fraternity","Stratford","1B",149,[[3,6,"19:30",JA]]],
+[150,"Purity","Mystic","8A",150,[[2,4,"19:00",JA]]]
+].map(([no,name,town,dist,id,m,note])=>({no,name,town,dist,id,m:m.map(([o,d,t,dark,label])=>({o,d,t,dark,label})),note}));
+
+const ORD=["","1st","2nd","3rd","4th"];
+const fmtT=t=>{if(!t)return"time not listed";let[h,mm]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return `${h}:${String(mm).padStart(2,"0")} ${ap}`};
+function sched(l){
+  if(!l.m.length)return {main:"Moon lodge",time:"see note"};
+  const stated=l.m.filter(x=>!x.label);
+  const byKey={};stated.forEach(x=>{const k=x.d+"|"+x.t;(byKey[k]=byKey[k]||[]).push(x.o)});
+  const parts=Object.entries(byKey).map(([k,os])=>{const[d,t]=k.split("|");os.sort();return {s:os.map(o=>ORD[o]).join(" & ")+" "+DOW[d],t:fmtT(t)}});
+  const times=[...new Set(parts.map(p=>p.t))];
+  if(times.length===1)return {main:parts.map(p=>p.s).join(", "),time:times[0]};
+  return {main:parts.map(p=>p.s+" ("+p.t+")").join(", "),time:""};
+}
+function darkPill(l){
+  if(!l.m.length)return "";
+  const st=l.m.filter(x=>!x.label);
+  const common=st.map(x=>x.dark).reduce((a,b)=>a.filter(v=>b.includes(v)));
+  if(!common.length)return st.some(x=>x.dark.length)?'<span class="pill yr">Meets year-round (reduced summer)</span>':'<span class="pill yr">Meets year-round</span>';
+  return `<span class="pill dark">Dark ${common.map(m=>MON[m-1]).join(", ")}</span>`;
+}
+function nthDow(y,mo,o,d){const first=new Date(y,mo,1).getDay();const day=1+((d-first+7)%7)+(o-1)*7;const dt=new Date(y,mo,day);return dt.getMonth()===mo?dt:null}
+function meetsOn(date){
+  const out=[];const y=date.getFullYear(),mo=date.getMonth();
+  L.forEach(l=>l.m.forEach(x=>{if(x.label)return;if(x.dark.includes(mo+1))return;const dt=nthDow(y,mo,x.o,x.d);if(dt&&dt.getDate()===date.getDate()&&x.d===date.getDay())out.push({l,t:x.t})}));
+  return out.sort((a,b)=>(a.t||"99").localeCompare(b.t||"99")||a.l.no-b.l.no);
+}
+let weekOffset=0;
+function startOfWeek(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay()+weekOffset*7);return d}
+function renderWeek(){
+  const s=startOfWeek(),today=new Date();today.setHours(0,0,0,0);
+  const el=document.getElementById("days");el.innerHTML="";
+  for(let i=0;i<7;i++){
+    const d=new Date(s);d.setDate(s.getDate()+i);
+    const ms=meetsOn(d);
+    const div=document.createElement("div");div.className="day"+(d.getTime()===today.getTime()?" today":"");
+    div.innerHTML=`<div class="d">${DOW[d.getDay()].slice(0,3)}<b>${MON[d.getMonth()]} ${d.getDate()}</b></div>`+
+      (ms.length?`<ul>${ms.map(({l,t})=>`<li>${l.name} No.&nbsp;${l.no}<span class="t">${fmtT(t)} · ${l.town}</span></li>`).join("")}</ul>`:`<div class="none">No stated meetings</div>`);
+    el.appendChild(div);
+  }
+}
+document.getElementById("prev").onclick=()=>{weekOffset--;renderWeek()};
+document.getElementById("next").onclick=()=>{weekOffset++;renderWeek()};
+document.getElementById("this").onclick=()=>{weekOffset=0;renderWeek()};
+
+const dists=[...new Set(L.map(l=>l.dist))].sort();
+const distSel=document.getElementById("dist");dists.forEach(d=>distSel.add(new Option("District "+d,d)));
+const chipDays=[1,2,3,4,5,6];let dayFilter=null;
+const chips=document.getElementById("chips");
+const mkChip=(label,val)=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=label;b.setAttribute("aria-pressed",val===dayFilter?"true":"false");b.onclick=()=>{dayFilter=val;[...chips.children].forEach(c=>c.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");render()};chips.appendChild(b)};
+mkChip("Any night",null);chipDays.forEach(d=>mkChip(DOW[d].slice(0,3),d));
+
+function rowHTML(l){
+  const s=sched(l);
+  return `<div class="row"><div class="no">${l.no}</div>
+  <div class="name"><a href="https://ct.grandview.systems/public_lodges/lodge/${l.id}" target="_blank" rel="noopener">${l.name} Lodge No. ${l.no}</a><span class="loc">${l.town} · District ${l.dist}</span></div>
+  <div class="sched">${s.main}${s.time?` <span class="time">· ${s.time}</span>`:""}</div>
+  <div class="meta">${darkPill(l)}</div>
+  ${l.note?`<div class="note">${l.note}</div>`:""}</div>`;
+}
+function primaryDay(l){const st=l.m.filter(x=>!x.label);return st.length?Math.min(...st.map(x=>x.d)):7}
+function render(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  const dist=distSel.value,sort=document.getElementById("sort").value;
+  let rows=L.filter(l=>(!q||`${l.name} ${l.no} ${l.town} no. ${l.no}`.toLowerCase().includes(q))&&(!dist||l.dist===dist)&&(dayFilter===null||l.m.some(x=>!x.label&&x.d===dayFilter)));
+  document.getElementById("count").textContent=`${rows.length} of ${L.length} lodges`;
+  const list=document.getElementById("list");
+  if(!rows.length){list.innerHTML='<p class="count">No lodges match. Clear the search or pick "Any night".</p>';return}
+  let groups=[];
+  if(sort==="num")groups=[["All lodges by number",rows.sort((a,b)=>a.no-b.no)]];
+  else if(sort==="dist")groups=dists.map(d=>["District "+d,rows.filter(l=>l.dist===d).sort((a,b)=>a.no-b.no)]).filter(g=>g[1].length);
+  else{
+    const days=dayFilter!==null?[dayFilter]:[1,2,3,4,5,6];
+    groups=days.map(d=>[DOW[d],rows.filter(l=>l.m.some(x=>!x.label&&x.d===d)).sort((a,b)=>a.no-b.no)]).filter(g=>g[1].length);
+    const moon=rows.filter(l=>!l.m.length);if(moon.length&&dayFilter===null)groups.push(["Moon lodges",moon]);
+  }
+  list.innerHTML=groups.map(([h,rs])=>`<section class="group"><h2>${h}<span>${rs.length} lodge${rs.length>1?"s":""}</span></h2><div class="rows">${rs.map(rowHTML).join("")}</div></section>`).join("");
+}
+document.getElementById("q").oninput=render;distSel.onchange=render;document.getElementById("sort").onchange=render;
+document.getElementById("weekbox").hidden=false;document.getElementById("filterbox").hidden=false;
+renderWeek();render();
+</script>
