@@ -104,8 +104,11 @@
   }
   .readout .k { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--dim); }
   .readout .v { font-size: 1.15rem; color: var(--accent); margin-top: 4px; }
-  .navlink {
+  .navrow {
     margin-top: 28px;
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+  }
+  .navlink {
     font-family: "JetBrains Mono", monospace;
     font-size: 0.8rem;
     letter-spacing: 0.2em;
@@ -152,7 +155,10 @@
     <div class="readout"><div class="k">LOCAL</div><div class="v" id="local">--:--:--</div></div>
   </div>
 
-  <a class="navlink" href="/repeaters">LOCAL 2M REPEATERS →</a>
+  <nav class="navrow" aria-label="Pages">
+    <a class="navlink" href="/repeaters">LOCAL 2M REPEATERS →</a>
+    <a class="navlink" href="/mesh">MESHCORE MAP →</a>
+  </nav>
 </main>
 
 <footer>73 DE KC1FQA</footer>
