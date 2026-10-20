@@ -75,6 +75,28 @@
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
+  .card {
+    margin-top: 40px;
+    display: grid; grid-template-columns: 48px 1fr auto; gap: 18px; align-items: center;
+    padding: 20px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--panel); color: var(--fg); text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .card:hover, .card:focus-visible {
+    border-color: var(--accent); box-shadow: 0 0 16px rgba(51,255,153,0.18); outline: none;
+  }
+  .card-icon { width: 48px; height: 48px; color: var(--accent); }
+  .card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .card-eyebrow { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.22em; color: var(--accent-2); }
+  .card-title { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+  .card-text { font-size: 0.9rem; color: var(--dim); }
+  .card-go { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; letter-spacing: 0.15em; color: var(--accent); }
+  @media (max-width: 520px) {
+    .card { grid-template-columns: 40px 1fr; }
+    .card-icon { width: 40px; height: 40px; }
+    .card-go { grid-column: 2; }
+  }
+
   .fine { margin-top: 18px; font-size: 0.8rem; color: var(--dim); max-width: 80ch; }
   .fine a { color: var(--dim); }
   footer {
@@ -113,22 +135,19 @@
     <a class="btn" href="https://map.meshcore.io/?lat=41.8526&amp;lon=-72.6437&amp;zoom=9" target="_blank" rel="noopener">OPEN FULL MAP ↗</a>
   </div>
 
-  <div class="eyebrow" style="margin-top:44px">NEW ENGLAND MESH · REGIONS</div>
-  <h2 style="font-size: clamp(1.4rem, 4.5vw, 2rem); line-height: 1.15; margin-top: 6px">Regional coordination map</h2>
-  <p class="lede">MeshCore coordination regions for New England and nearby areas, from New England Mesh.</p>
-
-  <div class="frame">
-    <iframe
-      src="https://newenglandme.sh/regions/map"
-      title="New England Mesh regional coordination map"
-      loading="lazy"
-      referrerpolicy="strict-origin-when-cross-origin"></iframe>
-  </div>
-
-  <div class="bar">
-    <span class="legend">If the map above is blank, open it directly.</span>
-    <a class="btn" href="https://newenglandme.sh/regions/map" target="_blank" rel="noopener">OPEN REGIONS MAP ↗</a>
-  </div>
+  <a class="card" href="https://newenglandme.sh/regions/map" target="_blank" rel="noopener">
+    <svg class="card-icon" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M6 12 L18 7 L30 12 L42 7 V36 L30 41 L18 36 L6 41 Z"></path>
+      <path d="M18 7 V36 M30 12 V41"></path>
+      <circle cx="24" cy="23" r="3.2"></circle>
+    </svg>
+    <span class="card-body">
+      <span class="card-eyebrow">NEW ENGLAND MESH · REGIONS</span>
+      <span class="card-title">Regional coordination map</span>
+      <span class="card-text">MeshCore coordination regions for New England and nearby areas. Opens on newenglandme.sh.</span>
+    </span>
+    <span class="card-go">OPEN ↗</span>
+  </a>
 
   <p class="fine">
     The live node map is run by the MeshCore project at <a href="https://map.meshcore.io/" rel="noopener">map.meshcore.io</a>, and it only shows nodes that have been uploaded to it.
