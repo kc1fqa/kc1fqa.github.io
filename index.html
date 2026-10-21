@@ -24,7 +24,7 @@
     background: var(--bg);
     color: var(--fg);
     font-family: "Space Grotesk", system-ui, sans-serif;
-    overflow: hidden;
+    overflow-x: hidden;
   }
   canvas#waterfall {
     position: fixed; inset: 0;
@@ -44,7 +44,7 @@
     min-height: 100%;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 24px 16px;
+    padding: 24px 16px 64px;
     text-align: center;
   }
   .status {
@@ -158,6 +158,8 @@
   <nav class="navrow" aria-label="Pages">
     <a class="navlink" href="/repeaters">LOCAL 2M REPEATERS →</a>
     <a class="navlink" href="/mesh">MESHCORE MAP →</a>
+    <a class="navlink" href="/sats">SATELLITE PASSES →</a>
+    <a class="navlink" href="/space">BAND CONDITIONS →</a>
   </nav>
 </main>
 

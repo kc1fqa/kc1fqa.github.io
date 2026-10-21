@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC1FQA · Satellite Passes</title>
+<meta name="description" content="Upcoming amateur radio satellite passes over Windsor, CT (FN31), with frequencies and a sky plot.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<style>
+  :root {
+    --bg: #070b0d;
+    --panel: #0c1316;
+    --panel-2: #101a1e;
+    --fg: #e6f2ec;
+    --dim: #7d978d;
+    --accent: #33ff99;
+    --accent-2: #ffb347;
+    --line: rgba(51, 255, 153, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.5; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 700; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--fg); text-decoration: none; text-shadow: 0 0 14px rgba(51,255,153,0.35); }
+  .brand .digit { color: var(--accent); }
+  .back { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
+  .back:hover { color: var(--accent); }
+  .eyebrow { margin-top: 30px; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 6px; }
+  .lede { color: var(--dim); margin-top: 10px; max-width: 64ch; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip {
+    font: 700 0.78rem "JetBrains Mono", monospace; letter-spacing: 0.08em;
+    color: var(--dim); background: var(--panel); border: 1px solid var(--line);
+    border-radius: 999px; padding: 9px 14px; cursor: pointer; min-height: 40px;
+  }
+  .chip[aria-pressed="true"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 14px; color: var(--dim); font-size: 0.9rem; }
+  .controls select { font: 0.85rem "JetBrains Mono", monospace; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+
+  .layout { display: grid; gap: 18px; margin-top: 22px; grid-template-columns: 1fr; }
+  @media (min-width: 880px) { .layout { grid-template-columns: 380px 1fr; align-items: start; } .side { position: sticky; top: 16px; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .k { font: 0.68rem "JetBrains Mono", monospace; letter-spacing: 0.2em; color: var(--dim); }
+  .sel-name { font-size: 1.5rem; font-weight: 700; line-height: 1.15; margin-top: 4px; }
+  .countdown { font: 700 1.9rem "JetBrains Mono", monospace; color: var(--accent); margin-top: 6px; }
+  .countdown.live { color: var(--accent-2); }
+  .sel-meta { color: var(--dim); font-size: 0.9rem; margin-top: 2px; }
+  #sky { display: block; width: 100%; max-width: 340px; margin: 14px auto 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .grid2 .v { font: 1rem "JetBrains Mono", monospace; }
+  .freqs { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px; }
+  .freq-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; }
+  .freq-row .v { font-family: "JetBrains Mono", monospace; color: var(--accent); text-align: right; }
+  .note { font-size: 0.8rem; color: var(--dim); margin-top: 8px; }
+
+  .passes { list-style: none; display: grid; gap: 8px; }
+  .day { font: 0.72rem "JetBrains Mono", monospace; letter-spacing: 0.22em; color: var(--accent-2); margin: 14px 0 2px; }
+  .day:first-child { margin-top: 0; }
+  .pass {
+    display: grid; grid-template-columns: 92px 1fr auto; gap: 12px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    cursor: pointer; width: 100%; text-align: left; color: var(--fg); font: inherit;
+  }
+  .pass:hover, .pass:focus-visible, .pass.active { border-color: var(--accent); box-shadow: 0 0 16px rgba(51,255,153,0.16); outline: none; }
+  .pass .t { font: 700 1.05rem "JetBrains Mono", monospace; }
+  .pass .t small { display: block; font-weight: 400; font-size: 0.72rem; color: var(--dim); }
+  .pass .n { font-weight: 700; }
+  .pass .d { font-size: 0.82rem; color: var(--dim); }
+  .el { font: 700 1rem "JetBrains Mono", monospace; text-align: right; }
+  .el small { display: block; font-weight: 400; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--dim); }
+  .el.hi { color: var(--accent); }
+  .el.mid { color: var(--fg); }
+  .el.lo { color: var(--dim); }
+  .badge { display: inline-block; font: 700 0.62rem "JetBrains Mono", monospace; letter-spacing: 0.12em; color: var(--bg); background: var(--accent-2); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+
+  .status { margin-top: 18px; font-size: 0.85rem; color: var(--dim); }
+  .status.err { color: #ff8a7a; }
+  .fine { margin-top: 22px; font-size: 0.8rem; color: var(--dim); max-width: 80ch; }
+  .fine a { color: var(--dim); }
+  footer { margin-top: 40px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+    <a class="back" href="/">← HOME</a>
+  </header>
+
+  <div class="eyebrow">AMATEUR SATELLITES · FN31</div>
+  <h1>Passes over Windsor, CT</h1>
+  <p class="lede">Upcoming passes for the popular FM and linear birds over the next 48 hours, worked out live in your browser from the latest orbital data. Tap a pass to see its path across the sky.</p>
+
+  <div class="chips" id="chips" role="group" aria-label="Satellites to show"></div>
+  <div class="controls">
+    <label>Minimum elevation
+      <select id="minEl">
+        <option value="0">0°</option>
+        <option value="10" selected>10°</option>
+        <option value="20">20°</option>
+        <option value="30">30°</option>
+      </select>
+    </label>
+    <span id="tleAge" class="mono"></span>
+  </div>
+
+  <div class="layout">
+    <aside class="side">
+      <div class="panel" id="detail" aria-live="polite">
+        <div class="k" id="selLabel">NEXT PASS</div>
+        <div class="sel-name" id="selName">Loading orbits…</div>
+        <div class="countdown" id="selCount">--:--</div>
+        <div class="sel-meta" id="selMeta"></div>
+        <svg id="sky" viewBox="-120 -120 240 240" role="img" aria-label="Sky plot of the selected pass"></svg>
+        <div class="grid2">
+          <div><div class="k">AOS</div><div class="v" id="selAos">—</div></div>
+          <div><div class="k">LOS</div><div class="v" id="selLos">—</div></div>
+          <div><div class="k">MAX EL</div><div class="v" id="selMax">—</div></div>
+          <div><div class="k">DURATION</div><div class="v" id="selDur">—</div></div>
+        </div>
+        <div class="freqs" id="selFreqs"></div>
+      </div>
+    </aside>
+    <section>
+      <div id="passList"></div>
+      <p class="status" id="status">Fetching the latest orbital elements from CelesTrak…</p>
+    </section>
+  </div>
+
+  <p class="fine">
+    Orbital data from <a href="https://celestrak.org/" rel="noopener">CelesTrak</a>, predictions by <a href="https://github.com/shashwatak/satellite-js" rel="noopener">satellite.js</a>.
+    Times are your device's local time, measured from Windsor town center. Expect up to ±10 kHz of Doppler on the UHF side. Some birds run on a schedule or only in sunlight, so check <a href="https://www.amsat.org/status/" rel="noopener">AMSAT live status</a> before you key up.
+  </p>
+
+  <footer>73 DE KC1FQA</footer>
+</div>
+
+<script src="/assets/satellite.min.js"></script>
+<script>
+(function () {
+  const OBS = { lat: 41.8526, lon: -72.6437, alt: 0.05 };
+  const HOURS = 48;
+
+  const SATS = [
+    { id: 25544, name: "ISS", type: "FM", on: true,
+      freqs: [["Voice repeater ↑", "145.990 FM · PL 67.0"], ["Voice repeater ↓", "437.800 FM"], ["APRS digi", "145.825"]] },
+    { id: 27607, name: "SO-50", type: "FM", on: true,
+      freqs: [["Uplink ↑", "145.850 FM · PL 67.0"], ["Downlink ↓", "436.795 FM"]],
+      note: "Send PL 74.4 for a second to arm the 10-minute timer." },
+    { id: 43017, name: "AO-91", type: "FM", on: true,
+      freqs: [["Uplink ↑", "435.250 FM · PL 67.0"], ["Downlink ↓", "145.960 FM"]],
+      note: "Aging battery, so it usually works only on passes in sunlight." },
+    { id: 43678, name: "PO-101", type: "FM", on: true,
+      freqs: [["Uplink ↑", "437.500 FM · PL 141.3"], ["Downlink ↓", "145.900 FM"]],
+      note: "Runs on a schedule, so check AMSAT or @Diwata2PH for when it's on." },
+    { id: 44909, name: "RS-44", type: "SSB/CW", on: false,
+      freqs: [["Uplink ↑", "145.935–145.995 SSB/CW"], ["Downlink ↓", "435.670–435.610 (inv.)"], ["Beacon", "435.605 CW"]] },
+    { id: 7530, name: "AO-7", type: "SSB/CW", on: false,
+      freqs: [["Mode B uplink ↑", "432.125–432.175"], ["Mode B downlink ↓", "145.975–145.925 (inv.)"]],
+      note: "Launched in 1974. It only works when it's in sunlight." },
+  ];
+
+  const $ = id => document.getElementById(id);
+  const sat = window.satellite;
+  const deg = 180 / Math.PI;
+  const observer = sat ? { latitude: sat.degreesToRadians(OBS.lat), longitude: sat.degreesToRadians(OBS.lon), height: OBS.alt } : null;
+
+  // ---------- prefs ----------
+  function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
+  function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  const savedOn = load("sats.on", null);
+  if (savedOn) SATS.forEach(s => { s.on = savedOn.includes(s.id); });
+  const savedMin = load("sats.minEl", null);
+  if (savedMin !== null) $("minEl").value = String(savedMin);
+
+  // ---------- chips ----------
+  SATS.forEach(s => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = s.name;
+    b.setAttribute("aria-pressed", String(s.on));
+    b.title = s.type;
+    b.addEventListener("click", () => {
+      s.on = !s.on; b.setAttribute("aria-pressed", String(s.on));
+      save("sats.on", SATS.filter(x => x.on).map(x => x.id));
+      render();
+    });
+    $("chips").appendChild(b);
+  });
+  $("minEl").addEventListener("change", () => { save("sats.minEl", +$("minEl").value); render(); });
+
+  // ---------- TLE fetch ----------
+  const TLE_KEY = "sats.tle.v1";
+  const TLE_MAX_AGE = 12 * 3600 * 1000;
+
+  function parseTle(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trimEnd()).filter(Boolean);
+    const out = {};
+    for (let i = 0; i < lines.length - 1; i++) {
+      const a = lines[i], b = lines[i + 1];
+      if (a.startsWith("1 ") && b.startsWith("2 ")) {
+        const id = parseInt(a.slice(2, 7), 10);
+        out[id] = [a, b];
+        i++;
+      }
+    }
+    return out;
+  }
+
+  async function fetchText(url) {
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.text();
+  }
+
+  async function getTles() {
+    const cached = load(TLE_KEY, null);
+    if (cached && Date.now() - cached.at < TLE_MAX_AGE && SATS.every(s => cached.tles[s.id])) return cached;
+    let tles = {};
+    try {
+      tles = parseTle(await fetchText("https://celestrak.org/NORAD/elements/gp.php?GROUP=amateur&FORMAT=tle"));
+    } catch (e) { /* fall through to per-satellite */ }
+    const missing = SATS.filter(s => !tles[s.id]);
+    await Promise.all(missing.map(async s => {
+      try { Object.assign(tles, parseTle(await fetchText("https://celestrak.org/NORAD/elements/gp.php?CATNR=" + s.id + "&FORMAT=tle"))); } catch (e) {}
+    }));
+    if (Object.keys(tles).length) {
+      const fresh = { at: Date.now(), tles };
+      save(TLE_KEY, fresh);
+      return fresh;
+    }
+    if (cached) return cached; // stale but better than nothing
+    throw new Error("Couldn't reach CelesTrak for orbital data.");
+  }
+
+  // ---------- prediction ----------
+  function look(rec, t) {
+    const pv = sat.propagate(rec, t);
+    if (!pv || !pv.position || typeof pv.position === "boolean") return null;
+    const la = sat.ecfToLookAngles(observer, sat.eciToEcf(pv.position, sat.gstime(t)));
+    return { el: la.elevation * deg, az: (la.azimuth * deg + 360) % 360 };
+  }
+
+  function edge(rec, t0, t1, rising) {
+    // bisection between t0 (below/above) and t1 to ~1 s
+    let a = t0, b = t1;
+    while (b - a > 1000) {
+      const m = (a + b) / 2;
+      const l = look(rec, new Date(m));
+      const up = l && l.el > 0;
+      if (up === rising) b = m; else a = m;
+    }
+    return rising ? b : a;
+  }
+
+  function predict(s, rec, start) {
+    const passes = [];
+    const step = 20000;
+    const end = start + HOURS * 3600 * 1000;
+    let prev = look(rec, new Date(start));
+    let inPass = prev && prev.el > 0;
+    let cur = inPass ? { aos: start, inProgressAtStart: true, max: prev.el, maxT: start, track: [] } : null;
+    for (let t = start + step; t <= end; t += step) {
+      const l = look(rec, new Date(t));
+      if (!l) break;
+      const up = l.el > 0;
+      if (up && !inPass) {
+        cur = { aos: edge(rec, t - step, t, true), max: l.el, maxT: t, track: [] };
+      }
+      if (up && cur && l.el > cur.max) { cur.max = l.el; cur.maxT = t; }
+      if (!up && inPass && cur) {
+        cur.los = edge(rec, t - step, t, false);
+        finish(s, rec, cur); passes.push(cur); cur = null;
+      }
+      inPass = up;
+    }
+    return passes;
+  }
+
+  function finish(s, rec, p) {
+    p.sat = s;
+    const n = 40, span = p.los - p.aos;
+    for (let i = 0; i <= n; i++) {
+      const l = look(rec, new Date(p.aos + span * i / n));
+      if (l) p.track.push(l);
+    }
+    p.aosAz = p.track[0] ? p.track[0].az : 0;
+    p.losAz = p.track.length ? p.track[p.track.length - 1].az : 0;
+  }
+
+  // ---------- formatting ----------
+  const fmtTime = t => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const fmtDay = t => new Date(t).toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }).toUpperCase();
+  const compass = az => ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(az / 22.5) % 16];
+  function fmtDur(ms) { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + "m " + String(s % 60).padStart(2, "0") + "s"; }
+  function fmtCount(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(ss).padStart(2, "0");
+  }
+
+  // ---------- sky plot ----------
+  const NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text) e.textContent = text;
+    return e;
+  }
+  function xy(az, elev) {
+    const r = 100 * (90 - Math.max(0, elev)) / 90;
+    const a = az / deg;
+    return [r * Math.sin(a), -r * Math.cos(a)];
+  }
+  function drawSky(p, live) {
+    const svg = $("sky");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    [100, 66.67, 33.33].forEach(r => svg.appendChild(el("circle", { cx: 0, cy: 0, r, fill: "none", stroke: "rgba(51,255,153,0.18)", "stroke-width": 1 })));
+    svg.appendChild(el("line", { x1: -100, y1: 0, x2: 100, y2: 0, stroke: "rgba(51,255,153,0.12)" }));
+    svg.appendChild(el("line", { x1: 0, y1: -100, x2: 0, y2: 100, stroke: "rgba(51,255,153,0.12)" }));
+    const lbl = { fill: "#7d978d", "font-family": "JetBrains Mono, monospace", "font-size": 10, "text-anchor": "middle", "dominant-baseline": "middle" };
+    [["N", 0, -110], ["E", 110, 0], ["S", 0, 110], ["W", -110, 0]].forEach(([t, x, y]) => svg.appendChild(el("text", Object.assign({ x, y }, lbl), t)));
+    [["30°", 66.67], ["60°", 33.33]].forEach(([t, r]) => svg.appendChild(el("text", Object.assign({ x: 4, y: -r + 7 }, lbl, { "text-anchor": "start", "font-size": 8 }), t)));
+    if (!p) return;
+    const d = p.track.map((l, i) => (i ? "L" : "M") + xy(l.az, l.el).map(n => n.toFixed(1)).join(" ")).join(" ");
+    svg.appendChild(el("path", { d, fill: "none", stroke: "#33ff99", "stroke-width": 2.2, "stroke-linecap": "round" }));
+    const a = xy(p.aosAz, 0), z = xy(p.losAz, 0);
+    svg.appendChild(el("circle", { cx: a[0], cy: a[1], r: 4.5, fill: "#33ff99" }));
+    svg.appendChild(el("circle", { cx: z[0], cy: z[1], r: 4.5, fill: "none", stroke: "#33ff99", "stroke-width": 2 }));
+    if (live) {
+      const q = xy(live.az, live.el);
+      svg.appendChild(el("circle", { cx: q[0], cy: q[1], r: 9, fill: "rgba(255,179,71,0.25)" }));
+      svg.appendChild(el("circle", { cx: q[0], cy: q[1], r: 5, fill: "#ffb347" }));
+    }
+  }
+
+  // ---------- state + render ----------
+  let recs = {}, allPasses = [], selected = null, userPicked = false;
+
+  function visiblePasses() {
+    const min = +$("minEl").value;
+    const now = Date.now();
+    return allPasses.filter(p => p.sat.on && p.max >= min && p.los > now).sort((a, b) => a.aos - b.aos);
+  }
+
+  function render() {
+    const list = visiblePasses();
+    const box = $("passList");
+    box.innerHTML = "";
+    if (!userPicked || !selected || !list.includes(selected)) { selected = list[0] || null; userPicked = false; }
+    if (!list.length) {
+      box.innerHTML = '<p class="status">No passes match. Try turning on more satellites or lowering the minimum elevation.</p>';
+    }
+    let lastDay = "";
+    let ul = null;
+    list.forEach(p => {
+      const day = fmtDay(p.aos);
+      if (day !== lastDay) {
+        const h = document.createElement("div"); h.className = "day"; h.textContent = day; box.appendChild(h);
+        ul = document.createElement("ul"); ul.className = "passes"; box.appendChild(ul);
+        lastDay = day;
+      }
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "pass" + (p === selected ? " active" : "");
+      const cls = p.max >= 45 ? "hi" : p.max >= 20 ? "mid" : "lo";
+      const nowLive = Date.now() >= p.aos && Date.now() <= p.los;
+      b.innerHTML =
+        '<div class="t">' + fmtTime(p.aos) + '<small>to ' + fmtTime(p.los) + '</small></div>' +
+        '<div><div class="n">' + p.sat.name + (nowLive ? '<span class="badge">NOW</span>' : '') + '</div>' +
+        '<div class="d">' + compass(p.aosAz) + ' → ' + compass(p.losAz) + ' · ' + fmtDur(p.los - p.aos) + ' · ' + p.sat.type + '</div></div>' +
+        '<div class="el ' + cls + '">' + Math.round(p.max) + '°<small>MAX</small></div>';
+      b.addEventListener("click", () => {
+        selected = p; userPicked = true; render();
+        if (window.innerWidth < 880) $("detail").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    renderDetail();
+  }
+
+  function renderDetail() {
+    const p = selected;
+    if (!p) {
+      $("selName").textContent = "No pass selected"; $("selCount").textContent = "--:--"; $("selMeta").textContent = "";
+      ["selAos", "selLos", "selMax", "selDur"].forEach(i => $(i).textContent = "—");
+      $("selFreqs").innerHTML = ""; drawSky(null); return;
+    }
+    const now = Date.now();
+    const live = now >= p.aos && now <= p.los;
+    $("selLabel").textContent = live ? "IN PROGRESS" : (userPicked ? "SELECTED PASS" : "NEXT PASS");
+    $("selName").textContent = p.sat.name;
+    const c = $("selCount");
+    c.classList.toggle("live", live);
+    c.textContent = live ? "LOS in " + fmtCount(p.los - now) : "AOS in " + fmtCount(p.aos - now);
+    $("selMeta").textContent = new Date(p.aos).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + " · " + p.sat.type;
+    $("selAos").textContent = fmtTime(p.aos) + " " + compass(p.aosAz);
+    $("selLos").textContent = fmtTime(p.los) + " " + compass(p.losAz);
+    $("selMax").textContent = Math.round(p.max) + "°";
+    $("selDur").textContent = fmtDur(p.los - p.aos);
+    const f = $("selFreqs");
+    f.innerHTML = p.sat.freqs.map(([k, v]) => '<div class="freq-row"><span>' + k + '</span><span class="v">' + v + '</span></div>').join("") +
+      (p.sat.note ? '<p class="note">' + p.sat.note + '</p>' : "");
+    drawSky(p, live ? look(recs[p.sat.id], new Date()) : null);
+  }
+
+  async function init() {
+    if (!sat) { $("status").textContent = "The prediction library didn't load. Try reloading the page."; $("status").className = "status err"; return; }
+    drawSky(null);
+    try {
+      const data = await getTles();
+      SATS.forEach(s => { if (data.tles[s.id]) recs[s.id] = sat.twoline2satrec(data.tles[s.id][0], data.tles[s.id][1]); });
+      const missing = SATS.filter(s => !recs[s.id]).map(s => s.name);
+      const ageH = (Date.now() - data.at) / 3600000;
+      $("tleAge").textContent = "Orbits updated " + (ageH < 1 ? "just now" : Math.round(ageH) + "h ago");
+      compute();
+      $("status").textContent = missing.length ? "No orbital data right now for: " + missing.join(", ") + "." : "";
+    } catch (e) {
+      $("status").textContent = e.message + " Check your connection and reload.";
+      $("status").className = "status err";
+      $("selName").textContent = "Orbital data unavailable";
+    }
+  }
+
+  function compute() {
+    const start = Date.now();
+    allPasses = [];
+    SATS.forEach(s => { if (recs[s.id]) allPasses.push(...predict(s, recs[s.id], start)); });
+    render();
+  }
+
+  // live tick: countdown + sky dot each second, list refresh as passes end
+  let lastRefresh = Date.now();
+  setInterval(() => {
+    if (!allPasses.length) return;
+    if (selected && Date.now() > selected.los) { userPicked = false; render(); return; }
+    if (Date.now() - lastRefresh > 60000) { lastRefresh = Date.now(); render(); return; }
+    renderDetail();
+  }, 1000);
+  // recompute every 30 min so the 48 h window keeps rolling
+  setInterval(() => { if (Object.keys(recs).length) compute(); }, 30 * 60 * 1000);
+
+  init();
+})();
+</script>
+</body>
+</html>

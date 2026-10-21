@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC1FQA · Band Conditions</title>
+<meta name="description" content="Live band conditions and space weather for KC1FQA: solar flux, K-index, flares, solar wind, aurora and HF estimates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<style>
+  :root {
+    --bg: #070b0d;
+    --panel: #0c1316;
+    --fg: #e6f2ec;
+    --dim: #7d978d;
+    --accent: #33ff99;
+    --accent-2: #ffb347;
+    --line: rgba(51, 255, 153, 0.18);
+    --good: #33ff99;
+    --fair: #ffb347;
+    --poor: #ff6b5e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 700; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--fg); text-decoration: none; text-shadow: 0 0 14px rgba(51,255,153,0.35); }
+  .brand .digit { color: var(--accent); }
+  .back { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
+  .back:hover { color: var(--accent); }
+  .eyebrow { margin-top: 30px; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 6px; }
+  h2 { font-size: 1.35rem; line-height: 1.2; }
+  .lede { color: var(--dim); margin-top: 10px; max-width: 64ch; }
+  .updated { font: 0.78rem "JetBrains Mono", monospace; color: var(--dim); margin-top: 8px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 22px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .tile .k { font: 0.66rem "JetBrains Mono", monospace; letter-spacing: 0.2em; color: var(--dim); }
+  .tile .v { font: 700 1.7rem "JetBrains Mono", monospace; line-height: 1.15; margin-top: 4px; }
+  .tile .s { font-size: 0.8rem; color: var(--dim); margin-top: 2px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font: 700 0.68rem "JetBrains Mono", monospace; letter-spacing: 0.1em; border-radius: 4px; padding: 2px 7px; margin-top: 6px; }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .pill.good { color: var(--good); background: rgba(51,255,153,0.1); }
+  .pill.fair { color: var(--fair); background: rgba(255,179,71,0.12); }
+  .pill.poor { color: var(--poor); background: rgba(255,107,94,0.12); }
+
+  section.block { margin-top: 36px; }
+  .block-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .block-head p { color: var(--dim); font-size: 0.88rem; }
+
+  .bands { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+  .bands th { font: 0.68rem "JetBrains Mono", monospace; letter-spacing: 0.2em; color: var(--dim); text-align: left; font-weight: 400; padding: 0 12px; }
+  .bands th.now { color: var(--accent-2); }
+  .bands td { background: var(--panel); padding: 12px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .bands td:first-child { border-left: 1px solid var(--line); border-radius: 10px 0 0 10px; font: 700 1rem "JetBrains Mono", monospace; white-space: nowrap; }
+  .bands td:last-child { border-right: 1px solid var(--line); border-radius: 0 10px 10px 0; }
+  .bands td.now { box-shadow: inset 0 0 0 1px rgba(255,179,71,0.35); }
+  .cond { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; font-size: 0.92rem; }
+  .cond::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .cond.good { color: var(--good); } .cond.fair { color: var(--fair); } .cond.poor { color: var(--poor); }
+
+  .vhf { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 10px; }
+  .vhf .tile .v { font-size: 1rem; font-family: "Space Grotesk", system-ui, sans-serif; }
+
+  .chart { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 10px; position: relative; }
+  .chart svg { display: block; width: 100%; height: 220px; overflow: visible; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--dim); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .tip { position: absolute; pointer-events: none; background: #050809; border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; font: 0.75rem "JetBrains Mono", monospace; color: var(--fg); white-space: nowrap; transform: translate(-50%, -110%); opacity: 0; transition: opacity 0.1s; }
+
+  .imgs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  figure { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  figure img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #000; }
+  figure.wide img { aspect-ratio: auto; object-fit: contain; background: #fff; }
+  figcaption { padding: 10px 12px; font-size: 0.82rem; color: var(--dim); }
+  figcaption b { color: var(--fg); font-weight: 700; display: block; font-size: 0.9rem; }
+
+  .err { color: #ff8a7a; font-size: 0.85rem; margin-top: 10px; }
+  .fine { margin-top: 26px; font-size: 0.8rem; color: var(--dim); max-width: 80ch; }
+  .fine a { color: var(--dim); }
+  footer { margin-top: 40px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); }
+  @media (max-width: 520px) { .bands td, .bands th { padding-left: 9px; padding-right: 9px; } .cond { font-size: 0.85rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+    <a class="back" href="/">← HOME</a>
+  </header>
+
+  <div class="eyebrow">PROPAGATION · SPACE WEATHER</div>
+  <h1>Band conditions</h1>
+  <p class="lede">Live solar and geomagnetic data from NOAA's Space Weather Prediction Center, plus a quick read on how the bands should be playing from Connecticut.</p>
+  <p class="updated" id="updated">Loading live data…</p>
+
+  <div class="tiles" id="tiles">
+    <div class="tile"><div class="k">SOLAR FLUX</div><div class="v" id="sfi">—</div><div class="s" id="sfiS">SFI · 10.7 cm</div></div>
+    <div class="tile"><div class="k">K-INDEX</div><div class="v" id="kp">—</div><div class="s" id="kpS">Planetary Kp</div></div>
+    <div class="tile"><div class="k">A-INDEX</div><div class="v" id="ai">—</div><div class="s">Running, 24 h</div></div>
+    <div class="tile"><div class="k">X-RAY</div><div class="v" id="xr">—</div><div class="s" id="xrS">GOES flare class</div></div>
+    <div class="tile"><div class="k">SOLAR WIND</div><div class="v" id="sw">—</div><div class="s">km/s</div></div>
+    <div class="tile"><div class="k">BZ</div><div class="v" id="bz">—</div><div class="s" id="bzS">nT · IMF north/south</div></div>
+  </div>
+
+  <div class="tiles" id="scales" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
+    <div class="tile"><div class="k">RADIO BLACKOUTS</div><div class="v" id="scR">R—</div><div class="s" id="scRS">Flare-driven HF fadeouts</div></div>
+    <div class="tile"><div class="k">SOLAR RADIATION</div><div class="v" id="scS">S—</div><div class="s" id="scSS">Polar HF absorption</div></div>
+    <div class="tile"><div class="k">GEOMAGNETIC STORMS</div><div class="v" id="scG">G—</div><div class="s" id="scGS">Aurora and HF disruption</div></div>
+  </div>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>HF bands from FN31</h2>
+      <p>Estimate from solar flux and Kp</p>
+    </div>
+    <table class="bands" aria-label="Estimated HF band conditions">
+      <thead><tr><th>BAND</th><th id="thDay">DAY</th><th id="thNight">NIGHT</th></tr></thead>
+      <tbody id="bandRows"></tbody>
+    </table>
+    <div class="vhf" id="vhf"></div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>Kp over the last 7 days</h2>
+      <p>3-hour planetary K-index</p>
+    </div>
+    <div class="chart" id="kpChart">
+      <svg id="kpSvg" role="img" aria-label="Bar chart of planetary K-index over the last seven days"></svg>
+      <div class="tip" id="kpTip"></div>
+      <div class="legend">
+        <span><i style="background:var(--good)"></i>Quiet (0–3)</span>
+        <span><i style="background:var(--fair)"></i>Unsettled (4)</span>
+        <span><i style="background:var(--poor)"></i>Storm (5+)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>The sun right now</h2>
+      <p>Live imagery</p>
+    </div>
+    <div class="imgs">
+      <figure>
+        <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" alt="Latest NASA SDO image of the sun in extreme ultraviolet, 193 angstrom" loading="lazy">
+        <figcaption><b>Corona · AIA 193 Å</b>Dark patches are coronal holes, which drive fast solar wind.</figcaption>
+      </figure>
+      <figure>
+        <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIIC.jpg" alt="Latest NASA SDO visible-light image of the sun showing sunspots" loading="lazy">
+        <figcaption><b>Sunspots · HMI visible light</b>More spots usually means a higher solar flux.</figcaption>
+      </figure>
+      <figure>
+        <img src="https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg" alt="NOAA OVATION aurora forecast for the northern hemisphere" loading="lazy">
+        <figcaption><b>Aurora forecast · OVATION</b>If the oval reaches southern New England, try 6 m and 2 m beaming north.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>Second opinion</h2>
+      <p>N0NBH solar-terrestrial data</p>
+    </div>
+    <figure class="wide" style="max-width: 460px">
+      <a href="https://www.hamqsl.com/solar.html" rel="noopener"><img src="https://www.hamqsl.com/solar101vhf.php" alt="N0NBH solar-terrestrial data widget with HF and VHF band conditions" loading="lazy"></a>
+    </figure>
+  </section>
+
+  <p class="fine">
+    Data from <a href="https://www.swpc.noaa.gov/" rel="noopener">NOAA SWPC</a>, imagery from <a href="https://sdo.gsfc.nasa.gov/" rel="noopener">NASA SDO</a>, and the widget from <a href="https://www.hamqsl.com/" rel="noopener">N0NBH</a>.
+    The HF table is a rule-of-thumb estimate, not a forecast: higher solar flux opens the high bands, and a high Kp closes them. Refreshes every 10 minutes.
+  </p>
+
+  <footer>73 DE KC1FQA</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const SWPC = "https://services.swpc.noaa.gov";
+  const OBS = { lat: 41.8526, lon: -72.6437 };
+
+  async function getJson(path) {
+    const r = await fetch(SWPC + path, { cache: "no-store" });
+    if (!r.ok) throw new Error(path + " HTTP " + r.status);
+    return r.json();
+  }
+  // SWPC serves some products as [header, ...rows] and some as objects; normalize to objects.
+  function rows(data) {
+    if (Array.isArray(data) && Array.isArray(data[0])) {
+      const h = data[0];
+      return data.slice(1).map(r => Object.fromEntries(h.map((k, i) => [k, r[i]])));
+    }
+    return Array.isArray(data) ? data : [];
+  }
+  const num = v => (v === null || v === undefined || v === "" || isNaN(+v)) ? null : +v;
+  const lastWith = (arr, key) => { for (let i = arr.length - 1; i >= 0; i--) if (num(arr[i][key]) !== null) return arr[i]; return null; };
+  const utc = s => new Date(/Z$|[+-]\d\d:?\d\d$/.test(s) ? s : s.replace(" ", "T") + "Z");
+
+  function level(cls, el) { el.classList.remove("good", "fair", "poor"); el.classList.add(cls); }
+  function pill(target, cls, text) {
+    let p = target.querySelector(".pill");
+    if (!p) { p = document.createElement("div"); target.appendChild(p); }
+    p.className = "pill " + cls; p.textContent = text;
+  }
+
+  // ---------- solar position (for day/night column) ----------
+  function sunElevation(d) {
+    const rad = Math.PI / 180;
+    const jd = d.getTime() / 86400000 + 2440587.5, n = jd - 2451545.0;
+    const L = (280.46 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * rad;
+    const lam = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad;
+    const eps = (23.439 - 0.0000004 * n) * rad;
+    const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+    const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+    const gmst = (18.697374558 + 24.06570982441908 * n) % 24;
+    const ha = ((gmst * 15 + OBS.lon) * rad) - ra;
+    const lat = OBS.lat * rad;
+    return Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha)) / rad;
+  }
+
+  // ---------- band estimates ----------
+  const LABEL = { good: "Good", fair: "Fair", poor: "Poor" };
+  function estimate(sfi, k) {
+    const storm = k >= 5, unsettled = k >= 4;
+    const down = c => storm ? (c === "good" ? "fair" : "poor") : (unsettled && c === "good" ? "fair" : c);
+    const B = [];
+    B.push(["80–40 m", down("fair"), down("good")]);
+    B.push(["30–20 m", down(sfi >= 90 ? "good" : "fair"), down(sfi >= 120 ? "fair" : "poor")]);
+    B.push(["17–15 m", down(sfi >= 120 ? "good" : sfi >= 90 ? "fair" : "poor"), down(sfi >= 160 ? "fair" : "poor")]);
+    B.push(["12–10 m", down(sfi >= 150 ? "good" : sfi >= 110 ? "fair" : "poor"), "poor"]);
+    return B;
+  }
+
+  function renderBands(sfi, k) {
+    const isDay = sunElevation(new Date()) > -6;
+    $("thDay").className = isDay ? "now" : ""; $("thNight").className = isDay ? "" : "now";
+    $("thDay").textContent = isDay ? "DAY · NOW" : "DAY"; $("thNight").textContent = isDay ? "NIGHT" : "NIGHT · NOW";
+    $("bandRows").innerHTML = estimate(sfi, k).map(([b, d, n]) =>
+      "<tr><td>" + b + "</td>" +
+      '<td class="' + (isDay ? "now" : "") + '"><span class="cond ' + d + '">' + LABEL[d] + "</span></td>" +
+      '<td class="' + (isDay ? "" : "now") + '"><span class="cond ' + n + '">' + LABEL[n] + "</span></td></tr>").join("");
+
+    const month = new Date().getMonth();
+    const esSeason = month >= 4 && month <= 7;
+    const aurora = k >= 6 ? ["poor", "Likely. Point north on 6 m and 2 m and listen for a raspy, buzzy sound."] :
+                   k >= 5 ? ["fair", "Possible on 6 m. Keep an eye on the aurora oval."] :
+                            ["good", "Unlikely this far south while Kp stays below 5."];
+    $("vhf").innerHTML =
+      tileHtml("6 m · SPORADIC-E", esSeason ? "In season (May–Aug). Watch 50.313 FT8 for openings." : "Out of season. The peak is May through August.") +
+      tileHtml("6 m · F2", sfi >= 180 ? "Possible with flux this high. Check midday toward Europe and South America." : "Unlikely below about SFI 180.") +
+      tileHtml("AURORA · 6 m / 2 m", aurora[1], aurora[0] === "good" ? null : aurora[0]);
+  }
+  function tileHtml(k, v, cls) {
+    return '<div class="tile"><div class="k">' + k + '</div><div class="v">' + v + "</div>" +
+      (cls ? '<div class="pill ' + cls + '">' + (cls === "poor" ? "ALERT" : "WATCH") + "</div>" : "") + "</div>";
+  }
+
+  // ---------- Kp chart ----------
+  function kpClass(k) { return k >= 5 ? "poor" : k >= 4 ? "fair" : "good"; }
+  const KCOL = { good: "#33ff99", fair: "#ffb347", poor: "#ff6b5e" };
+  function renderKpChart(list) {
+    const svg = $("kpSvg"), tip = $("kpTip");
+    const W = svg.clientWidth || 600, H = 220, padL = 26, padB = 22, padT = 8;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    const pts = list.slice(-56);
+    const n = pts.length; if (!n) return;
+    const ih = H - padB - padT, iw = W - padL;
+    const bw = iw / n;
+    const y = k => padT + ih - (k / 9) * ih;
+    let s = "";
+    [0, 3, 5, 9].forEach(k => {
+      s += '<line x1="' + padL + '" x2="' + W + '" y1="' + y(k) + '" y2="' + y(k) + '" stroke="rgba(51,255,153,' + (k ? 0.1 : 0.25) + ')" stroke-width="1"/>';
+      s += '<text x="' + (padL - 6) + '" y="' + (y(k) + 3) + '" fill="#7d978d" font-size="9" font-family="JetBrains Mono, monospace" text-anchor="end">' + k + "</text>";
+    });
+    let lastDay = "";
+    pts.forEach((p, i) => {
+      const x = padL + i * bw, w = Math.max(1, bw - 2), k = p.k, top = y(Math.max(k, 0.15));
+      const h = y(0) - top, r = Math.min(4, w / 2, h);
+      const d = "M" + x + " " + y(0) + " V" + (top + r) + " Q" + x + " " + top + " " + (x + r) + " " + top + " H" + (x + w - r) + " Q" + (x + w) + " " + top + " " + (x + w) + " " + (top + r) + " V" + y(0) + " Z";
+      s += '<path d="' + d + '" fill="' + KCOL[kpClass(k)] + '"/>';
+      s += '<rect class="hit" data-i="' + i + '" x="' + x + '" y="' + padT + '" width="' + bw + '" height="' + ih + '" fill="transparent"/>';
+      const day = p.t.toLocaleDateString([], { weekday: "short" });
+      if (day !== lastDay && p.t.getHours() < 3) {
+        s += '<text x="' + (x + 1) + '" y="' + (H - 6) + '" fill="#7d978d" font-size="9" font-family="JetBrains Mono, monospace">' + day.toUpperCase() + "</text>";
+        lastDay = day;
+      }
+    });
+    svg.innerHTML = s;
+    svg.querySelectorAll(".hit").forEach(r => {
+      r.addEventListener("mouseenter", show); r.addEventListener("touchstart", show, { passive: true });
+      r.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
+    });
+    function show(e) {
+      const p = pts[+e.target.dataset.i];
+      const box = svg.getBoundingClientRect(), cb = $("kpChart").getBoundingClientRect();
+      const x = padL + (+e.target.dataset.i + 0.5) * bw;
+      tip.innerHTML = "Kp " + p.k.toFixed(2) + " · " + p.t.toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
+      tip.style.left = (box.left - cb.left + x * box.width / W) + "px";
+      tip.style.top = (box.top - cb.top + y(p.k) * box.height / H) + "px";
+      tip.style.opacity = 1;
+    }
+  }
+
+  // ---------- main load ----------
+  let kpPoints = [];
+  async function load() {
+    const errs = [];
+    const settle = p => p.then(v => v, e => { errs.push(e.message); return null; });
+    const [kpRaw, fluxRaw, scalesRaw, plasmaRaw, magRaw, xrayRaw] = await Promise.all([
+      settle(getJson("/products/noaa-planetary-k-index.json")),
+      settle(getJson("/json/f107_cm_flux.json")),
+      settle(getJson("/products/noaa-scales.json")),
+      settle(getJson("/products/solar-wind/plasma-1-day.json")),
+      settle(getJson("/products/solar-wind/mag-1-day.json")),
+      settle(getJson("/json/goes/primary/xrays-1-day.json")),
+    ]);
+
+    let sfi = null, k = null;
+
+    if (kpRaw) {
+      const r = rows(kpRaw);
+      kpPoints = r.map(o => ({ t: utc(o.time_tag), k: num(o.Kp ?? o.kp ?? o.kp_index) })).filter(o => o.k !== null && !isNaN(o.t));
+      const last = kpPoints[kpPoints.length - 1];
+      if (last) {
+        k = last.k;
+        $("kp").textContent = k.toFixed(k % 1 ? 2 : 0).replace(/\.?0+$/, "") || "0";
+        $("kpS").textContent = "Planetary Kp · " + last.t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        const c = kpClass(k); pill($("kp").parentNode, c, c === "good" ? "QUIET" : c === "fair" ? "UNSETTLED" : "STORM");
+      }
+      const lastA = lastWith(r, "a_running");
+      if (lastA) $("ai").textContent = Math.round(num(lastA.a_running));
+      renderKpChart(kpPoints);
+    }
+
+    if (fluxRaw) {
+      const r = rows(fluxRaw).filter(o => num(o.flux) !== null).sort((a, b) => utc(b.time_tag) - utc(a.time_tag));
+      if (r[0]) {
+        sfi = num(r[0].flux);
+        $("sfi").textContent = Math.round(sfi);
+        const c = sfi >= 150 ? "good" : sfi >= 100 ? "fair" : "poor";
+        pill($("sfi").parentNode, c, c === "good" ? "HIGH" : c === "fair" ? "MODERATE" : "LOW");
+      }
+    }
+
+    if (xrayRaw) {
+      const r = rows(xrayRaw).filter(o => o.energy === "0.1-0.8nm" && num(o.flux) !== null);
+      const last = r[r.length - 1];
+      if (last) {
+        const f = num(last.flux);
+        const cls = f >= 1e-4 ? ["X", 1e-4] : f >= 1e-5 ? ["M", 1e-5] : f >= 1e-6 ? ["C", 1e-6] : f >= 1e-7 ? ["B", 1e-7] : ["A", 1e-8];
+        $("xr").textContent = cls[0] + (f / cls[1]).toFixed(1);
+        const c = cls[0] === "X" || cls[0] === "M" ? (cls[0] === "X" ? "poor" : "fair") : "good";
+        pill($("xr").parentNode, c, c === "good" ? "NO FLARE" : cls[0] + "-CLASS FLARE");
+      }
+    }
+
+    if (plasmaRaw) {
+      const last = lastWith(rows(plasmaRaw), "speed");
+      if (last) {
+        const v = Math.round(num(last.speed));
+        $("sw").textContent = v;
+        const c = v >= 600 ? "poor" : v >= 450 ? "fair" : "good";
+        pill($("sw").parentNode, c, c === "good" ? "SLOW" : c === "fair" ? "ELEVATED" : "FAST");
+      }
+    }
+    if (magRaw) {
+      const last = lastWith(rows(magRaw), "bz_gsm");
+      if (last) {
+        const bz = num(last.bz_gsm);
+        $("bz").textContent = (bz > 0 ? "+" : "") + bz.toFixed(1);
+        const c = bz <= -10 ? "poor" : bz <= -5 ? "fair" : "good";
+        pill($("bz").parentNode, c, bz < 0 ? "SOUTHWARD" : "NORTHWARD");
+      }
+    }
+
+    if (scalesRaw && scalesRaw["0"]) {
+      const now = scalesRaw["0"];
+      [["R", "scR"], ["S", "scS"], ["G", "scG"]].forEach(([key, id]) => {
+        const sc = now[key] || {};
+        const lvl = num(sc.Scale) ?? 0;
+        $(id).textContent = key + lvl;
+        const c = lvl >= 3 ? "poor" : lvl >= 1 ? "fair" : "good";
+        pill($(id).parentNode, c, lvl ? (sc.Text || "active").toUpperCase() : "NONE");
+      });
+    }
+
+    if (sfi !== null && k !== null) renderBands(sfi, k);
+    else if (sfi !== null || k !== null) renderBands(sfi ?? 100, k ?? 2);
+
+    const okCount = [kpRaw, fluxRaw, scalesRaw, plasmaRaw, magRaw, xrayRaw].filter(Boolean).length;
+    $("updated").textContent = okCount
+      ? "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + (errs.length ? " · " + errs.length + " feed(s) unavailable" : "")
+      : "Couldn't reach NOAA's data feeds right now. The images below may still load.";
+    $("updated").className = okCount ? "updated" : "updated err";
+  }
+
+  load();
+  setInterval(load, 10 * 60 * 1000);
+  let rT; window.addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(() => renderKpChart(kpPoints), 150); });
+})();
+</script>
+</body>
+</html>

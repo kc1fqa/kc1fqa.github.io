@@ -1,0 +1,3 @@
+satellite.js (assets/satellite.min.js)
+https://github.com/shashwatak/satellite-js
+MIT License. Copyright (c) Shashwat Kandadai and UCSC Center for Computational Experience.
