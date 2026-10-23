@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KC1FQA · Coming Soon</title>
-<meta name="description" content="KC1FQA amateur radio station. Site coming soon.">
+<title>KC1FQA · Amateur Radio Station</title>
+<meta name="description" content="KC1FQA, an amateur radio station in Windsor, Connecticut (FN31). Satellite passes, band conditions, local repeaters, MeshCore, a Morse trainer and license practice exams.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -12,178 +12,315 @@
 <style>
   :root {
     --bg: #070b0d;
+    --panel: #0c1316;
+    --panel-2: #0f181b;
     --fg: #e6f2ec;
-    --dim: #6f8a80;
+    --dim: #7d978d;
     --accent: #33ff99;
     --accent-2: #ffb347;
+    --bad: #ff6b5e;
     --line: rgba(51, 255, 153, 0.18);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: "Space Grotesk", system-ui, sans-serif;
-    overflow-x: hidden;
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.5; overflow-x: hidden; }
+  a { color: inherit; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .k { font: 0.68rem "JetBrains Mono", monospace; letter-spacing: 0.22em; color: var(--dim); text-transform: uppercase; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(7, 11, 13, 0.82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
   }
-  canvas#waterfall {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    opacity: 0.55;
-  }
-  .scan {
-    position: fixed; inset: 0; pointer-events: none;
-    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 2px 3px);
-  }
-  .vignette {
-    position: fixed; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse at center, rgba(7,11,13,0) 30%, rgba(7,11,13,0.92) 100%);
-  }
-  main {
-    position: relative; z-index: 2;
-    min-height: 100%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 24px 16px 64px;
-    text-align: center;
-  }
-  .status {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.25em;
-    color: var(--accent-2);
-    display: inline-flex; align-items: center; gap: 10px;
-    margin-bottom: 18px;
-  }
-  .led {
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--accent-2);
-    box-shadow: 0 0 10px var(--accent-2);
-    transition: opacity 0.05s;
-  }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 54px; }
+  .tb-call { font: 700 1rem "JetBrains Mono", monospace; letter-spacing: 0.12em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+  .tb-call .digit { color: var(--accent); }
+  .tb-led { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .tb-clocks { display: flex; gap: 16px; font: 0.8rem "JetBrains Mono", monospace; color: var(--dim); }
+  .tb-clocks b { color: var(--accent); font-weight: 700; }
+  @media (max-width: 420px) { .tb-clocks .loc { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  canvas#waterfall { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5; }
+  .scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 2px 3px); }
+  .vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, rgba(7,11,13,0.1) 20%, rgba(7,11,13,0.95) 100%); }
+  .hero-in { position: relative; z-index: 2; min-height: min(78vh, 720px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 56px 16px 64px; }
+  .status { font: 0.78rem "JetBrains Mono", monospace; letter-spacing: 0.28em; color: var(--accent-2); display: inline-flex; align-items: center; gap: 10px; }
+  .led { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 12px var(--accent-2); transition: opacity 0.04s; }
   .led.off { opacity: 0.15; box-shadow: none; }
-  h1 {
-    font-weight: 700;
-    font-size: clamp(3.4rem, 17vw, 10rem);
-    line-height: 0.95;
-    letter-spacing: 0.04em;
-    color: var(--fg);
-    text-shadow: 0 0 24px rgba(51,255,153,0.35), 0 0 2px rgba(51,255,153,0.8);
+  h1.call {
+    margin-top: 18px; font-weight: 700; font-size: clamp(3.6rem, 17vw, 10.5rem); line-height: 0.92; letter-spacing: 0.04em;
+    text-shadow: 0 0 28px rgba(51,255,153,0.35), 0 0 2px rgba(51,255,153,0.8);
   }
-  h1 .digit { color: var(--accent); }
-  .morse {
-    font-family: "JetBrains Mono", monospace;
-    color: var(--dim);
-    font-size: clamp(0.7rem, 2.6vw, 1rem);
-    letter-spacing: 0.15em;
-    margin-top: 14px;
-    word-spacing: 0.6em;
-  }
+  h1.call .digit { color: var(--accent); }
+  .morse { font: clamp(0.75rem, 2.7vw, 1.05rem) "JetBrains Mono", monospace; color: var(--dim); letter-spacing: 0.15em; word-spacing: 0.6em; margin-top: 16px; }
   .morse span.on { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
-  .tag {
-    margin-top: 34px;
-    font-size: clamp(1.1rem, 4vw, 1.5rem);
-    font-weight: 500;
+  .tagline { margin-top: 30px; font-size: clamp(1.1rem, 3.6vw, 1.45rem); font-weight: 500; max-width: 34ch; }
+  .meta { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .chip { font: 0.75rem "JetBrains Mono", monospace; letter-spacing: 0.12em; color: var(--fg); border: 1px solid var(--line); background: rgba(7,11,13,0.65); border-radius: 999px; padding: 6px 12px; }
+  .chip b { color: var(--accent); font-weight: 700; }
+  .cta { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .btn { font: 700 0.8rem "JetBrains Mono", monospace; letter-spacing: 0.16em; text-decoration: none; border-radius: 8px; padding: 13px 20px; border: 1px solid var(--line); color: var(--accent); background: rgba(7,11,13,0.7); transition: border-color .15s, box-shadow .15s; }
+  .btn:hover, .btn:focus-visible { border-color: var(--accent); box-shadow: 0 0 16px rgba(51,255,153,0.25); outline: none; }
+  .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  /* S-meter */
+  .smeter { margin-top: 34px; width: min(420px, 100%); }
+  .smeter .scale { display: flex; justify-content: space-between; font: 0.62rem "JetBrains Mono", monospace; color: var(--dim); letter-spacing: 0.05em; padding: 0 2px; }
+  .smeter .scale .plus { color: var(--bad); }
+  .smeter .track { margin-top: 4px; height: 10px; border-radius: 5px; background: #121c1a; border: 1px solid var(--line); overflow: hidden; }
+  .smeter .fill { height: 100%; width: 30%; background: linear-gradient(90deg, #1f9e5f 0%, var(--accent) 70%, var(--accent-2) 85%, var(--bad) 100%); background-size: 420px 100%; transition: width 0.12s linear; }
+  .smeter .lbl { display: flex; justify-content: space-between; margin-top: 4px; font: 0.62rem "JetBrains Mono", monospace; color: var(--dim); letter-spacing: 0.2em; }
+
+  /* ---------- sections ---------- */
+  section.band { padding: 64px 0; border-bottom: 1px solid var(--line); }
+  .sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px 20px; margin-bottom: 22px; }
+  .sec-head h2 { font-size: clamp(1.6rem, 4.6vw, 2.3rem); line-height: 1.1; margin-top: 6px; }
+  .sec-head p { color: var(--dim); max-width: 52ch; }
+  .eyebrow { font: 0.75rem "JetBrains Mono", monospace; letter-spacing: 0.26em; color: var(--accent-2); }
+
+  /* live readouts */
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  @media (max-width: 520px) { .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ro { padding: 14px 14px 16px; } .ro .v { font-size: 1.45rem; } .ro .k { font-size: 0.6rem; letter-spacing: 0.14em; padding-right: 14px; } .ro .s { font-size: 0.78rem; } }
+  .ro { position: relative; display: block; text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 18px; transition: border-color .15s, transform .15s; }
+  .ro:hover, .ro:focus-visible { border-color: var(--accent); outline: none; transform: translateY(-2px); }
+  .ro .v { font: 700 2rem "JetBrains Mono", monospace; line-height: 1.1; margin-top: 8px; }
+  .ro .s { font-size: 0.85rem; color: var(--dim); margin-top: 4px; min-height: 1.3em; }
+  .ro .go { position: absolute; top: 14px; right: 16px; font: 0.7rem "JetBrains Mono", monospace; color: var(--dim); }
+  .ro:hover .go { color: var(--accent); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font: 700 0.66rem "JetBrains Mono", monospace; letter-spacing: 0.1em; border-radius: 4px; padding: 2px 7px; margin-top: 8px; }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .pill.good { color: var(--accent); background: rgba(51,255,153,0.1); }
+  .pill.fair { color: var(--accent-2); background: rgba(255,179,71,0.12); }
+  .pill.poor { color: var(--bad); background: rgba(255,107,94,0.12); }
+  .v.live { color: var(--accent-2); }
+
+  /* tool modules */
+  .modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .mod {
+    position: relative; display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start;
+    text-decoration: none; background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); border-radius: 12px; padding: 20px 18px 18px;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
   }
-  .sub {
-    margin-top: 8px;
-    color: var(--dim);
-    font-size: 0.95rem;
-  }
-  .panel {
-    margin-top: 38px;
-    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-    font-family: "JetBrains Mono", monospace;
-  }
-  .readout {
-    border: 1px solid var(--line);
-    background: rgba(7,11,13,0.7);
-    padding: 10px 16px;
-    border-radius: 6px;
-    min-width: 140px;
-  }
-  .readout .k { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--dim); }
-  .readout .v { font-size: 1.15rem; color: var(--accent); margin-top: 4px; }
-  .navrow {
-    margin-top: 28px;
-    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
-  }
-  .navlink {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    text-decoration: none;
-    border: 1px solid var(--line);
-    background: rgba(7,11,13,0.7);
-    padding: 10px 18px;
-    border-radius: 6px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .navlink:hover, .navlink:focus-visible {
-    border-color: var(--accent);
-    box-shadow: 0 0 14px rgba(51,255,153,0.3);
-    outline: none;
-  }
-  footer {
-    position: fixed; bottom: 14px; left: 0; right: 0; z-index: 2;
-    text-align: center;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.75rem;
-    color: var(--dim);
-    letter-spacing: 0.2em;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    canvas#waterfall { display: none; }
-  }
+  .mod::before { content: ""; position: absolute; left: 18px; right: 18px; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(51,255,153,0.45), transparent); opacity: 0; transition: opacity .2s; }
+  .mod:hover, .mod:focus-visible { border-color: var(--accent); box-shadow: 0 0 22px rgba(51,255,153,0.14); transform: translateY(-2px); outline: none; }
+  .mod:hover::before, .mod:focus-visible::before { opacity: 1; }
+  .mod .ic { width: 52px; height: 52px; border-radius: 10px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--accent); background: #050809; }
+  .mod .ic svg { width: 28px; height: 28px; }
+  .mod .ch { font: 0.66rem "JetBrains Mono", monospace; letter-spacing: 0.2em; color: var(--accent-2); }
+  .mod h3 { font-size: 1.2rem; line-height: 1.2; margin-top: 2px; }
+  .mod p { font-size: 0.9rem; color: var(--dim); margin-top: 6px; }
+  .mod .arrow { font: 0.75rem "JetBrains Mono", monospace; color: var(--accent); letter-spacing: 0.15em; margin-top: 10px; display: inline-block; }
+
+  /* shack */
+  .shack { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 860px) { .shack { grid-template-columns: 1fr 1fr; } }
+  .rack { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .rack-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: #0a1114; }
+  .rack ul { list-style: none; }
+  .rack li { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; padding: 14px 16px; border-bottom: 1px solid rgba(51,255,153,0.08); }
+  .rack li:last-child { border-bottom: 0; }
+  .rack .rig { font-weight: 700; }
+  .rack .use { font: 0.72rem "JetBrains Mono", monospace; letter-spacing: 0.12em; color: var(--accent); text-align: right; }
+  .rack .what { grid-column: 1 / -1; font-size: 0.88rem; color: var(--dim); }
+  .modes { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; }
+  .mode { font: 700 0.78rem "JetBrains Mono", monospace; letter-spacing: 0.1em; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; background: #050809; }
+  .mode.soon { color: var(--dim); border-style: dashed; }
+  .about { padding: 16px; color: var(--dim); font-size: 0.95rem; border-top: 1px solid var(--line); }
+  .about b { color: var(--fg); font-weight: 500; }
+
+  /* QSO strip */
+  .qso { display: grid; gap: 14px; align-items: center; grid-template-columns: 1fr; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  @media (min-width: 760px) { .qso { grid-template-columns: 1.4fr 1fr; } }
+  .qso h3 { font-size: 1.35rem; }
+  .qso p { color: var(--dim); margin-top: 6px; }
+  .qso .freqs { display: grid; gap: 6px; font: 0.88rem "JetBrains Mono", monospace; }
+  .qso .freqs div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed rgba(51,255,153,0.12); padding-bottom: 6px; }
+  .qso .freqs span:last-child { color: var(--accent); }
+
+  footer { padding: 40px 16px 52px; text-align: center; }
+  footer .sig { font: 700 0.9rem "JetBrains Mono", monospace; letter-spacing: 0.3em; color: var(--accent); }
+  footer .small { margin-top: 8px; font-size: 0.8rem; color: var(--dim); }
+
+  @media (prefers-reduced-motion: reduce) { canvas#waterfall { display: none; } .mod, .ro { transition: none; } html { scroll-behavior: auto; } }
 </style>
 </head>
 <body>
-<canvas id="waterfall" aria-hidden="true"></canvas>
-<div class="scan" aria-hidden="true"></div>
-<div class="vignette" aria-hidden="true"></div>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="tb-call" href="#top"><span class="tb-led" aria-hidden="true"></span><span>KC<span class="digit">1</span>FQA</span></a>
+    <div class="tb-clocks" aria-label="Clocks"><span>UTC <b id="tbUtc">--:--</b></span><span class="loc">LOCAL <b id="tbLoc">--:--</b></span></div>
+  </div>
+</div>
+
+<header class="hero" id="top">
+  <canvas id="waterfall" aria-hidden="true"></canvas>
+  <div class="scan" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="hero-in">
+    <div class="status"><span class="led off" id="led"></span><span id="txState">ON THE AIR</span></div>
+    <h1 class="call">KC<span class="digit">1</span>FQA</h1>
+    <div class="morse" id="morse" aria-label="KC1FQA in Morse code"></div>
+    <p class="tagline">Amateur radio from Windsor, Connecticut: 2 meters, D-STAR, satellites and LoRa mesh.</p>
+    <div class="meta">
+      <span class="chip">GRID <b>FN31</b></span>
+      <span class="chip">HARTFORD CO. · CT</span>
+      <span class="chip">ITU <b>8</b> · CQ <b>5</b></span>
+    </div>
+    <div class="smeter" aria-hidden="true">
+      <div class="scale"><span>1</span><span>3</span><span>5</span><span>7</span><span>9</span><span class="plus">+20</span><span class="plus">+40</span></div>
+      <div class="track"><div class="fill" id="sfill"></div></div>
+      <div class="lbl"><span>S-METER</span><span id="sread">S5</span></div>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#tools">STATION TOOLS ↓</a>
+      <a class="btn" href="/sats">NEXT SATELLITE →</a>
+    </div>
+  </div>
+</header>
 
 <main>
-  <div class="status"><span class="led" id="led"></span>STANDING BY</div>
-  <h1>KC<span class="digit">1</span>FQA</h1>
-  <div class="morse" id="morse" aria-label="KC1FQA in Morse code"></div>
-  <p class="tag">Station coming on the air soon.</p>
-  <p class="sub">Amateur radio · New England</p>
+  <!-- LIVE -->
+  <section class="band" aria-labelledby="liveH">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><div class="eyebrow">LIVE · RIGHT NOW</div><h2 id="liveH">Conditions at the station</h2></div>
+        <p>Live from NOAA and the satellite tracker. Tap any reading for the full details.</p>
+      </div>
+      <div class="readouts">
+        <a class="ro" href="/space"><span class="go">→</span><div class="k">Solar flux</div><div class="v" id="roSfi">—</div><div class="s" id="roSfiS">10.7 cm · SFI</div></a>
+        <a class="ro" href="/space"><span class="go">→</span><div class="k">K-index</div><div class="v" id="roKp">—</div><div class="s" id="roKpS">Planetary Kp</div></a>
+        <a class="ro" href="/space"><span class="go">→</span><div class="k">HF right now</div><div class="v" id="roHf">—</div><div class="s" id="roHfS">20 m estimate</div></a>
+        <a class="ro" href="/sats"><span class="go">→</span><div class="k">Next satellite pass</div><div class="v" id="roSat">—</div><div class="s" id="roSatS">Computing orbits…</div></a>
+      </div>
+    </div>
+  </section>
 
-  <div class="panel">
-    <div class="readout"><div class="k">UTC</div><div class="v" id="utc">--:--:--</div></div>
-    <div class="readout"><div class="k">LOCAL</div><div class="v" id="local">--:--:--</div></div>
-  </div>
+  <!-- TOOLS -->
+  <section class="band" id="tools" aria-labelledby="toolsH">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><div class="eyebrow">STATION TOOLS</div><h2 id="toolsH">Everything on the bench</h2></div>
+        <p>Tools I use around the shack, free for any ham to use.</p>
+      </div>
+      <div class="modules">
+        <a class="mod" href="/sats">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="12" width="8" height="8" rx="1.5" transform="rotate(45 16 16)"/><path d="M9 9l-4-4m18 18l4 4M5 11l6-6m10 22l6-6"/><path d="M22 6a8 8 0 0 1 4 4M23 2a12 12 0 0 1 7 7"/></svg></span>
+          <span><span class="ch">CH 01</span><h3>Satellite passes</h3><p>The next 48 hours of passes over FN31, with a sky plot, countdown and uplink/downlink frequencies.</p><span class="arrow">OPEN →</span></span>
+        </a>
+        <a class="mod" href="/space">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="16" cy="16" r="5"/><path d="M16 3v4M16 25v4M3 16h4M25 16h4M6.8 6.8l2.8 2.8M22.4 22.4l2.8 2.8M6.8 25.2l2.8-2.8M22.4 9.6l2.8-2.8"/></svg></span>
+          <span><span class="ch">CH 02</span><h3>Band conditions</h3><p>Solar flux, K-index, flares and solar wind, plus HF band estimates and the aurora outlook.</p><span class="arrow">OPEN →</span></span>
+        </a>
+        <a class="mod" href="/repeaters">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12v17M11 29h10M16 12l-5 17M16 12l5 17"/><circle cx="16" cy="9" r="2"/><path d="M10 5a8 8 0 0 0 0 8M22 5a8 8 0 0 1 0 8M6.5 2.5a13 13 0 0 0 0 13M25.5 2.5a13 13 0 0 1 0 13"/></svg></span>
+          <span><span class="ch">CH 03</span><h3>Local 2 m repeaters</h3><p>The five closest machines to Windsor, with offsets, PL tones and a map.</p><span class="arrow">OPEN →</span></span>
+        </a>
+        <a class="mod" href="/mesh">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="8" r="3"/><circle cx="25" cy="10" r="3"/><circle cx="16" cy="24" r="3"/><circle cx="27" cy="25" r="2"/><path d="M9.6 9.4l12.8 1.2M8.6 10.6l5.9 11M23.8 12.7l-6.3 8.7M18.9 24.3l6.1.6"/></svg></span>
+          <span><span class="ch">CH 04</span><h3>MeshCore map</h3><p>The live LoRa mesh around central Connecticut, plus New England regional coordination.</p><span class="arrow">OPEN →</span></span>
+        </a>
+        <a class="mod" href="/cw">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 24h24M7 24v-3h18v3"/><path d="M10 21l9-9h5"/><circle cx="25.5" cy="12" r="1.8"/><path d="M5 8h3M11 8h8M22 8h3"/></svg></span>
+          <span><span class="ch">CH 05</span><h3>Morse code trainer</h3><p>Koch-method lessons, character drills and text-to-CW, all at full character speed.</p><span class="arrow">OPEN →</span></span>
+        </a>
+        <a class="mod" href="/exam/">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="18" height="24" rx="2"/><path d="M11 4v3h10V4"/><path d="M11 14l2 2 4-4M11 22l2 2 4-4M20 15h2M20 23h2"/></svg></span>
+          <span><span class="ch">CH 06</span><h3>License study guide</h3><p>Practice exams and drills for the Technician, General and Extra pools, with progress tracking.</p><span class="arrow">OPEN →</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
 
-  <nav class="navrow" aria-label="Pages">
-    <a class="navlink" href="/repeaters">LOCAL 2M REPEATERS →</a>
-    <a class="navlink" href="/mesh">MESHCORE MAP →</a>
-    <a class="navlink" href="/sats">SATELLITE PASSES →</a>
-    <a class="navlink" href="/space">BAND CONDITIONS →</a>
-    <a class="navlink" href="/cw">MORSE TRAINER →</a>
-    <a class="navlink" href="/exam/">LICENSE STUDY GUIDE →</a>
-  </nav>
+  <!-- SHACK -->
+  <section class="band" aria-labelledby="shackH">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><div class="eyebrow">THE SHACK</div><h2 id="shackH">Station equipment</h2></div>
+        <p>What's on the air at KC1FQA, from the Jeep to the backyard.</p>
+      </div>
+      <div class="shack">
+        <div class="rack">
+          <div class="rack-h"><span class="k">Rigs &amp; antennas</span><span class="k" style="color:var(--accent)">● ON</span></div>
+          <ul>
+            <li><span class="rig">Icom ID-5100</span><span class="use">MOBILE</span><span class="what">Dual-band D-STAR mobile, installed in the Jeep.</span></li>
+            <li><span class="rig">Icom ID-51A</span><span class="use">HANDHELD</span><span class="what">Dual-band D-STAR HT for repeaters and portable work.</span></li>
+            <li><span class="rig">TYT TH-8900</span><span class="use">FM · QUAD-BAND</span><span class="what">Quad-band FM mobile covering 10 m, 6 m, 2 m and 70 cm.</span></li>
+            <li><span class="rig">Arrow dual-band Yagi</span><span class="use">SATELLITE</span><span class="what">Handheld 2 m / 70 cm beam for working the FM birds.</span></li>
+          </ul>
+        </div>
+        <div class="rack">
+          <div class="rack-h"><span class="k">Projects on the bench</span><span class="k" style="color:var(--accent-2)">● BUILDING</span></div>
+          <ul>
+            <li><span class="rig">D-STAR hotspot</span><span class="use">PI ZERO 2W</span><span class="what">MMDVM duplex hat and Nextion touchscreen, running WPSD.</span></li>
+            <li><span class="rig">MeshCore companion</span><span class="use">LORA · HELTEC V4</span><span class="what">Pocket node in a 3D-printed H1+ case.</span></li>
+            <li><span class="rig">MeshCore home repeater</span><span class="use">PLANNED</span><span class="what">A fixed node to help fill in the central CT mesh.</span></li>
+            <li><span class="rig">Solar weather node</span><span class="use">PLANNED</span><span class="what">Solar-powered mesh node that reports local weather.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="rack" style="margin-top:14px">
+        <div class="rack-h"><span class="k">Modes &amp; activities</span></div>
+        <div class="modes">
+          <span class="mode">2 M FM</span><span class="mode">70 CM FM</span><span class="mode">D-STAR</span><span class="mode">FM SATELLITES</span><span class="mode">LORA · MESHCORE</span><span class="mode soon">CW · LEARNING</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QSO -->
+  <section class="band" aria-labelledby="qsoH" style="border-bottom:0">
+    <div class="wrap">
+      <div class="qso">
+        <div>
+          <div class="eyebrow">LISTENING FOR YOU</div>
+          <h3 id="qsoH" style="margin-top:6px">Catch me on the air</h3>
+          <p>Most often on the local 2 m repeaters around Hartford County, on D-STAR, or on a satellite pass. Give a call for KC1FQA.</p>
+          <div class="cta" style="justify-content:flex-start; margin-top:16px">
+            <a class="btn" href="/repeaters">REPEATER LIST →</a>
+            <a class="btn" href="https://www.qrz.com/db/KC1FQA" rel="noopener">QRZ LOOKUP ↗</a>
+          </div>
+        </div>
+        <div class="freqs" aria-label="Frequencies to try"><div style="border:0;padding:0"><span class="k">WHERE TO TRY</span><span></span></div>
+          <div><span>146.640 − · PL 141.3</span><span>Hartford</span></div>
+          <div><span>146.820 − · no tone</span><span>Talcott Mtn</span></div>
+          <div><span>146.520 simplex</span><span>Calling</span></div>
+          <div><span>145.850 ↑ / 436.795 ↓</span><span>SO-50</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer>73 DE KC1FQA</footer>
+<footer>
+  <div class="sig">73 DE KC1FQA SK</div>
+  <p class="small">Windsor, Connecticut · FN31</p>
+</footer>
 
+<script src="/assets/satellite.min.js" defer></script>
 <script>
-  // Clocks
+(function () {
+  const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, "0");
+
+  // ---------- clocks ----------
   function tick() {
     const d = new Date();
-    document.getElementById("utc").textContent =
-      pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds());
-    document.getElementById("local").textContent =
-      pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    $("tbUtc").textContent = pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + "Z";
+    $("tbLoc").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
   tick(); setInterval(tick, 1000);
 
-  // Morse readout, keyed in real time (~15 WPM)
-  const code = { K:"-.-", C:"-.-.", "1":".----", F:"..-.", Q:"--.-", A:".-" };
+  // ---------- Morse keyed in real time (~15 WPM) ----------
+  const code = { K: "-.-", C: "-.-.", "1": ".----", F: "..-.", Q: "--.-", A: ".-" };
   const call = "KC1FQA";
-  const morseEl = document.getElementById("morse");
-  const led = document.getElementById("led");
+  const morseEl = $("morse"), led = $("led");
   const spans = [];
   call.split("").forEach((ch, i) => {
     const s = document.createElement("span");
@@ -192,16 +329,16 @@
     if (i < call.length - 1) morseEl.appendChild(document.createTextNode(" "));
     spans.push(s);
   });
-  const unit = 80;
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  async function key() {
+  const unit = 80, sleep = ms => new Promise(r => setTimeout(r, ms));
+  let keyDown = false;
+  (async function key() {
     while (true) {
       for (let i = 0; i < call.length; i++) {
         spans[i].classList.add("on");
         for (const el of code[call[i]]) {
-          led.classList.remove("off");
+          led.classList.remove("off"); keyDown = true;
           await sleep(el === "." ? unit : unit * 3);
-          led.classList.add("off");
+          led.classList.add("off"); keyDown = false;
           await sleep(unit);
         }
         spans[i].classList.remove("on");
@@ -209,35 +346,47 @@
       }
       await sleep(unit * 25);
     }
-  }
-  led.classList.add("off");
-  key();
+  })();
 
-  // Waterfall display
-  const cv = document.getElementById("waterfall");
-  const ctx = cv.getContext("2d");
+  // ---------- S-meter (follows the keying, with a little QSB) ----------
+  let sLevel = 0.3;
+  setInterval(() => {
+    const target = keyDown ? 0.72 + Math.random() * 0.2 : 0.22 + Math.random() * 0.08;
+    sLevel += (target - sLevel) * 0.35;
+    $("sfill").style.width = (sLevel * 100).toFixed(1) + "%";
+    const s = sLevel < 0.62 ? "S" + Math.max(1, Math.round(sLevel / 0.62 * 9)) : "S9+" + Math.round((sLevel - 0.62) / 0.38 * 40 / 10) * 10;
+    $("sread").textContent = s;
+  }, 90);
+
+  // ---------- waterfall ----------
+  const cv = $("waterfall"), ctx = cv.getContext("2d");
   let W, H;
-  function resize() {
-    W = cv.width = Math.floor(window.innerWidth / 3);
-    H = cv.height = Math.floor(window.innerHeight / 3);
+  function resize(first) {
+    const r = cv.getBoundingClientRect();
+    const nW = Math.max(1, Math.floor(r.width / 3)), nH = Math.max(1, Math.floor(r.height / 3));
+    if (!first && nW === W && Math.abs(nH - H) < 4) return;
+    let old = null;
+    if (!first) { old = document.createElement("canvas"); old.width = W; old.height = H; old.getContext("2d").drawImage(cv, 0, 0); }
+    W = cv.width = nW; H = cv.height = nH;
+    ctx.fillStyle = "#070b0d"; ctx.fillRect(0, 0, W, H);
+    if (old) ctx.drawImage(old, 0, 0, old.width, old.height, 0, 0, W, Math.round(old.height * W / old.width));
   }
-  resize(); window.addEventListener("resize", resize);
-
+  resize(true); window.addEventListener("resize", () => resize(false));
   const signals = [
-    { f: 0.22, w: 0.006, drift: 0.00002, on: t => Math.sin(t / 40) > 0.2 },
-    { f: 0.48, w: 0.012, drift: -0.00001, on: t => (t % 220) < 140 },
-    { f: 0.71, w: 0.004, drift: 0.00003, on: t => Math.sin(t / 9) > 0 },
-    { f: 0.86, w: 0.02, drift: 0, on: t => (t % 400) < 90 },
+    { f: 0.18, w: 0.006, drift: 0.00002, on: t => Math.sin(t / 40) > 0.2 },
+    { f: 0.5, w: 0.005, drift: 0, on: () => keyDown },      // our own CW signal
+    { f: 0.66, w: 0.012, drift: -0.00001, on: t => (t % 220) < 140 },
+    { f: 0.84, w: 0.02, drift: 0, on: t => (t % 400) < 90 },
   ];
   function color(v) {
-    // dark → teal → green → amber
     const r = Math.min(255, Math.max(0, (v - 0.6) * 640));
     const g = Math.min(255, v * 330);
     const b = Math.min(255, 70 + v * 120 - Math.max(0, v - 0.5) * 300);
     return [r, g, Math.max(0, b)];
   }
   let t = 0;
-  function frame() {
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function frame(prefill) {
     ctx.drawImage(cv, 0, 0, W, H - 1, 0, 1, W, H - 1);
     const row = ctx.createImageData(W, 1);
     for (let x = 0; x < W; x++) {
@@ -255,10 +404,131 @@
     ctx.putImageData(row, 0, 0);
     for (const s of signals) { s.f += s.drift; if (s.f > 0.95 || s.f < 0.05) s.drift *= -1; }
     t++;
-    requestAnimationFrame(frame);
+    if (!prefill) requestAnimationFrame(() => frame());
   }
-  ctx.fillStyle = "#070b0d"; ctx.fillRect(0, 0, W, H);
-  frame();
+  if (!reduce) { for (let i = 0; i < H; i++) frame(true); frame(); }
+
+  // ---------- live readouts: NOAA ----------
+  function pill(el, cls, text) {
+    let p = el.parentNode.querySelector(".pill");
+    if (!p) { p = document.createElement("div"); el.parentNode.appendChild(p); }
+    p.className = "pill " + cls; p.textContent = text;
+  }
+  const num = v => (v === null || v === undefined || v === "" || isNaN(+v)) ? null : +v;
+  const rows = d => (Array.isArray(d) && Array.isArray(d[0])) ? d.slice(1).map(r => Object.fromEntries(d[0].map((k, i) => [k, r[i]]))) : (Array.isArray(d) ? d : []);
+  function sunUp() {
+    const rad = Math.PI / 180, d = new Date();
+    const n = d.getTime() / 86400000 + 2440587.5 - 2451545.0;
+    const L = (280.46 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * rad;
+    const lam = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad, eps = 23.439 * rad;
+    const dec = Math.asin(Math.sin(eps) * Math.sin(lam)), ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+    const gmst = (18.697374558 + 24.06570982441908 * n) % 24, ha = (gmst * 15 - 72.6437) * rad - ra, lat = 41.8526 * rad;
+    return Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(ha)) / rad > -6;
+  }
+  async function noaa() {
+    const get = p => fetch("https://services.swpc.noaa.gov" + p, { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
+    const [kpRaw, fluxRaw] = await Promise.all([get("/products/noaa-planetary-k-index.json"), get("/json/f107_cm_flux.json")]);
+    let sfi = null, k = null;
+    if (fluxRaw) {
+      const r = rows(fluxRaw).filter(o => num(o.flux) !== null).sort((a, b) => (b.time_tag > a.time_tag ? 1 : -1));
+      if (r[0]) {
+        sfi = num(r[0].flux); $("roSfi").textContent = Math.round(sfi);
+        const c = sfi >= 150 ? "good" : sfi >= 100 ? "fair" : "poor";
+        pill($("roSfiS"), c, c === "good" ? "HIGH" : c === "fair" ? "MODERATE" : "LOW");
+      }
+    }
+    if (kpRaw) {
+      const r = rows(kpRaw).map(o => num(o.Kp ?? o.kp ?? o.kp_index)).filter(v => v !== null);
+      if (r.length) {
+        k = r[r.length - 1]; $("roKp").textContent = (Math.round(k * 100) / 100).toString();
+        const c = k >= 5 ? "poor" : k >= 4 ? "fair" : "good";
+        pill($("roKpS"), c, c === "good" ? "QUIET" : c === "fair" ? "UNSETTLED" : "STORM");
+      }
+    }
+    if (sfi !== null && k !== null) {
+      const day = sunUp();
+      let c = day ? (sfi >= 90 ? "good" : "fair") : (sfi >= 120 ? "fair" : "poor");
+      if (k >= 5) c = c === "good" ? "fair" : "poor"; else if (k >= 4 && c === "good") c = "fair";
+      $("roHf").textContent = c === "good" ? "Good" : c === "fair" ? "Fair" : "Poor";
+      $("roHf").style.color = c === "good" ? "var(--accent)" : c === "fair" ? "var(--accent-2)" : "var(--bad)";
+      $("roHfS").textContent = "20 m · " + (day ? "daytime" : "nighttime") + " estimate";
+    } else if (sfi === null && k === null) {
+      $("roHfS").textContent = "NOAA data unavailable";
+    }
+  }
+  noaa(); setInterval(noaa, 10 * 60 * 1000);
+
+  // ---------- live readouts: next satellite pass ----------
+  const SATS = [[25544, "ISS"], [27607, "SO-50"], [43017, "AO-91"], [43678, "PO-101"]];
+  function loadTle() { try { const v = localStorage.getItem("sats.tle.v1"); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function saveTle(v) { try { localStorage.setItem("sats.tle.v1", JSON.stringify(v)); } catch (e) {} }
+  function parseTle(text) {
+    const l = text.split(/\r?\n/).map(s => s.trimEnd()).filter(Boolean), out = {};
+    for (let i = 0; i < l.length - 1; i++) if (l[i].startsWith("1 ") && l[i + 1].startsWith("2 ")) { out[parseInt(l[i].slice(2, 7), 10)] = [l[i], l[i + 1]]; i++; }
+    return out;
+  }
+  async function tles() {
+    const c = loadTle();
+    if (c && Date.now() - c.at < 12 * 3600e3 && SATS.every(([id]) => c.tles[id])) return c.tles;
+    try {
+      const r = await fetch("https://celestrak.org/NORAD/elements/gp.php?GROUP=amateur&FORMAT=tle");
+      if (r.ok) {
+        const t = parseTle(await r.text());
+        if (Object.keys(t).length) {
+          const merged = Object.assign({}, c ? c.tles : {}, t);
+          saveTle({ at: Date.now(), tles: merged }); return merged;
+        }
+      }
+    } catch (e) {}
+    return c ? c.tles : null;
+  }
+  let nextPass = null;
+  async function passes() {
+    const sat = window.satellite;
+    if (!sat) { setTimeout(passes, 300); return; }
+    const t = await tles();
+    if (!t) { $("roSatS").textContent = "Orbital data unavailable"; return; }
+    const obs = { latitude: sat.degreesToRadians(41.8526), longitude: sat.degreesToRadians(-72.6437), height: 0.05 };
+    const elev = (rec, ms) => {
+      const pv = sat.propagate(rec, new Date(ms));
+      if (!pv || !pv.position || typeof pv.position === "boolean") return -90;
+      return sat.ecfToLookAngles(obs, sat.eciToEcf(pv.position, sat.gstime(new Date(ms)))).elevation * 180 / Math.PI;
+    };
+    const now = Date.now(), end = now + 24 * 3600e3, step = 30000;
+    let best = null;
+    SATS.forEach(([id, name]) => {
+      if (!t[id]) return;
+      const rec = sat.twoline2satrec(t[id][0], t[id][1]);
+      let up = elev(rec, now) > 0, aos = up ? now : null, max = up ? elev(rec, now) : 0;
+      for (let ms = now + step; ms < end; ms += step) {
+        const e = elev(rec, ms);
+        if (e > 0 && !up) { aos = ms; max = e; up = true; }
+        else if (e > 0 && up) { if (e > max) max = e; }
+        else if (e <= 0 && up) {
+          up = false;
+          if (max >= 10) { if (!best || aos < best.aos) best = { name, aos, los: ms, max }; break; }
+          aos = null; max = 0;
+        }
+        if (best && ms > best.aos) break;
+      }
+    });
+    nextPass = best;
+    if (!best) { $("roSat").textContent = "—"; $("roSatS").textContent = "No good passes in the next 24 h"; }
+  }
+  function satTick() {
+    if (!nextPass) return;
+    const now = Date.now();
+    if (now > nextPass.los) { nextPass = null; passes(); return; }
+    const live = now >= nextPass.aos;
+    const ms = live ? nextPass.los - now : nextPass.aos - now;
+    const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+    const cd = (h ? h + ":" + pad(m) : m) + ":" + pad(s % 60);
+    $("roSat").textContent = nextPass.name;
+    $("roSat").className = "v" + (live ? " live" : "");
+    $("roSatS").textContent = (live ? "Overhead now · LOS in " : "AOS in ") + cd + " · max " + Math.round(nextPass.max) + "°";
+  }
+  passes(); setInterval(satTick, 1000);
+})();
 </script>
 </body>
 </html>
