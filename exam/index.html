@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC1FQA · Ham License Study Guide</title>
+<meta name="description" content="Free study guide and practice exams for the US amateur radio Technician (2026–2030), General (2023–2027) and Amateur Extra (2024–2028) question pools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<style>
+  :root {
+    --bg: #070b0d; --panel: #0c1316; --panel-2: #111b1f; --fg: #e6f2ec; --dim: #7d978d;
+    --accent: #33ff99; --accent-2: #ffb347; --bad: #ff6b5e;
+    --line: rgba(51, 255, 153, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 700; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--fg); text-decoration: none; text-shadow: 0 0 14px rgba(51,255,153,0.35); }
+  .brand .digit { color: var(--accent); }
+  .back { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
+  .back:hover { color: var(--accent); }
+  .eyebrow { margin-top: 30px; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 6px; }
+  h2 { font-size: 1.3rem; line-height: 1.2; }
+  .lede { color: var(--dim); margin-top: 10px; max-width: 66ch; }
+  .k { font: 0.68rem "JetBrains Mono", monospace; letter-spacing: 0.2em; color: var(--dim); }
+  .mono { font-family: "JetBrains Mono", monospace; }
+
+  /* element picker */
+  .els { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 22px; }
+  .el { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; cursor: pointer; color: var(--fg); font: inherit; display: flex; flex-direction: column; gap: 4px; }
+  .el:hover, .el:focus-visible { border-color: var(--accent); outline: none; }
+  .el[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 18px rgba(51,255,153,0.18); }
+  .el .t { font-size: 1.25rem; font-weight: 700; }
+  .el .m { font: 0.78rem "JetBrains Mono", monospace; color: var(--dim); }
+  .bar { height: 6px; background: #1a2522; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+
+  .tabs { display: flex; gap: 6px; margin-top: 26px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tab { font: 700 0.78rem "JetBrains Mono", monospace; letter-spacing: 0.15em; color: var(--dim); background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 14px; cursor: pointer; min-height: 44px; }
+  .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .pane { margin-top: 20px; }
+  .pane[hidden] { display: none; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 14px; color: var(--dim); font-size: 0.9rem; }
+  select { font: 0.85rem "JetBrains Mono", monospace; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; max-width: 100%; }
+  .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .check input { accent-color: #33ff99; width: 18px; height: 18px; }
+
+  button.btn { font: 700 0.82rem "JetBrains Mono", monospace; letter-spacing: 0.12em; color: var(--accent); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; cursor: pointer; min-height: 44px; }
+  button.btn:hover:not(:disabled), button.btn:focus-visible { border-color: var(--accent); outline: none; }
+  button.btn.primary { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  button.btn:disabled { opacity: 0.4; cursor: default; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+  /* question card */
+  .qhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .qid { font: 700 0.85rem "JetBrains Mono", monospace; color: var(--accent-2); letter-spacing: 0.08em; }
+  .qtext { font-size: 1.15rem; font-weight: 500; margin-top: 8px; }
+  .fig { margin-top: 12px; background: #fff; border-radius: 8px; padding: 6px; max-width: 520px; }
+  .fig img { display: block; width: 100%; height: auto; }
+  .answers { list-style: none; display: grid; gap: 8px; margin-top: 14px; }
+  .ans { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; width: 100%; text-align: left; background: #050809; border: 1px solid var(--line); border-radius: 8px; padding: 12px; color: var(--fg); font: inherit; cursor: pointer; min-height: 48px; }
+  .ans:hover:not(:disabled), .ans:focus-visible { border-color: var(--accent); outline: none; }
+  .ans .L { font: 700 0.95rem "JetBrains Mono", monospace; color: var(--dim); width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; }
+  .ans.picked { border-color: var(--accent-2); }
+  .ans.picked .L { color: var(--bg); background: var(--accent-2); border-color: var(--accent-2); }
+  .ans.right { border-color: var(--accent); background: rgba(51,255,153,0.08); }
+  .ans.right .L { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .ans.wrong { border-color: var(--bad); background: rgba(255,107,94,0.08); }
+  .ans.wrong .L { color: var(--bg); background: var(--bad); border-color: var(--bad); }
+  .ans:disabled { cursor: default; }
+  .feedback { margin-top: 12px; font-weight: 700; }
+  .feedback.ok { color: var(--accent); } .feedback.no { color: var(--bad); }
+  .refs { font: 0.78rem "JetBrains Mono", monospace; color: var(--dim); margin-top: 6px; }
+
+  /* exam nav dots */
+  .dots { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 16px; }
+  .dot { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: #050809; color: var(--dim); font: 0.7rem "JetBrains Mono", monospace; cursor: pointer; }
+  .dot.done { background: rgba(51,255,153,0.15); color: var(--fg); }
+  .dot.cur { border-color: var(--accent-2); color: var(--accent-2); }
+  .dot.r { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .dot.w { background: var(--bad); color: var(--bg); border-color: var(--bad); }
+
+  .score { font: 700 2.6rem "JetBrains Mono", monospace; line-height: 1.1; }
+  .score.pass { color: var(--accent); } .score.fail { color: var(--bad); }
+  .verdict { display: inline-flex; align-items: center; gap: 8px; font: 700 0.8rem "JetBrains Mono", monospace; letter-spacing: 0.15em; padding: 4px 10px; border-radius: 4px; margin-top: 6px; }
+  .verdict.pass { color: var(--accent); background: rgba(51,255,153,0.1); }
+  .verdict.fail { color: var(--bad); background: rgba(255,107,94,0.12); }
+  .missed { list-style: none; display: grid; gap: 10px; margin-top: 16px; }
+  .missed li { background: #050809; border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .missed .q { margin-top: 4px; }
+  .missed .yours { color: var(--bad); font-size: 0.9rem; margin-top: 6px; }
+  .missed .corr { color: var(--accent); font-size: 0.9rem; }
+
+  /* progress */
+  .subs { display: grid; gap: 8px; }
+  .sub { display: grid; grid-template-columns: 44px 1fr 64px; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .sub .id { font: 700 0.95rem "JetBrains Mono", monospace; color: var(--accent-2); }
+  .sub .n { font-size: 0.92rem; }
+  .sub .p { font: 0.85rem "JetBrains Mono", monospace; text-align: right; }
+  .sub .bar { margin-top: 6px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .stat .v { font: 700 1.6rem "JetBrains Mono", monospace; margin-top: 2px; }
+  .empty { color: var(--dim); }
+
+  .fine { margin-top: 26px; font-size: 0.8rem; color: var(--dim); max-width: 80ch; }
+  .fine a { color: var(--dim); }
+  footer { margin-top: 40px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); }
+  @media (max-width: 600px) {
+    .els { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .el { padding: 10px 8px; gap: 2px; }
+    .el .t { font-size: 0.95rem; line-height: 1.15; }
+    .el .k { font-size: 0.56rem; letter-spacing: 0.08em; }
+    .el .m { display: none; }
+    .el .bar { margin-top: 6px; }
+  }
+  @media (max-width: 520px) { .qtext { font-size: 1.05rem; } .sub { grid-template-columns: 34px 1fr 52px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+    <a class="back" href="/">← HOME</a>
+  </header>
+
+  <div class="eyebrow">LICENSE EXAM PREP</div>
+  <h1>Ham license study guide</h1>
+  <p class="lede">Practice exams and study drills built from the official NCVEC question pools, using the exact questions and answers you'll see on test day. Pick your exam to start. Your progress is saved on this device.</p>
+
+  <div class="els" id="els" role="group" aria-label="Choose an exam"></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-exam" aria-controls="p-exam" aria-selected="true">PRACTICE EXAM</button>
+    <button class="tab" role="tab" id="t-study" aria-controls="p-study" aria-selected="false">STUDY</button>
+    <button class="tab" role="tab" id="t-review" aria-controls="p-review" aria-selected="false">MISSED</button>
+    <button class="tab" role="tab" id="t-prog" aria-controls="p-prog" aria-selected="false">PROGRESS</button>
+  </div>
+
+  <!-- PRACTICE EXAM -->
+  <div class="pane" role="tabpanel" id="p-exam" aria-labelledby="t-exam">
+    <div id="examIntro" class="panel">
+      <h2 id="examTitle">Practice exam</h2>
+      <p class="lede" id="examDesc" style="margin-top:6px"></p>
+      <div class="actions"><button class="btn primary" id="examStart" type="button">▶ START EXAM</button></div>
+    </div>
+    <div id="examRun" hidden>
+      <div class="panel">
+        <div class="qhead"><span class="k" id="examPos">QUESTION 1 OF 35</span><span class="qid" id="examQid"></span></div>
+        <div id="examQ"></div>
+        <div class="actions">
+          <button class="btn" id="examPrev" type="button">← PREV</button>
+          <button class="btn" id="examNext" type="button">NEXT →</button>
+          <button class="btn primary" id="examFinish" type="button">GRADE EXAM</button>
+        </div>
+        <div class="dots" id="examDots" aria-label="Jump to question"></div>
+      </div>
+    </div>
+    <div id="examResult" hidden></div>
+  </div>
+
+  <!-- STUDY -->
+  <div class="pane" role="tabpanel" id="p-study" aria-labelledby="t-study" hidden>
+    <div class="toolbar">
+      <label for="studySub" class="k">SECTION</label>
+      <select id="studySub"></select>
+      <label class="check"><input type="checkbox" id="studyShuffle" checked> Shuffle order</label>
+    </div>
+    <div class="panel" id="studyCard"></div>
+  </div>
+
+  <!-- MISSED -->
+  <div class="pane" role="tabpanel" id="p-review" aria-labelledby="t-review" hidden>
+    <p class="lede" style="margin:0 0 14px">Questions you got wrong the last time you answered them. Get one right and it drops off the list.</p>
+    <div class="panel" id="reviewCard"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="pane" role="tabpanel" id="p-prog" aria-labelledby="t-prog" hidden>
+    <div class="stats" id="progStats"></div>
+    <div class="subs" id="progSubs"></div>
+    <div class="actions"><button class="btn" id="resetProg" type="button">RESET PROGRESS FOR THIS EXAM</button></div>
+  </div>
+
+  <p class="fine">
+    The questions come from the NCVEC public-domain pools: Technician 2026–2030 (Feb 19, 2026 revision), General 2023–2027 (6th errata), and Amateur Extra 2024–2028 (4th errata). Withdrawn questions are left out.
+    Each practice exam draws one question from every group, the same way the real exam is built. Data comes via <a href="https://github.com/russolsen/ham_radio_question_pool" rel="noopener">ham_radio_question_pool</a>. Check <a href="https://www.ncvec.org/" rel="noopener">NCVEC</a> for the official pools and any new errata, and find an exam session at <a href="https://www.arrl.org/find-an-amateur-radio-license-exam-session" rel="noopener">ARRL</a>.
+  </p>
+
+  <footer>73 DE KC1FQA</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ELS = [
+    { key: "tech", name: "Technician", years: "2026–2030", note: "Element 2 · 35 questions · pass 26" },
+    { key: "general", name: "General", years: "2023–2027", note: "Element 3 · 35 questions · pass 26" },
+    { key: "extra", name: "Amateur Extra", years: "2024–2028", note: "Element 4 · 50 questions · pass 37" },
+  ];
+  const LET = "ABCD";
+  const cache = {};
+  let D = null; // current pool data
+  let byId = {};
+
+  // ---------- storage ----------
+  function load(k, d) { try { const v = localStorage.getItem("exam." + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem("exam." + k, JSON.stringify(v)); } catch (e) {} }
+  // progress: { [qid]: [timesRight, timesWrong, lastCorrect(1/0)] }
+  function prog(key) { return load("prog." + (key || D.key), {}); }
+  function record(qid, ok) {
+    const p = prog();
+    const r = p[qid] || [0, 0, 0];
+    if (ok) r[0]++; else r[1]++;
+    r[2] = ok ? 1 : 0;
+    p[qid] = r; save("prog." + D.key, p);
+  }
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const groupOf = q => q.id.slice(0, 3);
+  const subOf = q => q.id.slice(0, 2);
+
+  // ---------- element picker ----------
+  function mastery(key) {
+    const p = prog(key), data = cache[key];
+    const total = data ? data.questions.length : ({ tech: 409, general: 423, extra: 599 })[key];
+    const known = Object.values(p).filter(r => r[2] === 1).length;
+    return { known, total, pct: Math.round(100 * known / total) };
+  }
+  function renderEls() {
+    const cur = load("el", "tech");
+    $("els").innerHTML = ELS.map(e => {
+      const m = mastery(e.key);
+      return '<button class="el" type="button" data-k="' + e.key + '" aria-pressed="' + (e.key === cur) + '">' +
+        '<span class="k">' + e.years + ' POOL</span><span class="t">' + e.name + '</span><span class="m">' + e.note + '</span>' +
+        '<span class="bar" aria-hidden="true"><i style="width:' + m.pct + '%"></i></span>' +
+        '<span class="m">' + m.known + ' of ' + m.total + ' questions mastered</span></button>';
+    }).join("");
+    $("els").querySelectorAll(".el").forEach(b => b.addEventListener("click", () => choose(b.dataset.k)));
+  }
+
+  async function choose(key) {
+    save("el", key);
+    if (!cache[key]) {
+      $("examDesc").textContent = "Loading questions…";
+      try {
+        const r = await fetch("/exam/data/" + key + ".json");
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        cache[key] = await r.json();
+      } catch (e) {
+        $("examDesc").textContent = "Couldn't load the question pool. Check your connection and reload.";
+        return;
+      }
+    }
+    D = cache[key];
+    byId = Object.fromEntries(D.questions.map(q => [q.id, q]));
+    renderEls();
+    resetExam();
+    buildStudySelect();
+    study.start();
+    review.start();
+    renderProgress();
+  }
+
+  // ---------- tabs ----------
+  const TABS = ["exam", "study", "review", "prog"];
+  function selectTab(n) {
+    TABS.forEach(t => { $("t-" + t).setAttribute("aria-selected", String(t === n)); $("p-" + t).hidden = t !== n; });
+    save("tab", n);
+    if (n === "prog" && D) renderProgress();
+    if (n === "review" && D) review.start();
+    renderEls();
+  }
+  TABS.forEach(t => $("t-" + t).addEventListener("click", () => selectTab(t)));
+
+  // ---------- answer order ----------
+  // Keep the pool's order when answers refer to each other ("All these choices", "Both A and B", etc.).
+  function order(q, allowShuffle) {
+    const idx = [0, 1, 2, 3];
+    if (!allowShuffle) return idx;
+    if (q.a.some(a => /these choices|all of the|none of the|both [a-d]|[a-d] and [a-d]\b|answers? [a-d]\b/i.test(a))) return idx;
+    return shuffle(idx);
+  }
+
+  function questionHtml(q, ord, opts) {
+    // opts: { picked, reveal, disabled }
+    let h = '<p class="qtext">' + esc(q.q) + "</p>";
+    if (q.f) h += '<div class="fig"><img src="/exam/data/fig/' + esc(q.f) + '" alt="Figure for question ' + q.id + '" loading="lazy"></div>';
+    h += '<ol class="answers">';
+    ord.forEach((ai, pos) => {
+      let cls = "ans";
+      if (opts.reveal) { if (ai === q.c) cls += " right"; else if (ai === opts.picked) cls += " wrong"; }
+      else if (ai === opts.picked) cls += " picked";
+      h += '<li><button type="button" class="' + cls + '" data-ai="' + ai + '"' + (opts.disabled ? " disabled" : "") + '><span class="L">' + LET[pos] + "</span><span>" + esc(q.a[ai]) + "</span></button></li>";
+    });
+    return h + "</ol>";
+  }
+
+  // ---------- practice exam ----------
+  let exam = null;
+  function resetExam() {
+    exam = null;
+    $("examTitle").textContent = D.name + " practice exam";
+    $("examDesc").textContent = D.examSize + " questions, one from each group in the " + D.years + " pool. You need " + D.pass + " correct (" + Math.round(100 * D.pass / D.examSize) + "%) to pass. You'll see your score and every miss when you grade it.";
+    $("examIntro").hidden = false; $("examRun").hidden = true; $("examResult").hidden = true;
+  }
+  $("examStart").addEventListener("click", () => {
+    const groups = {};
+    D.questions.forEach(q => (groups[groupOf(q)] = groups[groupOf(q)] || []).push(q));
+    const gids = D.subs.flatMap(s => s.groups.map(g => g.id));
+    const qs = gids.map(g => groups[g][Math.floor(Math.random() * groups[g].length)]);
+    exam = { qs, ord: qs.map(q => order(q, true)), picks: qs.map(() => null), i: 0, done: false };
+    $("examIntro").hidden = true; $("examResult").hidden = true; $("examRun").hidden = false;
+    renderExamQ();
+  });
+  function renderExamQ() {
+    const q = exam.qs[exam.i];
+    $("examPos").textContent = "QUESTION " + (exam.i + 1) + " OF " + exam.qs.length;
+    $("examQid").textContent = q.id;
+    $("examQ").innerHTML = questionHtml(q, exam.ord[exam.i], { picked: exam.picks[exam.i] });
+    $("examQ").querySelectorAll(".ans").forEach(b => b.addEventListener("click", () => {
+      exam.picks[exam.i] = +b.dataset.ai;
+      renderExamQ();
+      if (exam.i < exam.qs.length - 1) setTimeout(() => { exam.i++; renderExamQ(); }, 220);
+    }));
+    $("examPrev").disabled = exam.i === 0;
+    $("examNext").disabled = exam.i === exam.qs.length - 1;
+    const answered = exam.picks.filter(p => p !== null).length;
+    $("examFinish").textContent = answered < exam.qs.length ? "GRADE (" + answered + "/" + exam.qs.length + ")" : "GRADE EXAM";
+    $("examDots").innerHTML = exam.qs.map((_, i) =>
+      '<button type="button" class="dot' + (exam.picks[i] !== null ? " done" : "") + (i === exam.i ? " cur" : "") + '" data-i="' + i + '" aria-label="Question ' + (i + 1) + '">' + (i + 1) + "</button>").join("");
+    $("examDots").querySelectorAll(".dot").forEach(b => b.addEventListener("click", () => { exam.i = +b.dataset.i; renderExamQ(); }));
+  }
+  $("examPrev").addEventListener("click", () => { if (exam.i > 0) { exam.i--; renderExamQ(); } });
+  $("examNext").addEventListener("click", () => { if (exam.i < exam.qs.length - 1) { exam.i++; renderExamQ(); } });
+  $("examFinish").addEventListener("click", () => {
+    const unanswered = exam.picks.filter(p => p === null).length;
+    if (unanswered && !$("examFinish").dataset.confirm) {
+      $("examFinish").dataset.confirm = "1";
+      $("examFinish").textContent = unanswered + " BLANK. GRADE ANYWAY?";
+      setTimeout(() => { delete $("examFinish").dataset.confirm; if (exam && !exam.done) renderExamQ(); }, 3500);
+      return;
+    }
+    delete $("examFinish").dataset.confirm;
+    gradeExam();
+  });
+  function gradeExam() {
+    exam.done = true;
+    let right = 0;
+    const missed = [];
+    exam.qs.forEach((q, i) => {
+      const ok = exam.picks[i] === q.c;
+      if (ok) right++; else missed.push(i);
+      if (exam.picks[i] !== null) record(q.id, ok); else record(q.id, false);
+    });
+    const pass = right >= D.pass;
+    const hist = load("hist." + D.key, []); hist.push({ at: Date.now(), right, of: exam.qs.length }); save("hist." + D.key, hist.slice(-30));
+    let h = '<div class="panel"><div class="k">' + esc(D.name.toUpperCase()) + ' PRACTICE EXAM</div>' +
+      '<div class="score ' + (pass ? "pass" : "fail") + '">' + right + " / " + exam.qs.length + "</div>" +
+      '<div class="verdict ' + (pass ? "pass" : "fail") + '">' + (pass ? "✓ PASS" : "✗ NOT YET") + " · NEED " + D.pass + "</div>" +
+      '<p class="lede" style="margin-top:10px">' + (pass
+        ? (right === exam.qs.length ? "A perfect score. You're ready to book a session." : "You'd have passed. A few more passing scores in a row and you're ready for test day.")
+        : "Go over your misses below, then try another exam or drill the weak sections on the Study tab.") + "</p>" +
+      '<div class="dots">' + exam.qs.map((q, i) => '<span class="dot ' + (exam.picks[i] === q.c ? "r" : "w") + '" style="display:grid;place-items:center" title="' + q.id + '">' + (i + 1) + "</span>").join("") + "</div>" +
+      '<div class="actions"><button class="btn primary" id="examAgain" type="button">↻ NEW EXAM</button></div></div>';
+    if (missed.length) {
+      h += '<h2 style="margin-top:26px">Missed questions</h2><ul class="missed">' + missed.map(i => {
+        const q = exam.qs[i], p = exam.picks[i];
+        return '<li><span class="qid">' + q.id + "</span>" + (q.r ? ' <span class="refs">' + esc(q.r) + "</span>" : "") +
+          '<p class="q">' + esc(q.q) + "</p>" +
+          (q.f ? '<div class="fig"><img src="/exam/data/fig/' + esc(q.f) + '" alt="Figure for question ' + q.id + '" loading="lazy"></div>' : "") +
+          '<p class="yours">Your answer: ' + (p === null ? "(blank)" : esc(q.a[p])) + "</p>" +
+          '<p class="corr">Correct: ' + esc(q.a[q.c]) + "</p></li>";
+      }).join("") + "</ul>";
+    }
+    $("examRun").hidden = true; $("examResult").hidden = false; $("examResult").innerHTML = h;
+    $("examAgain").addEventListener("click", () => { resetExam(); $("examStart").click(); });
+    $("examResult").scrollIntoView({ behavior: "smooth", block: "start" });
+    renderEls();
+  }
+
+  // ---------- generic drill (study + review) ----------
+  function makeDrill(cardId, pick) {
+    const d = { list: [], i: 0, state: null };
+    d.start = function () { d.list = pick(); d.i = 0; d.right = 0; d.wrong = 0; d.show(); };
+    d.show = function () {
+      const card = $(cardId);
+      if (!d.list.length) { card.innerHTML = '<p class="empty">' + (cardId === "reviewCard" ? "Nothing to review. Missed questions from Study or a practice exam show up here." : "No questions in this section.") + "</p>"; return; }
+      if (d.i >= d.list.length) {
+        card.innerHTML = '<div class="k">ROUND COMPLETE</div><div class="score pass">' + d.right + " / " + (d.right + d.wrong) + '</div><div class="actions"><button class="btn primary" type="button" id="' + cardId + 'Again">↻ GO AGAIN</button></div>';
+        $(cardId + "Again").addEventListener("click", d.start);
+        return;
+      }
+      const q = d.list[d.i];
+      d.state = { ord: order(q, true), picked: null };
+      d.paint();
+    };
+    d.paint = function () {
+      const q = d.list[d.i], st = d.state, card = $(cardId);
+      const sub = D.subs.find(s => s.id === subOf(q)), grp = sub.groups.find(g => g.id === groupOf(q));
+      let h = '<div class="qhead"><span class="k">' + (d.i + 1) + " OF " + d.list.length + ' · ✓ ' + d.right + " ✗ " + d.wrong + '</span><span class="qid">' + q.id + "</span></div>" +
+        '<p class="refs" title="' + esc(grp.title) + '">' + esc(sub.id + " " + sub.title) + "</p>" +
+        questionHtml(q, st.ord, { picked: st.picked, reveal: st.picked !== null, disabled: st.picked !== null });
+      if (st.picked !== null) {
+        const ok = st.picked === q.c;
+        h += '<p class="feedback ' + (ok ? "ok" : "no") + '">' + (ok ? "✓ Correct" : "✗ The answer is " + LET[st.ord.indexOf(q.c)]) + "</p>" +
+          (q.r ? '<p class="refs">FCC rule reference: ' + esc(q.r) + "</p>" : "") +
+          '<div class="actions"><button class="btn primary" type="button" id="' + cardId + 'Next">NEXT →</button></div>';
+      }
+      card.innerHTML = h;
+      card.querySelectorAll(".ans:not([disabled])").forEach(b => b.addEventListener("click", () => {
+        st.picked = +b.dataset.ai;
+        const ok = st.picked === q.c;
+        if (ok) d.right++; else d.wrong++;
+        record(q.id, ok);
+        d.paint();
+        const nx = $(cardId + "Next"); if (nx) nx.focus({ preventScroll: true });
+      }));
+      const nx = $(cardId + "Next");
+      if (nx) nx.addEventListener("click", () => { d.i++; d.show(); });
+    };
+    return d;
+  }
+
+  function buildStudySelect() {
+    const cur = load("studySub." + D.key, "all");
+    let h = '<option value="all">All sections (' + D.questions.length + ")</option>" +
+      '<option value="unseen">Not answered yet</option>';
+    D.subs.forEach(s => {
+      const n = D.questions.filter(q => subOf(q) === s.id).length;
+      h += '<optgroup label="' + esc(s.id + " " + s.title) + '"><option value="' + s.id + '">' + esc(s.id + " " + s.title) + " (" + n + ")</option>";
+      s.groups.forEach(g => { h += '<option value="' + g.id + '">' + esc(g.id + " " + (g.title.length > 60 ? g.title.slice(0, 58) + "…" : g.title)) + "</option>"; });
+      h += "</optgroup>";
+    });
+    $("studySub").innerHTML = h;
+    $("studySub").value = [...$("studySub").options].some(o => o.value === cur) ? cur : "all";
+  }
+  const study = makeDrill("studyCard", () => {
+    const v = $("studySub").value, p = prog();
+    let list = D.questions.filter(q => v === "all" ? true : v === "unseen" ? !p[q.id] : q.id.startsWith(v));
+    return $("studyShuffle").checked ? shuffle(list) : list;
+  });
+  $("studySub").addEventListener("change", () => { save("studySub." + D.key, $("studySub").value); study.start(); });
+  $("studyShuffle").addEventListener("change", () => { save("shuffle", $("studyShuffle").checked); study.start(); });
+  $("studyShuffle").checked = load("shuffle", true);
+
+  const review = makeDrill("reviewCard", () => {
+    const p = prog();
+    return shuffle(D.questions.filter(q => p[q.id] && p[q.id][2] === 0));
+  });
+
+  // ---------- progress ----------
+  function renderProgress() {
+    const p = prog();
+    const m = mastery(D.key);
+    const seen = Object.keys(p).filter(id => byId[id]).length;
+    const hist = load("hist." + D.key, []);
+    const last3 = hist.slice(-3);
+    const passRun = last3.length === 3 && last3.every(h => h.right >= D.pass);
+    $("progStats").innerHTML =
+      '<div class="stat"><div class="k">MASTERED</div><div class="v">' + m.pct + '%</div><div class="k">' + m.known + " / " + m.total + "</div></div>" +
+      '<div class="stat"><div class="k">SEEN</div><div class="v">' + seen + '</div><div class="k">OF ' + m.total + "</div></div>" +
+      '<div class="stat"><div class="k">PRACTICE EXAMS</div><div class="v">' + hist.length + '</div><div class="k">' + (hist.length ? "LAST " + hist[hist.length - 1].right + "/" + hist[hist.length - 1].of : "NONE YET") + "</div></div>" +
+      '<div class="stat"><div class="k">READY?</div><div class="v" style="color:' + (passRun ? "var(--accent)" : "var(--dim)") + '">' + (passRun ? "YES" : "NOT YET") + '</div><div class="k">3 PASSING EXAMS IN A ROW</div></div>';
+    $("progSubs").innerHTML = D.subs.map(s => {
+      const qs = D.questions.filter(q => subOf(q) === s.id);
+      const k = qs.filter(q => p[q.id] && p[q.id][2] === 1).length;
+      const pct = Math.round(100 * k / qs.length);
+      return '<div class="sub"><span class="id">' + s.id + '</span><div><div class="n">' + esc(s.title) + '</div><div class="bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div></div><span class="p">' + pct + "%</span></div>";
+    }).join("");
+  }
+  $("resetProg").addEventListener("click", () => {
+    const b = $("resetProg");
+    if (!b.dataset.confirm) { b.dataset.confirm = "1"; b.textContent = "TAP AGAIN TO ERASE " + D.name.toUpperCase() + " PROGRESS"; setTimeout(() => { delete b.dataset.confirm; b.textContent = "RESET PROGRESS FOR THIS EXAM"; }, 4000); return; }
+    save("prog." + D.key, {}); save("hist." + D.key, []);
+    delete b.dataset.confirm; b.textContent = "RESET PROGRESS FOR THIS EXAM";
+    renderProgress(); renderEls(); review.start();
+  });
+
+  // ---------- boot ----------
+  const qsEl = new URLSearchParams(location.search).get("el");
+  const startEl = ["tech", "general", "extra"].includes(qsEl) ? qsEl : load("el", "tech");
+  renderEls();
+  const t = load("tab", "exam"); selectTab(TABS.includes(t) ? t : "exam");
+  choose(startEl);
+})();
+</script>
+</body>
+</html>

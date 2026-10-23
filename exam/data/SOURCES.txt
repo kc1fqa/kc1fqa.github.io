@@ -1,0 +1,2 @@
+Question pool data (exam/data/*.json) derived from https://github.com/russolsen/ham_radio_question_pool (Apache License 2.0).
+Question text and figures are from the NCVEC public-domain question pools: https://www.ncvec.org/
