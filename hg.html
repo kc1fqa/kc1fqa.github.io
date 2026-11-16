@@ -82,7 +82,7 @@
 
   <div class="cards">
     <div class="card"><div class="k">Tent · latest · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
-    <div class="card room-only"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big"><span id="rCo2">—</span> ppm</div><div class="sub">CO₂ · <span id="rTemp">—</span>°F · <span id="rRh">—</span>% RH</div></div>
+    <div class="card room-only"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big" id="rBig">—</div><div class="sub" id="rSub">—</div></div>
     <div class="card"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
     <div class="card"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
   </div>
@@ -98,11 +98,11 @@
     </div>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
-      <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i>Lung room (Govee)</span>
+      <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i><span id="roomLegend">Lung room</span></span>
       <span><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
     </div>
     <div class="chart" id="timeline"></div>
-    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its export: <span id="gaps">—</span>. Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.</span></p>
+    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its export: <span id="gaps">—</span>. <span id="roomVpdNote"></span></span></p>
   </section>
 
   <section class="room-only">
@@ -113,7 +113,7 @@
     </table></div>
   </section>
 
-  <section class="room-only">
+  <section class="room-only co2-only">
     <h2>Lung room CO₂</h2>
     <div class="chart" id="co2"></div>
   </section>
@@ -145,13 +145,17 @@
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
   bloom1: {
-    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/room.csv',
+    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv',
+    roomLabel: 'Lung room (Govee)',
+    roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
     schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
   veg: {
-    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: null,
-    src: 'AC Infinity controller "Veg" export',
+    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv',
+    roomLabel: 'Lung room (Pulse)',
+    roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
+    src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
     schedule: [
       { from: null, offStart: '10:04', offEnd: '16:04' },
       { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
@@ -332,7 +336,11 @@ function drawStatic() {
   const T = TENTS[key];
   set('title', T.name);
   document.title = `KC1FQA · Home Grow · ${T.tab}`;
+  const hasCo2 = room.some((r) => !isNaN(r.co2));
   document.querySelectorAll('.room-only').forEach((e) => { e.hidden = !room.length; });
+  document.querySelectorAll('.co2-only').forEach((e) => { e.hidden = !room.length || !hasCo2; });
+  set('roomLegend', T.roomLabel || 'Lung room');
+  set('roomVpdNote', T.roomVpdNote || '');
   set('timelineH', room.length ? 'Tent vs lung room, every minute' : 'Every minute');
   set('lightsTxt', scheduleText());
   set('srcTxt', T.src);
@@ -345,7 +353,11 @@ function drawStatic() {
 
   const lt = tent[tent.length - 1], lr = room[room.length - 1];
   if (lt) { set('tWhen', fmtWhen(lt.t)); set('tTemp', f(lt.temp_f)); set('tRh', f(lt.rh)); set('tVpd', f(lt.vpd, 2)); }
-  if (lr) { set('rWhen', fmtWhen(lr.t)); set('rCo2', f(lr.co2, 0)); set('rTemp', f(lr.temp_f)); set('rRh', f(lr.rh)); }
+  if (lr) {
+    set('rWhen', fmtWhen(lr.t));
+    if (hasCo2) { set('rBig', `${f(lr.co2, 0)} ppm`); set('rSub', `CO₂ · ${f(lr.temp_f)}°F · ${f(lr.rh)}% RH`); }
+    else { set('rBig', `${f(lr.temp_f)}°F`); set('rSub', `${f(lr.rh)}% RH · ${f(lr.vpd, 2)} kPa VPD`); }
+  }
   const latest = d3.max([lt && lt.t, lr && lr.t].filter(Boolean));
   set('updated', latest ? fmtWhen(latest) : '—');
 
@@ -363,11 +375,16 @@ function drawStatic() {
     };
     const cmp = both.length ? [agg('Lights on', both.filter((p) => p.a.on)), agg('Lights off', both.filter((p) => !p.a.on))] : [];
     fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
-    if (cmp.length) writeLede($('lede2'), [['Minute for minute, the tent ran '], [f(cmp[0].tr - cmp[0].rr) + ' points', 1], [' more humid than the lung room with lights on and '],
-      [f(cmp[1].tr - cmp[1].rr), 1], [' with lights off. Lung-room CO₂ averaged '], [f(cmp[0].co2, 0) + ' ppm', 1], [' with lights on and '], [f(cmp[1].co2, 0) + ' ppm', 1], [' with lights off.']]);
+    if (cmp.length) {
+      const sg = (v) => isNaN(v) ? '—' : d3.format('+.1f')(v).replace('-', '−');
+      const parts = [['Compared minute for minute with the lung room, the tent ran '], [sg(cmp[0].tt - cmp[0].rt) + '°F', 1], [' and '], [sg(cmp[0].tr - cmp[0].rr) + ' RH points', 1],
+        [' with lights on, and '], [sg(cmp[1].tt - cmp[1].rt) + '°F', 1], [' and '], [sg(cmp[1].tr - cmp[1].rr) + ' RH points', 1], [' with lights off.']];
+      if (hasCo2) parts.push([' Lung-room CO₂ averaged '], [f(cmp[0].co2, 0) + ' ppm', 1], [' with lights on and '], [f(cmp[1].co2, 0) + ' ppm', 1], [' with lights off.']);
+      writeLede($('lede2'), parts);
+    }
     const gaps = [];
-    for (let i = 1; i < room.length; i++) { const h = (room[i].t - room[i - 1].t) / 36e5; if (h > 1) gaps.push(`${d3.timeFormat('%b %-d %-I:%M %p')(room[i - 1].t)} to ${d3.timeFormat('%b %-d %-I:%M %p')(room[i].t)} (${f(h)} h)`); }
-    set('gaps', gaps.length ? gaps.join('; ') : 'none over an hour');
+    for (let i = 1; i < room.length; i++) { const h = (room[i].t - room[i - 1].t) / 36e5; if (h > 1.5) gaps.push(`${d3.timeFormat('%b %-d %-I:%M %p')(room[i - 1].t)} to ${d3.timeFormat('%b %-d %-I:%M %p')(room[i].t)} (${f(h)} h)`); }
+    set('gaps', gaps.length ? gaps.join('; ') : 'none over 90 minutes');
   }
 
   // Daily: a day runs from that day's lights-off to the next lights-off
@@ -389,9 +406,10 @@ async function load(k) {
     const [t, r] = await Promise.all([d3.csv(T.file), T.room ? d3.csv(T.room) : Promise.resolve([])]);
     cache[k] = {
       tent: t.map((d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd })).filter((d) => d.t).sort((a, b) => a.t - b.t),
-      room: r.map((d) => ({ t: parse(d.time), co2: +d.co2, temp_f: +d.temp_f, rh: +d.rh })).filter((d) => d.t).sort((a, b) => a.t - b.t)
+      room: r.map((d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN }))
+        .filter((d) => d.t).sort((a, b) => a.t - b.t)
     };
-    cache[k].room.forEach((d) => { d.vpd = vpdOf(d.temp_f, d.rh); });
+    cache[k].room.forEach((d) => { if (isNaN(d.vpd)) d.vpd = vpdOf(d.temp_f, d.rh); });
   }
   return cache[k];
 }
