@@ -36,13 +36,16 @@
   .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
   h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 16px; }
   .lede { color: var(--dim); margin-top: 10px; max-width: 72ch; }
-  .plants { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
-  .pgroup .gh { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; color: var(--accent-2); text-transform: uppercase; margin-bottom: 6px; }
-  .pgroup .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-  .plant { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
-  .plant .n { font-weight: 700; }
-  .plant .n .c { color: var(--accent); font-family: var(--mono); font-size: 0.85rem; margin-right: 6px; }
-  .plant .b { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
+  .meta { display: flex; gap: 10px 28px; flex-wrap: wrap; margin-top: 12px; }
+  .meta div { display: flex; flex-direction: column; }
+  .meta .mk { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--accent-2); text-transform: uppercase; }
+  .meta .mv { font-weight: 700; }
+  .ptbl th, .ptbl td { text-align: left; }
+  .ptbl td.qty { color: var(--accent); width: 3.5em; }
+  .ptbl td.cv { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
+  .ptbl td.br { text-align: left; color: var(--dim); white-space: normal; min-width: 9em; }
+  .ptbl td.br .lin { display: block; font-size: 0.72rem; opacity: 0.85; }
+  .ptbl tr.grp td { color: var(--accent-2); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding-top: 14px; background: rgba(255,179,71,0.04); }
   .lede b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
   .cards { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
@@ -84,7 +87,11 @@
   <p class="eyebrow">HOME GROW</p>
   <nav class="tabs" id="tabs" aria-label="Tent"></nav>
   <h1 id="title">—</h1>
-  <div class="plants" id="plants" aria-label="Cultivars in this tent"></div>
+  <div class="meta" id="meta">
+    <div><span class="mk">Stage</span><span class="mv" id="mStage">—</span></div>
+    <div><span class="mk">Feed</span><span class="mv" id="mFeed">—</span></div>
+    <div><span class="mk">Plants</span><span class="mv" id="mPlants">—</span></div>
+  </div>
   <p class="lede" id="lede">Loading readings…</p>
   <p class="lede room-only" id="lede2"></p>
 
@@ -94,6 +101,14 @@
     <div class="card"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
     <div class="card"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
   </div>
+
+  <section id="plantsSec">
+    <h2>Plants</h2>
+    <div class="tblwrap"><table class="ptbl">
+      <thead><tr><th>Qty</th><th>Cultivar</th><th>Breeder / lineage</th></tr></thead>
+      <tbody id="plantsTb"></tbody>
+    </table></div>
+  </section>
 
   <section>
     <div class="row">
@@ -157,8 +172,10 @@ const TENTS = {
     roomLabel: 'Lung room (Govee)',
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
+    feed: 'Athena Pro Line Bloom',
+    flip: '2026-11-07',
     plants: [
-      { group: 'In flower', flip: '2026-11-07', items: [
+      { group: 'In flower', items: [
         { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
         { name: 'Bishop', count: 1 }
       ] }
@@ -170,6 +187,8 @@ const TENTS = {
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
+    feed: 'Athena Pro Line Grow',
+    stage: 'Moms, veg & seedlings',
     plants: [
       { group: 'Moms', items: [
         { name: 'Cap Junky', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Apples and Bananas', count: 1 },
@@ -370,27 +389,28 @@ function writeLede(el, parts) {
 function drawStatic() {
   const T = TENTS[key];
   set('title', T.name);
-  const pl = $('plants'); pl.replaceChildren(); pl.hidden = !(T.plants && T.plants.length);
-  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-  for (const g of T.plants || []) {
-    const box = el('div', 'pgroup');
-    const total = d3.sum(g.items, (c) => c.phenos ? c.phenos.length : c.count);
-    let head = `${g.group} · ${total} plant${total === 1 ? '' : 's'}`;
-    if (g.flip) {
-      const flip = parseDay(g.flip), days = Math.floor((d3.timeDay.floor(new Date()) - flip) / 864e5);
-      head += ` · day ${days} of flower (week ${Math.floor(days / 7) + 1}) · flipped ${d3.timeFormat('%b %-d')(flip)}`;
-    }
-    box.append(el('div', 'gh', head));
-    const chips = el('div', 'chips');
+  // Stage, feed, plants
+  let stage = T.stage || '—';
+  if (T.flip) {
+    const flip = parseDay(T.flip), days = Math.floor((d3.timeDay.floor(new Date()) - flip) / 864e5);
+    stage = `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`;
+  }
+  set('mStage', stage); set('mFeed', T.feed || '—');
+  const groups = T.plants || [], count = (c) => c.phenos ? c.phenos.length : c.count;
+  const total = d3.sum(groups, (g) => d3.sum(g.items, count));
+  set('mPlants', total ? `${total}` + (groups.length > 1 ? ` (${groups.map((g) => `${d3.sum(g.items, count)} ${g.group.toLowerCase()}`).join(', ')})` : '') : '—');
+  $('plantsSec').hidden = !total;
+  const tb = $('plantsTb'); tb.replaceChildren();
+  const td = (cls, txt) => { const e = document.createElement('td'); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  for (const g of groups) {
+    if (groups.length > 1) { const tr = document.createElement('tr'); tr.className = 'grp'; const c = td(null, `${g.group} · ${d3.sum(g.items, count)}`); c.colSpan = 3; tr.append(c); tb.append(tr); }
     for (const c of g.items) {
-      const info = CULTIVARS[c.name] || {}, n = c.phenos ? c.phenos.length : c.count;
-      const d = el('div', 'plant'), nm = el('div', 'n');
-      nm.append(el('span', 'c', `${n}×`), document.createTextNode(c.name)); d.append(nm);
-      const sub = [c.phenos ? 'Phenos ' + c.phenos.join(', ') : null, info.breeder, info.lineage].filter(Boolean).join(' · ');
-      if (sub) d.append(el('div', 'b', sub));
-      chips.append(d);
+      const info = CULTIVARS[c.name] || {}, tr = document.createElement('tr');
+      const br = td('br', info.breeder || '');
+      if (info.lineage) { const l = document.createElement('span'); l.className = 'lin'; l.textContent = info.lineage; br.append(l); }
+      tr.append(td('qty', `${count(c)}×`), td('cv', c.phenos ? `${c.name} ${c.phenos.join(' ')}` : c.name), br);
+      tb.append(tr);
     }
-    box.append(chips); pl.append(box);
   }
   document.title = `KC1FQA · Home Grow · ${T.tab}`;
   const hasCo2 = room.some((r) => !isNaN(r.co2));
