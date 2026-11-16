@@ -40,6 +40,8 @@
   .meta div { display: flex; flex-direction: column; }
   .meta .mk { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--accent-2); text-transform: uppercase; }
   .meta .mv { font-weight: 700; }
+  .meta .mv a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  .meta .mv a:hover { border-bottom-style: solid; }
   .ptbl th, .ptbl td { text-align: left; }
   .ptbl td.qty { color: var(--accent); width: 3.5em; }
   .ptbl td.cv { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
@@ -172,7 +174,7 @@ const TENTS = {
     roomLabel: 'Lung room (Govee)',
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
-    feed: 'Athena Pro Line Bloom',
+    feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     flip: '2026-11-07',
     plants: [
       { group: 'In flower', items: [
@@ -187,7 +189,7 @@ const TENTS = {
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
-    feed: 'Athena Pro Line Grow',
+    feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     stage: 'Moms, veg & seedlings',
     plants: [
       { group: 'Moms', items: [
@@ -395,7 +397,10 @@ function drawStatic() {
     const flip = parseDay(T.flip), days = Math.floor((d3.timeDay.floor(new Date()) - flip) / 864e5);
     stage = `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`;
   }
-  set('mStage', stage); set('mFeed', T.feed || '—');
+  set('mStage', stage);
+  const mf = $('mFeed'); mf.replaceChildren();
+  if (T.feed && T.feedUrl) { const a = document.createElement('a'); a.href = T.feedUrl; a.target = '_blank'; a.rel = 'noopener'; a.textContent = T.feed + ' ↗'; a.title = 'Official feed chart'; mf.append(a); }
+  else mf.textContent = T.feed || '—';
   const groups = T.plants || [], count = (c) => c.phenos ? c.phenos.length : c.count;
   const total = d3.sum(groups, (g) => d3.sum(g.items, count));
   set('mPlants', total ? `${total}` + (groups.length > 1 ? ` (${groups.map((g) => `${d3.sum(g.items, count)} ${g.group.toLowerCase()}`).join(', ')})` : '') : '—');
