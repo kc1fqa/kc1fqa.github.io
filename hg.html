@@ -36,7 +36,9 @@
   .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
   h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 16px; }
   .lede { color: var(--dim); margin-top: 10px; max-width: 72ch; }
-  .plants { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .plants { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+  .pgroup .gh { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; color: var(--accent-2); text-transform: uppercase; margin-bottom: 6px; }
+  .pgroup .chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .plant { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
   .plant .n { font-weight: 700; }
   .plant .n .c { color: var(--accent); font-family: var(--mono); font-size: 0.85rem; margin-right: 6px; }
@@ -156,8 +158,10 @@ const TENTS = {
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
     plants: [
-      { name: 'Apple Cloud', breeder: 'Bloom Seed Co.', count: 4, note: '4 phenos' },
-      { name: 'Bishop', count: 1 }
+      { group: 'In flower', flip: '2026-11-07', items: [
+        { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
+        { name: 'Bishop', count: 1 }
+      ] }
     ],
     schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
@@ -166,11 +170,32 @@ const TENTS = {
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
+    plants: [
+      { group: 'Moms', items: [
+        { name: 'Cap Junky', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Apples and Bananas', count: 1 },
+        { name: 'Galactic Derailer', count: 1 }, { name: 'Northern Lights', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Blue Dream', count: 1 }
+      ] },
+      { group: 'Veg', items: [
+        { name: 'Bishop', count: 3 }, { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
+        { name: 'Blue Dream', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Galactic Derailer', count: 1 }
+      ] },
+      { group: 'Seedlings', items: [
+        { name: 'Downtown Haze', count: 6 }, { name: 'End Game', count: 3 }
+      ] }
+    ],
     schedule: [
       { from: null, offStart: '10:04', offEnd: '16:04' },
       { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
     ]
   }
+};
+
+// Breeder and lineage, shared across tents
+const CULTIVARS = {
+  'Apple Cloud': { breeder: 'Bloom Seed Co.' },
+  'Bishop': { breeder: 'Paul @ INSA', lineage: 'Golden Goat × Lemon Jeffrey × Pineapple Express' },
+  'Downtown Haze': { breeder: 'Happy Valley Genetics' },
+  'End Game': { breeder: 'Happy Valley Genetics' }
 };
 
 const C = { tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
@@ -346,14 +371,26 @@ function drawStatic() {
   const T = TENTS[key];
   set('title', T.name);
   const pl = $('plants'); pl.replaceChildren(); pl.hidden = !(T.plants && T.plants.length);
-  for (const c of T.plants || []) {
-    const d = document.createElement('div'); d.className = 'plant';
-    const n = document.createElement('div'); n.className = 'n';
-    const cnt = document.createElement('span'); cnt.className = 'c'; cnt.textContent = `${c.count}×`;
-    n.append(cnt, document.createTextNode(c.name)); d.append(n);
-    const sub = [c.breeder, c.note].filter(Boolean).join(' · ');
-    if (sub) { const b = document.createElement('div'); b.className = 'b'; b.textContent = sub; d.append(b); }
-    pl.append(d);
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  for (const g of T.plants || []) {
+    const box = el('div', 'pgroup');
+    const total = d3.sum(g.items, (c) => c.phenos ? c.phenos.length : c.count);
+    let head = `${g.group} · ${total} plant${total === 1 ? '' : 's'}`;
+    if (g.flip) {
+      const flip = parseDay(g.flip), days = Math.floor((d3.timeDay.floor(new Date()) - flip) / 864e5);
+      head += ` · day ${days} of flower (week ${Math.floor(days / 7) + 1}) · flipped ${d3.timeFormat('%b %-d')(flip)}`;
+    }
+    box.append(el('div', 'gh', head));
+    const chips = el('div', 'chips');
+    for (const c of g.items) {
+      const info = CULTIVARS[c.name] || {}, n = c.phenos ? c.phenos.length : c.count;
+      const d = el('div', 'plant'), nm = el('div', 'n');
+      nm.append(el('span', 'c', `${n}×`), document.createTextNode(c.name)); d.append(nm);
+      const sub = [c.phenos ? 'Phenos ' + c.phenos.join(', ') : null, info.breeder, info.lineage].filter(Boolean).join(' · ');
+      if (sub) d.append(el('div', 'b', sub));
+      chips.append(d);
+    }
+    box.append(chips); pl.append(box);
   }
   document.title = `KC1FQA · Home Grow · ${T.tab}`;
   const hasCo2 = room.some((r) => !isNaN(r.co2));
