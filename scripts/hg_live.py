@@ -42,6 +42,7 @@ DATA_DIR = Path(sys.argv[1] if len(sys.argv) > 1 else "data") / "live"
 DEVICES = {
     "Bloom 3x3": "bloom1",
     "Veg": "veg",
+    "4x2": "bloom2",                # Bloom 2, coming online soon
     "Edd Veg": "veg_room",          # Pulse sensor in the mom room lung room
 }
 
