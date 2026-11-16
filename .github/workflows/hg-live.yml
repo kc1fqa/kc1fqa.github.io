@@ -1,0 +1,52 @@
+# Pulls live grow-tent readings every 15 minutes for kc1fqa.com/hg.
+# Readings go to the hg-data branch (kept as a single commit), not main,
+# so the site itself doesn't rebuild on every run.
+name: Home grow live data
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"   # every 15 min, off the top of the hour
+  workflow_dispatch:                # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hg-live
+  cancel-in-progress: false
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Get the script
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+          path: site
+
+      - name: Get the current live data
+        run: |
+          git clone --depth 1 --branch hg-data "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data \
+            || (mkdir -p data && cd data && git init -q -b hg-data && git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git")
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Pull readings
+        run: python3 site/scripts/hg_live.py data
+        env:
+          ACI_EMAIL: ${{ secrets.ACI_EMAIL }}
+          ACI_PASSWORD: ${{ secrets.ACI_PASSWORD }}
+          PULSE_API_KEY: ${{ secrets.PULSE_API_KEY }}
+
+      - name: Save to hg-data
+        if: always()
+        working-directory: data
+        run: |
+          git config user.name "hg-live bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -q -m "Live readings $(date -u +%Y-%m-%dT%H:%MZ)" || exit 0
+          git push -q -f origin fresh:hg-data

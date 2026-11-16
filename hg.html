@@ -31,6 +31,9 @@
   .back { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
   .back:hover { color: var(--accent); }
   .eyebrow { margin-top: 30px; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  .live { margin-left: 10px; color: var(--dim); letter-spacing: 0.12em; }
+  .live.on { color: var(--accent); }
+  .live.on::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; box-shadow: 0 0 8px var(--accent); vertical-align: 1px; }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .tab { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); cursor: pointer; text-decoration: none; }
   .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
@@ -86,7 +89,7 @@
     <a class="back" href="/">← HOME</a>
   </header>
 
-  <p class="eyebrow">HOME GROW</p>
+  <p class="eyebrow">HOME GROW <span class="live" id="liveTag"></span></p>
   <nav class="tabs" id="tabs" aria-label="Tent"></nav>
   <h1 id="title">—</h1>
   <div class="meta" id="meta">
@@ -170,7 +173,7 @@
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
   bloom1: {
-    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv',
+    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: null,
     roomLabel: 'Lung room (Govee)',
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
@@ -185,7 +188,7 @@ const TENTS = {
     schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
   veg: {
-    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv',
+    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room',
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
@@ -289,7 +292,7 @@ function placeTip(el, tip, xPx, W) {
 function withGaps(pts) {
   const out = [];
   for (let i = 0; i < pts.length; i++) {
-    if (i && pts[i].t - pts[i - 1].t > 5 * 6e4) out.push({ t: new Date((+pts[i].t + +pts[i - 1].t) / 2), v: NaN });
+    if (i && pts[i].t - pts[i - 1].t > 20 * 6e4) out.push({ t: new Date((+pts[i].t + +pts[i - 1].t) / 2), v: NaN });
     out.push(pts[i]);
   }
   return out;
@@ -453,7 +456,7 @@ function drawStatic() {
     const both = tent.filter((a) => byTime.has(+a.t)).map((a) => ({ a, b: byTime.get(+a.t) }));
     const agg = (label, xs) => {
       const tt = d3.mean(xs, (p) => p.a.temp_f), rt = d3.mean(xs, (p) => p.b.temp_f), tr = d3.mean(xs, (p) => p.a.rh), rr = d3.mean(xs, (p) => p.b.rh);
-      return { label, tt, rt, tr, rr, tv: d3.mean(xs, (p) => p.a.vpd), rv: d3.mean(xs, (p) => p.b.vpd), co2: d3.mean(xs, (p) => p.b.co2), hours: xs.length / 60 };
+      return { label, tt, rt, tr, rr, tv: d3.mean(xs, (p) => p.a.vpd), rv: d3.mean(xs, (p) => p.b.vpd), co2: d3.mean(xs, (p) => p.b.co2), hours: d3.sum(xs, (p) => p.a.w) / 60 };
     };
     const cmp = both.length ? [agg('Lights on', both.filter((p) => p.a.on)), agg('Lights off', both.filter((p) => !p.a.on))] : [];
     fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
@@ -473,7 +476,7 @@ function drawStatic() {
   const fmtDay = d3.timeFormat('%Y-%m-%d'), showDay = d3.timeFormat('%a %b %-d');
   const grouped = d3.group(tent.map((r) => { const s = new Date(+r.t - entryAt(r.t).offStart * 6e4); return { ...r, day: fmtDay(s), d: d3.timeDay.floor(s) }; }), (r) => r.day);
   const daily = Array.from(grouped, ([day, xs]) => {
-    const on = xs.filter((r) => r.on), off = xs.filter((r) => !r.on), m = (a, k) => a.length ? d3.mean(a, (r) => r[k]) : NaN, hours = xs.length / 60;
+    const on = xs.filter((r) => r.on), off = xs.filter((r) => !r.on), m = (a, k) => a.length ? d3.mean(a, (r) => r[k]) : NaN, hours = d3.sum(xs, (r) => r.w) / 60;
     return [showDay(xs[0].d) + (hours < 23.5 ? ' (partial)' : ''), f(hours), f(m(on, 'temp_f')), f(m(off, 'temp_f')), f(m(on, 'temp_f') - m(off, 'temp_f')),
       f(m(on, 'rh')), f(m(off, 'rh')), f(m(on, 'vpd'), 2), f(m(off, 'vpd'), 2)];
   }).reverse();  // newest first
@@ -482,18 +485,45 @@ function drawStatic() {
 
 function drawCharts() { drawTimeline(); drawCo2(); drawHourly(); }
 
+// Live readings, written every 15 min by the hg-live job to the hg-data branch
+const LIVE_BASE = 'https://raw.githubusercontent.com/kc1fqa/kc1fqa.github.io/hg-data/live/';
+const bust = () => '?t=' + Math.floor(Date.now() / 6e4);
+const tryCsv = (url) => url ? d3.csv(url).catch(() => []) : Promise.resolve([]);
+let liveStatus = null;
+
+// Export rows, then any live rows newer than the export
+function combine(exp, live) {
+  const last = exp.length ? +exp[exp.length - 1].t : -Infinity;
+  const all = exp.concat(live.filter((r) => +r.t > last)).sort((a, b) => a.t - b.t);
+  // minutes each row stands for (1 for minute data, ~15 for live polls), capped so gaps don't count
+  all.forEach((r, i) => { r.w = i < all.length - 1 ? Math.min((all[i + 1].t - r.t) / 6e4, 20) : 1; });
+  return all;
+}
+
 async function load(k) {
   if (!cache[k]) {
     const T = TENTS[k];
-    const [t, r] = await Promise.all([d3.csv(T.file), T.room ? d3.csv(T.room) : Promise.resolve([])]);
-    cache[k] = {
-      tent: t.map((d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd })).filter((d) => d.t).sort((a, b) => a.t - b.t),
-      room: r.map((d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN }))
-        .filter((d) => d.t).sort((a, b) => a.t - b.t)
-    };
+    const [t, r, lt, lr] = await Promise.all([
+      d3.csv(T.file), tryCsv(T.room),
+      tryCsv(T.live && LIVE_BASE + T.live + '.csv' + bust()), tryCsv(T.roomLive && LIVE_BASE + T.roomLive + '.csv' + bust())
+    ]);
+    const tentRow = (d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd });
+    const roomRow = (d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN });
+    const clean = (rows, fn) => rows.map(fn).filter((d) => d.t && !isNaN(d.temp_f)).sort((a, b) => a.t - b.t);
+    cache[k] = { tent: combine(clean(t, tentRow), clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)) };
     cache[k].room.forEach((d) => { if (isNaN(d.vpd)) d.vpd = vpdOf(d.temp_f, d.rh); });
   }
   return cache[k];
+}
+
+function drawLiveTag() {
+  const el = $('liveTag'), T = TENTS[key], dev = liveStatus && liveStatus.devices && liveStatus.devices[T.live];
+  el.className = 'live';
+  if (!dev || !dev.lastReading) { el.textContent = '· FROM EXPORTS'; return; }
+  const t = parse(dev.lastReading.time), mins = t ? Math.round((Date.now() - t) / 6e4) : NaN;
+  const fresh = dev.online && mins <= 45;
+  el.className = fresh ? 'live on' : 'live';
+  el.textContent = fresh ? `LIVE · ${mins < 1 ? 'just now' : mins + ' MIN AGO'}` : `· LAST LIVE READING ${t ? fmtWhen(t).toUpperCase() : '—'}`;
 }
 
 async function show(k) {
@@ -507,7 +537,7 @@ async function show(k) {
     sched = prepSchedule(TENTS[k].schedule);
     tent = d.tent; room = d.room;
     tent.forEach((r) => { r.on = isOn(r.t); });
-    drawStatic(); drawCharts();
+    drawStatic(); drawCharts(); drawLiveTag();
   } catch (err) {
     set('lede', 'Could not load the readings.');
     console.error(err);
@@ -521,6 +551,7 @@ for (const [k, T] of Object.entries(TENTS)) {
 $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTimeline(); drawHourly(); });
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
+d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
 show(location.hash.slice(1) || 'bloom1');
 </script>
 </body>
