@@ -20,7 +20,6 @@
     --accent-2: #ffb347;
     --line: rgba(51, 255, 153, 0.18);
     --grid: rgba(230, 242, 236, 0.07);
-    --band: rgba(255, 179, 71, 0.09);
     --mono: "JetBrains Mono", ui-monospace, monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +31,10 @@
   .back { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
   .back:hover { color: var(--accent); }
   .eyebrow { margin-top: 30px; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
-  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 6px; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .tab { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); cursor: pointer; text-decoration: none; }
+  .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 16px; }
   .lede { color: var(--dim); margin-top: 10px; max-width: 72ch; }
   .lede b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
   .cards { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
@@ -61,6 +63,7 @@
   th { color: var(--dim); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
   tr:last-child td { border-bottom: 0; }
   .msg { color: var(--dim); font-family: var(--mono); font-size: 0.8rem; padding: 24px 10px; }
+  [hidden] { display: none !important; }
   footer { margin-top: 40px; text-align: center; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); }
 </style>
 </head>
@@ -71,21 +74,22 @@
     <a class="back" href="/">← HOME</a>
   </header>
 
-  <p class="eyebrow">HOME GROW · BLOOM 1</p>
-  <h1>3x3 tent &amp; lung room</h1>
+  <p class="eyebrow">HOME GROW</p>
+  <nav class="tabs" id="tabs" aria-label="Tent"></nav>
+  <h1 id="title">—</h1>
   <p class="lede" id="lede">Loading readings…</p>
-  <p class="lede" id="lede2"></p>
+  <p class="lede room-only" id="lede2"></p>
 
   <div class="cards">
     <div class="card"><div class="k">Tent · latest · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
-    <div class="card"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big"><span id="rCo2">—</span> ppm</div><div class="sub">CO₂ · <span id="rTemp">—</span>°F · <span id="rRh">—</span>% RH</div></div>
-    <div class="card"><div class="k">Tent · lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
-    <div class="card"><div class="k">Tent · lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
+    <div class="card room-only"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big"><span id="rCo2">—</span> ppm</div><div class="sub">CO₂ · <span id="rTemp">—</span>°F · <span id="rRh">—</span>% RH</div></div>
+    <div class="card"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
+    <div class="card"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
   </div>
 
   <section>
     <div class="row">
-      <h2>Tent vs lung room, every minute</h2>
+      <h2 id="timelineH">Every minute</h2>
       <select id="metric" aria-label="Reading to chart">
         <option value="temp_f">Temperature (°F)</option>
         <option value="rh">Humidity (%)</option>
@@ -94,14 +98,14 @@
     </div>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
-      <span><i class="sw" style="background:var(--accent-2)"></i>Lung room (Govee)</span>
-      <span><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on (<span id="lightsTxt">—</span>)</span>
+      <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i>Lung room (Govee)</span>
+      <span><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
     </div>
     <div class="chart" id="timeline"></div>
-    <p class="cap">Lights-on hours are read from the temperature jump at each switch. Breaks in the lung-room line are gaps in its export: <span id="gaps">—</span>. Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.</p>
+    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its export: <span id="gaps">—</span>. Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.</span></p>
   </section>
 
-  <section>
+  <section class="room-only">
     <h2>Tent vs lung room, same minutes only</h2>
     <div class="tblwrap"><table>
       <thead><tr><th>Period</th><th>Tent °F</th><th>Room °F</th><th>Tent − room °F</th><th>Tent RH %</th><th>Room RH %</th><th>Tent − room RH</th><th>Tent VPD</th><th>Room VPD</th><th>Room CO₂ ppm</th><th>Hours matched</th></tr></thead>
@@ -109,13 +113,13 @@
     </table></div>
   </section>
 
-  <section>
+  <section class="room-only">
     <h2>Lung room CO₂</h2>
     <div class="chart" id="co2"></div>
   </section>
 
   <section>
-    <h2>Tent average by hour of day</h2>
+    <h2>Average by hour of day</h2>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Lights on</span>
       <span><i class="sw" style="background:var(--accent-2)"></i>Lights off</span>
@@ -124,39 +128,92 @@
   </section>
 
   <section>
-    <h2>Tent day by day</h2>
-    <p class="cap">Each day is lights-off (6 AM–6 PM) followed by that evening's lights-on. Swing is lights-on minus lights-off temperature.</p>
+    <h2>Day by day</h2>
+    <p class="cap">Each day starts when the lights go off and runs to the next lights-off. Swing is lights-on minus lights-off temperature.</p>
     <div class="tblwrap"><table>
       <thead><tr><th>Day</th><th>Hours logged</th><th>On °F</th><th>Off °F</th><th>Swing °F</th><th>On RH %</th><th>Off RH %</th><th>On VPD</th><th>Off VPD</th></tr></thead>
       <tbody id="daily"></tbody>
     </table></div>
-    <p class="cap">Tent VPD is AC Infinity's own figure, with leaf temperature offset 0 °F (leaf assumed equal to air). Data: AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor exports, updated <span id="updated">—</span>.</p>
+    <p class="cap">Tent VPD is AC Infinity's own figure, with leaf temperature offset 0 °F (leaf assumed equal to air). Data: <span id="srcTxt">—</span>, updated <span id="updated">—</span>.</p>
   </section>
 
   <footer>73 DE KC1FQA</footer>
 </div>
 
 <script>
-// ---- Settings ----
-const LIGHTS = { on: 18, off: 6 };          // lights on 6 PM, off 6 AM
-const FILES = { tent: '/assets/hg/tent.csv', room: '/assets/hg/room.csv' };
+// ---- Tents ----
+// Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
+const TENTS = {
+  bloom1: {
+    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/room.csv',
+    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
+    schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
+  },
+  veg: {
+    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: null,
+    src: 'AC Infinity controller "Veg" export',
+    schedule: [
+      { from: null, offStart: '10:04', offEnd: '16:04' },
+      { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
+    ]
+  }
+};
+
 const C = { tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
 const M = { temp_f: { label: 'Temperature', unit: '°F', dp: 1 }, rh: { label: 'Humidity', unit: '% RH', dp: 1 }, vpd: { label: 'VPD', unit: ' kPa', dp: 2 } };
 
 // ---- Helpers ----
 const parse = d3.timeParse('%Y-%m-%d %H:%M');
+const parseDay = d3.timeParse('%Y-%m-%d');
 const fmtWhen = d3.timeFormat('%b %-d, %-I:%M %p');
+const fmtClock = (mins) => d3.timeFormat('%-I:%M %p')(new Date(2000, 0, 1, 0, mins)).replace(':00 ', ' ');
 const f = (v, dp = 1) => (v == null || isNaN(v)) ? '—' : d3.format(`,.${dp}f`)(v);
-const isOn = (t) => { const h = t.getHours(); return h >= LIGHTS.on || h < LIGHTS.off; };
 const vpdOf = (tempF, rh) => { const c = (tempF - 32) * 5 / 9; return 0.6108 * Math.exp(17.27 * c / (c + 237.3)) * (1 - rh / 100); };
 const hourLabel = (h) => h === 0 ? '12a' : h < 12 ? h + 'a' : h === 12 ? '12p' : (h - 12) + 'p';
-const hourWord = (h) => h === 0 ? '12 AM' : h < 12 ? h + ' AM' : h === 12 ? '12 PM' : (h - 12) + ' PM';
 const $ = (id) => document.getElementById(id);
 const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
+const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
-let tent = [], room = [], metric = 'temp_f';
+const cache = {};
+let key = 'bloom1', tent = [], room = [], sched = [], metric = 'temp_f';
 
-function stats(xs, key) { return { mean: d3.mean(xs, (r) => r[key]), min: d3.min(xs, (r) => r[key]), max: d3.max(xs, (r) => r[key]) }; }
+function prepSchedule(s) {
+  return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
+    .sort((a, b) => a.from - b.from);
+}
+const entryAt = (t) => { let e = sched[0]; for (const x of sched) if (x.from <= t) e = x; return e; };
+function isOn(t) {
+  const e = entryAt(t), m = t.getHours() * 60 + t.getMinutes();
+  const off = e.offStart < e.offEnd ? (m >= e.offStart && m < e.offEnd) : (m >= e.offStart || m < e.offEnd);
+  return !off;
+}
+// lights-on intervals between t0 and t1
+function onBands(t0, t1) {
+  const offs = [];
+  for (let d = d3.timeDay.offset(d3.timeDay.floor(t0), -1); d <= t1; d = d3.timeDay.offset(d, 1)) {
+    const e = entryAt(d3.timeHour.offset(d, 12));
+    const s = new Date(+d + e.offStart * 6e4), en = new Date(+d + (e.offEnd < e.offStart ? e.offEnd + 1440 : e.offEnd) * 6e4);
+    offs.push([s, en]);
+  }
+  const bands = [];
+  for (let i = 0; i < offs.length - 1; i++) {
+    const a = offs[i][1] > t0 ? offs[i][1] : t0, b = offs[i + 1][0] < t1 ? offs[i + 1][0] : t1;
+    if (b > a) bands.push([a, b]);
+  }
+  return bands;
+}
+function scheduleText() {
+  const parts = sched.map((e, i) => {
+    const span = `off ${fmtClock(e.offStart)}–${fmtClock(e.offEnd)}`;
+    if (sched.length === 1) return span;
+    if (i === 0) return `${span} until ${d3.timeFormat('%b %-d')(d3.timeDay.offset(sched[1].from, -1))}`;
+    return `${span} from ${d3.timeFormat('%b %-d')(e.from)}`;
+  });
+  const onMin = (1440 - ((sched[sched.length - 1].offEnd - sched[sched.length - 1].offStart + 1440) % 1440)) / 60;
+  return `Lights ${parts.join(', ')} (${f(onMin, 0)}/${f(24 - onMin, 0)})`;
+}
+
+function stats(xs, k) { return { mean: d3.mean(xs, (r) => r[k]), min: d3.min(xs, (r) => r[k]), max: d3.max(xs, (r) => r[k]) }; }
 
 function yAxis(svg, y, W, mg, ticks) {
   const g = svg.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(ticks).tickSize(0));
@@ -165,12 +222,10 @@ function yAxis(svg, y, W, mg, ticks) {
   g.attr('transform', `translate(${mg.l},0)`).call(d3.axisLeft(y).ticks(ticks).tickSize(-(W - mg.l - mg.r)).tickPadding(6));
   g.select('.domain').remove();
 }
-
 function placeTip(el, tip, xPx, W) {
   const sx = el.clientWidth / W, tw = tip.node().offsetWidth;
   tip.style('left', Math.max(0, Math.min(xPx * sx - tw / 2, el.clientWidth - tw)) + 'px');
 }
-
 function withGaps(pts) {
   const out = [];
   for (let i = 0; i < pts.length; i++) {
@@ -189,13 +244,8 @@ function timeChart(el, series, o) {
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', o.aria);
   yAxis(svg, y, W, mg, 5);
   const x = d3.scaleTime().domain(d3.extent(all, (p) => p.t)).range([mg.l, W - mg.r]);
-  const [t0, t1] = x.domain(), bands = [];
-  for (let d = d3.timeDay.offset(d3.timeDay.floor(t0), -1); d < t1; d = d3.timeDay.offset(d, 1)) {
-    const s = d3.timeHour.offset(d, LIGHTS.on), e = d3.timeHour.offset(d, 24 + LIGHTS.off);
-    const a = s > t0 ? s : t0, b = e < t1 ? e : t1;
-    if (b > a) bands.push([a, b]);
-  }
-  svg.insert('g', ':first-child').selectAll('rect').data(bands).join('rect')
+  const [t0, t1] = x.domain();
+  svg.insert('g', ':first-child').selectAll('rect').data(onBands(t0, t1)).join('rect')
     .attr('x', (b) => x(b[0])).attr('width', (b) => x(b[1]) - x(b[0])).attr('y', mg.t).attr('height', H - mg.b - mg.t).attr('fill', C.band);
   const n = Math.max(2, Math.min(10, Math.floor((W - mg.l - mg.r) / 70)));
   svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).ticks(n).tickFormat(d3.timeFormat('%b %-d')).tickSizeOuter(0));
@@ -223,31 +273,28 @@ function timeChart(el, series, o) {
 // ---- Drawing ----
 function drawTimeline() {
   const m = M[metric];
-  const tp = tent.map((r) => ({ t: r.t, v: r[metric] }));
-  const rp = room.map((r) => ({ t: r.t, v: metric === 'vpd' ? r.vpd : r[metric] }));
-  timeChart($('timeline'), [{ name: 'Tent', pts: tp, color: C.tent }, { name: 'Lung room', pts: rp, color: C.room }],
-    { H: 260, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute in the tent and the lung room, lights-on periods shaded` });
+  const series = [{ name: 'Tent', pts: tent.map((r) => ({ t: r.t, v: r[metric] })), color: C.tent }];
+  if (room.length) series.push({ name: 'Lung room', pts: room.map((r) => ({ t: r.t, v: r[metric] })), color: C.room });
+  timeChart($('timeline'), series, { H: 260, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute, lights-on periods shaded` });
 }
-
 function drawCo2() {
+  if (!room.length) return;
   timeChart($('co2'), [{ name: 'CO₂', pts: room.map((r) => ({ t: r.t, v: r.co2 })), color: C.room }],
     { H: 220, fmt: (v) => f(v, 0) + ' ppm', aria: 'Lung room CO2 every minute in ppm, lights-on periods shaded' });
 }
-
 function drawHourly() {
   const el = $('hourly'), m = M[metric];
   const by = d3.group(tent, (r) => r.t.getHours());
   const rows = d3.range(24).filter((h) => by.has(h)).map((h) => {
     const xs = by.get(h);
-    return { hour: h, on: h >= LIGHTS.on || h < LIGHTS.off, temp_f: d3.mean(xs, (r) => r.temp_f), rh: d3.mean(xs, (r) => r.rh), vpd: d3.mean(xs, (r) => r.vpd) };
+    return { hour: h, on: d3.mean(xs, (r) => r.on ? 1 : 0) >= 0.5, temp_f: d3.mean(xs, (r) => r.temp_f), rh: d3.mean(xs, (r) => r.rh), vpd: d3.mean(xs, (r) => r.vpd) };
   });
   el.replaceChildren();
   if (!rows.length) return;
   const col = (d) => d.on ? C.tent : C.room;
   const W = Math.max(300, el.clientWidth - 12), H = 220, mg = { t: 10, r: 12, b: 26, l: 40 };
   const y = d3.scaleLinear().domain(d3.extent(rows, (d) => d[metric])).nice().range([H - mg.b, mg.t]);
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-    .attr('aria-label', `Average tent ${m.label.toLowerCase()} for each hour of the day`);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `Average ${m.label.toLowerCase()} for each hour of the day`);
   yAxis(svg, y, W, mg, 4);
   const x = d3.scalePoint().domain(d3.range(24)).range([mg.l + 8, W - mg.r - 8]);
   svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).tickValues(d3.range(0, 24, W < 480 ? 6 : 3)).tickFormat(hourLabel).tickSizeOuter(0));
@@ -259,7 +306,7 @@ function drawHourly() {
     const [px] = d3.pointer(ev, svg.node()), p = rows.reduce((a, b) => Math.abs(x(b.hour) - px) < Math.abs(x(a.hour) - px) ? b : a);
     ring.style('display', null).attr('cx', x(p.hour)).attr('cy', y(p[metric])).attr('stroke', col(p));
     tip.style('display', null).selectAll('*').remove();
-    tip.append('div').attr('class', 't').text(`${hourLabel(p.hour)} hour · lights ${p.on ? 'on' : 'off'}`);
+    tip.append('div').attr('class', 't').text(`${hourLabel(p.hour)} hour · lights ${p.on ? 'on' : 'off'} (mostly)`);
     tip.append('div').text(`${f(p.temp_f)}°F · ${f(p.rh)}% RH · ${f(p.vpd, 2)} kPa`);
     placeTip(el, tip, x(p.hour), W);
   };
@@ -276,80 +323,105 @@ function fillTable(id, rows) {
     tb.append(tr);
   }
 }
+function writeLede(el, parts) {
+  el.replaceChildren();
+  for (const [txt, bold] of parts) { if (bold) { const b = document.createElement('b'); b.textContent = txt; el.append(b); } else el.append(document.createTextNode(txt)); }
+}
 
 function drawStatic() {
-  // Tent lights on/off summary
-  const on = tent.filter((r) => isOn(r.t)), off = tent.filter((r) => !isOn(r.t));
+  const T = TENTS[key];
+  set('title', T.name);
+  document.title = `KC1FQA · Home Grow · ${T.tab}`;
+  document.querySelectorAll('.room-only').forEach((e) => { e.hidden = !room.length; });
+  set('timelineH', room.length ? 'Tent vs lung room, every minute' : 'Every minute');
+  set('lightsTxt', scheduleText());
+  set('srcTxt', T.src);
+
+  const on = tent.filter((r) => r.on), off = tent.filter((r) => !r.on);
   const sOn = { t: stats(on, 'temp_f'), rh: d3.mean(on, (r) => r.rh), vpd: d3.mean(on, (r) => r.vpd) };
   const sOff = { t: stats(off, 'temp_f'), rh: d3.mean(off, (r) => r.rh), vpd: d3.mean(off, (r) => r.vpd) };
   set('onTemp', f(sOn.t.mean)); set('onRh', f(sOn.rh)); set('onVpd', f(sOn.vpd, 2)); set('onRange', `${f(sOn.t.min)}–${f(sOn.t.max)}`);
   set('offTemp', f(sOff.t.mean)); set('offRh', f(sOff.rh)); set('offVpd', f(sOff.vpd, 2)); set('offRange', `${f(sOff.t.min)}–${f(sOff.t.max)}`);
 
-  // Latest
   const lt = tent[tent.length - 1], lr = room[room.length - 1];
   if (lt) { set('tWhen', fmtWhen(lt.t)); set('tTemp', f(lt.temp_f)); set('tRh', f(lt.rh)); set('tVpd', f(lt.vpd, 2)); }
   if (lr) { set('rWhen', fmtWhen(lr.t)); set('rCo2', f(lr.co2, 0)); set('rTemp', f(lr.temp_f)); set('rRh', f(lr.rh)); }
-  set('lightsTxt', `${hourWord(LIGHTS.on)}–${hourWord(LIGHTS.off)}`);
   const latest = d3.max([lt && lt.t, lr && lr.t].filter(Boolean));
   set('updated', latest ? fmtWhen(latest) : '—');
 
-  // Same-minute comparison
-  const byTime = new Map(room.map((r) => [+r.t, r]));
-  const both = tent.filter((a) => byTime.has(+a.t)).map((a) => ({ a, b: byTime.get(+a.t) }));
-  const agg = (label, xs) => {
-    const tt = d3.mean(xs, (p) => p.a.temp_f), rt = d3.mean(xs, (p) => p.b.temp_f), tr = d3.mean(xs, (p) => p.a.rh), rr = d3.mean(xs, (p) => p.b.rh);
-    return { label, tt, rt, tr, rr, tv: d3.mean(xs, (p) => p.a.vpd), rv: d3.mean(xs, (p) => p.b.vpd), co2: d3.mean(xs, (p) => p.b.co2), hours: xs.length / 60 };
-  };
-  const cmp = both.length ? [agg('Lights on', both.filter((p) => isOn(p.a.t))), agg('Lights off', both.filter((p) => !isOn(p.a.t)))] : [];
-  fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
-
-  // Gaps in the room export (> 1 hour)
-  const gaps = [];
-  for (let i = 1; i < room.length; i++) { const h = (room[i].t - room[i - 1].t) / 36e5; if (h > 1) gaps.push(`${d3.timeFormat('%b %-d %-I:%M %p')(room[i - 1].t)} to ${d3.timeFormat('%b %-d %-I:%M %p')(room[i].t)} (${f(h)} h)`); }
-  set('gaps', gaps.length ? gaps.join('; ') : 'none over an hour');
-
-  // Lede
   const days = tent.length ? (tent[tent.length - 1].t - tent[0].t) / 864e5 : 0;
-  $('lede').innerHTML = '';
-  const L = $('lede');
-  const add = (txt, bold) => { const n = bold ? document.createElement('b') : document.createTextNode(txt); if (bold) n.textContent = txt; L.append(n); };
-  add('Over '); add(f(days), 1); add(' days the tent averaged '); add(f(sOn.t.mean) + '°F', 1); add(' at '); add(f(sOn.vpd, 2) + ' kPa', 1);
-  add(' VPD with lights on, and '); add(f(sOff.t.mean) + '°F', 1); add(' at '); add(f(sOff.vpd, 2) + ' kPa', 1);
-  add(' with lights off, a '); add(f(sOn.t.mean - sOff.t.mean) + '°F', 1); add(' day/night swing.');
-  const L2 = $('lede2'); L2.innerHTML = '';
-  if (cmp.length) {
-    const add2 = (txt, bold) => { const n = bold ? document.createElement('b') : document.createTextNode(txt); if (bold) n.textContent = txt; L2.append(n); };
-    add2('Minute for minute, the tent ran '); add2(f(cmp[0].tr - cmp[0].rr) + ' points', 1); add2(' more humid than the lung room with lights on and ');
-    add2(f(cmp[1].tr - cmp[1].rr), 1); add2(' with lights off. Lung-room CO₂ averaged '); add2(f(cmp[0].co2, 0) + ' ppm', 1);
-    add2(' with lights on and '); add2(f(cmp[1].co2, 0) + ' ppm', 1); add2(' with lights off.');
+  writeLede($('lede'), [['Over '], [f(days), 1], [' days this tent averaged '], [f(sOn.t.mean) + '°F', 1], [' at '], [f(sOn.vpd, 2) + ' kPa', 1],
+    [' VPD with lights on, and '], [f(sOff.t.mean) + '°F', 1], [' at '], [f(sOff.vpd, 2) + ' kPa', 1], [' with lights off, a '], [f(sOn.t.mean - sOff.t.mean) + '°F', 1], [' day/night swing.']]);
+
+  // Same-minute comparison with the lung room
+  if (room.length) {
+    const byTime = new Map(room.map((r) => [+r.t, r]));
+    const both = tent.filter((a) => byTime.has(+a.t)).map((a) => ({ a, b: byTime.get(+a.t) }));
+    const agg = (label, xs) => {
+      const tt = d3.mean(xs, (p) => p.a.temp_f), rt = d3.mean(xs, (p) => p.b.temp_f), tr = d3.mean(xs, (p) => p.a.rh), rr = d3.mean(xs, (p) => p.b.rh);
+      return { label, tt, rt, tr, rr, tv: d3.mean(xs, (p) => p.a.vpd), rv: d3.mean(xs, (p) => p.b.vpd), co2: d3.mean(xs, (p) => p.b.co2), hours: xs.length / 60 };
+    };
+    const cmp = both.length ? [agg('Lights on', both.filter((p) => p.a.on)), agg('Lights off', both.filter((p) => !p.a.on))] : [];
+    fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
+    if (cmp.length) writeLede($('lede2'), [['Minute for minute, the tent ran '], [f(cmp[0].tr - cmp[0].rr) + ' points', 1], [' more humid than the lung room with lights on and '],
+      [f(cmp[1].tr - cmp[1].rr), 1], [' with lights off. Lung-room CO₂ averaged '], [f(cmp[0].co2, 0) + ' ppm', 1], [' with lights on and '], [f(cmp[1].co2, 0) + ' ppm', 1], [' with lights off.']]);
+    const gaps = [];
+    for (let i = 1; i < room.length; i++) { const h = (room[i].t - room[i - 1].t) / 36e5; if (h > 1) gaps.push(`${d3.timeFormat('%b %-d %-I:%M %p')(room[i - 1].t)} to ${d3.timeFormat('%b %-d %-I:%M %p')(room[i].t)} (${f(h)} h)`); }
+    set('gaps', gaps.length ? gaps.join('; ') : 'none over an hour');
   }
 
-  // Daily table: a day = lights-off 6 AM–6 PM, then that evening's lights-on
+  // Daily: a day runs from that day's lights-off to the next lights-off
   const fmtDay = d3.timeFormat('%Y-%m-%d'), showDay = d3.timeFormat('%a %b %-d');
-  const shifted = tent.map((r) => { const s = d3.timeHour.offset(r.t, -LIGHTS.off); return { ...r, day: fmtDay(s), d: d3.timeDay.floor(s), on: s.getHours() >= (LIGHTS.on - LIGHTS.off) }; });
-  const daily = Array.from(d3.group(shifted, (r) => r.day), ([day, xs]) => {
-    const on = xs.filter((r) => r.on), off = xs.filter((r) => !r.on), m = (a, k) => a.length ? d3.mean(a, (r) => r[k]) : NaN;
-    const hours = xs.length / 60;
+  const grouped = d3.group(tent.map((r) => { const s = new Date(+r.t - entryAt(r.t).offStart * 6e4); return { ...r, day: fmtDay(s), d: d3.timeDay.floor(s) }; }), (r) => r.day);
+  const daily = Array.from(grouped, ([day, xs]) => {
+    const on = xs.filter((r) => r.on), off = xs.filter((r) => !r.on), m = (a, k) => a.length ? d3.mean(a, (r) => r[k]) : NaN, hours = xs.length / 60;
     return [showDay(xs[0].d) + (hours < 23.5 ? ' (partial)' : ''), f(hours), f(m(on, 'temp_f')), f(m(off, 'temp_f')), f(m(on, 'temp_f') - m(off, 'temp_f')),
       f(m(on, 'rh')), f(m(off, 'rh')), f(m(on, 'vpd'), 2), f(m(off, 'vpd'), 2)];
-  });
+  }).reverse();  // newest first
   fillTable('daily', daily);
 }
 
 function drawCharts() { drawTimeline(); drawCo2(); drawHourly(); }
 
-// ---- Load ----
-Promise.all([d3.csv(FILES.tent), d3.csv(FILES.room)]).then(([t, r]) => {
-  tent = t.map((d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd })).filter((d) => d.t).sort((a, b) => a.t - b.t);
-  room = r.map((d) => ({ t: parse(d.time), co2: +d.co2, temp_f: +d.temp_f, rh: +d.rh })).filter((d) => d.t).sort((a, b) => a.t - b.t);
-  room.forEach((d) => { d.vpd = vpdOf(d.temp_f, d.rh); });
-  drawStatic(); drawCharts();
-  $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTimeline(); drawHourly(); });
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
-}).catch((err) => {
-  set('lede', 'Could not load the readings.');
-  console.error(err);
-});
+async function load(k) {
+  if (!cache[k]) {
+    const T = TENTS[k];
+    const [t, r] = await Promise.all([d3.csv(T.file), T.room ? d3.csv(T.room) : Promise.resolve([])]);
+    cache[k] = {
+      tent: t.map((d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd })).filter((d) => d.t).sort((a, b) => a.t - b.t),
+      room: r.map((d) => ({ t: parse(d.time), co2: +d.co2, temp_f: +d.temp_f, rh: +d.rh })).filter((d) => d.t).sort((a, b) => a.t - b.t)
+    };
+    cache[k].room.forEach((d) => { d.vpd = vpdOf(d.temp_f, d.rh); });
+  }
+  return cache[k];
+}
+
+async function show(k) {
+  if (!TENTS[k]) k = 'bloom1';
+  key = k;
+  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === k ? 'page' : 'false'));
+  set('lede', 'Loading readings…');
+  try {
+    const d = await load(k);
+    if (key !== k) return;
+    sched = prepSchedule(TENTS[k].schedule);
+    tent = d.tent; room = d.room;
+    tent.forEach((r) => { r.on = isOn(r.t); });
+    drawStatic(); drawCharts();
+  } catch (err) {
+    set('lede', 'Could not load the readings.');
+    console.error(err);
+  }
+}
+
+// ---- Start ----
+for (const [k, T] of Object.entries(TENTS)) {
+  const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + k; a.dataset.k = k; a.textContent = T.tab; $('tabs').append(a);
+}
+$('metric').addEventListener('change', (e) => { metric = e.target.value; drawTimeline(); drawHourly(); });
+window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
+show(location.hash.slice(1) || 'bloom1');
 </script>
 </body>
 </html>
