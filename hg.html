@@ -31,6 +31,15 @@
   .back { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
   .back:hover { color: var(--accent); }
   .eyebrow { margin-top: 30px; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  .remind { margin-top: 16px; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--panel); padding: 12px 14px; }
+  .remind.due { border-left-color: var(--accent-2); background: rgba(255,179,71,0.06); }
+  .remind .rk { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+  .remind.due .rk { color: var(--accent-2); }
+  .remind .rt { margin-top: 4px; font-size: 0.92rem; }
+  .remind details { margin-top: 6px; font-size: 0.88rem; color: var(--dim); }
+  .remind summary { cursor: pointer; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; }
+  .remind ol { margin: 6px 0 0 18px; }
+  .remind ol b { color: var(--fg); }
   .live { margin-left: 10px; color: var(--dim); letter-spacing: 0.12em; }
   .live.on { color: var(--accent); }
   .live.on::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; box-shadow: 0 0 8px var(--accent); vertical-align: 1px; }
@@ -142,6 +151,17 @@
     <div><span class="mk">Feed</span><span class="mv" id="mFeed">—</span></div>
     <div><span class="mk">Plants</span><span class="mv" id="mPlants">—</span></div>
     <div id="mWeekBox"><span class="mk">This week's mix</span><span class="mv" id="mWeek">—</span></div>
+  </div>
+  <div class="remind" id="exportRemind" hidden>
+    <div class="rk" id="rTitle">Weekly export</div>
+    <div class="rt" id="rText">—</div>
+    <details><summary>How to export</summary>
+      <ol>
+        <li>In the AC Infinity app, open the <b id="rCtrl">controller</b> and go to the <b>DATA</b> tab.</li>
+        <li>Export the data as CSV, covering at least the days since the last export.</li>
+        <li>Upload the CSV to Claude and say which tent it's from. Claude adds it here.</li>
+      </ol>
+    </details>
   </div>
   <p class="lede" id="lede">Loading readings…</p>
   <p class="lede room-only" id="lede2"></p>
@@ -584,6 +604,7 @@ const TENTS = {
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
     program: 'athena-fade', phase: 'flower',
+    exportEvery: 7, controller: 'Bloom 3x3',
     feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     flip: '2026-11-07',
     plants: [
@@ -597,6 +618,7 @@ const TENTS = {
   bloom2: {
     name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: null, room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
     src: 'live readings from AC Infinity controller "4x2" and the Govee H5110 "Bloom 2"',
+    exportEvery: 7, controller: '4x2',
     feed: 'Drip nutrients', feedUrl: 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf',
     stage: 'Getting set up',
     plants: [],
@@ -638,7 +660,7 @@ const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
 const cache = {};
-let key = 'veg', tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
+let key = 'veg', exportLast = null, tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
 
 function prepSchedule(s) {
   return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
@@ -815,6 +837,26 @@ function drawStatic() {
     stage = `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`;
   }
   set('mStage', stage);
+  // Weekly export reminder
+  const rb = $('exportRemind');
+  rb.hidden = !T.exportEvery;
+  if (T.exportEvery) {
+    set('rCtrl', `"${T.controller}"`);
+    const today = d3.timeDay.floor(new Date()), fd = d3.timeFormat('%a %b %-d');
+    if (!exportLast) {
+      rb.className = 'remind';
+      set('rTitle', 'Weekly export');
+      set('rText', 'No AC Infinity export on file yet. Send the first one once this tent is running.');
+    } else {
+      const due = d3.timeDay.offset(d3.timeDay.floor(exportLast), T.exportEvery);
+      const late = Math.round((today - due) / 864e5);
+      rb.className = late >= 0 ? 'remind due' : 'remind';
+      set('rTitle', late > 0 ? `Export overdue by ${late} day${late === 1 ? '' : 's'}` : late === 0 ? 'Export due today' : 'Weekly export');
+      set('rText', `Last AC Infinity export runs to ${fmtWhen(exportLast)}. ` +
+        (late >= 0 ? 'Time to send a new one so the 1-minute history stays complete.' : `Next one due ${fd(due)}. Live readings fill the gap in between.`));
+    }
+  }
+
   // This week's mix
   const wk = $('mWeek'); wk.replaceChildren();
   let mix = null;
@@ -942,7 +984,8 @@ async function load(k) {
     const tentRow = (d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd });
     const roomRow = (d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN });
     const clean = (rows, fn) => rows.map(fn).filter((d) => d.t && !isNaN(d.temp_f)).sort((a, b) => a.t - b.t);
-    cache[k] = { tent: combine(clean(t, tentRow), clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)), canopy: combine([], clean(lc, tentRow)) };
+    const expRows = clean(t, tentRow);
+    cache[k] = { exportLast: expRows.length ? expRows[expRows.length - 1].t : null, tent: combine(expRows, clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)), canopy: combine([], clean(lc, tentRow)) };
     cache[k].room.forEach((d) => { if (isNaN(d.vpd)) d.vpd = vpdOf(d.temp_f, d.rh); });
   }
   return cache[k];
@@ -983,7 +1026,7 @@ async function show(k) {
     const d = await load(k);
     if (key !== k) return;
     sched = prepSchedule(TENTS[k].schedule);
-    tent = d.tent; room = d.room; canopy = d.canopy;
+    tent = d.tent; room = d.room; canopy = d.canopy; exportLast = d.exportLast;
     tent.forEach((r) => { r.on = isOn(r.t); });
     drawStatic(); drawCharts(); drawLiveTag();
   } catch (err) {
