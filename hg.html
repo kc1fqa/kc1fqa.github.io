@@ -34,6 +34,24 @@
   .live { margin-left: 10px; color: var(--dim); letter-spacing: 0.12em; }
   .live.on { color: var(--accent); }
   .live.on::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; box-shadow: 0 0 8px var(--accent); vertical-align: 1px; }
+  .nut-index { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .nut-index a, .nut-links a { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; background: var(--panel); }
+  .nut-index a:hover, .nut-links a:hover { border-color: var(--accent); }
+  .nut { border-top: 1px solid var(--line); padding-top: 22px; }
+  .nut-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .nut-use { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-2); text-transform: uppercase; }
+  .nut h3 { font-size: 0.95rem; margin-top: 16px; }
+  .nut-list { margin: 8px 0 0 18px; color: var(--fg); font-size: 0.92rem; }
+  .nut-list li { margin-top: 5px; }
+  .nut-list b { color: var(--accent); font-weight: 700; }
+  .nut-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .ntbl td { font-family: "Space Grotesk", system-ui, sans-serif; white-space: normal; }
+  .ntbl th, .ntbl td { text-align: left; }
+  .ntbl td:first-child { white-space: nowrap; font-weight: 700; color: var(--fg); }
+  .ntbl tr.sub-row td { color: var(--dim); }
+  .ntbl td:last-child { min-width: 9em; }
+  @media (max-width: 520px) { .hide-sm { display: none; } }
+  .ntbl tr.sub-row td:first-child { font-weight: 400; color: var(--dim); }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .tab { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); cursor: pointer; text-decoration: none; }
   .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
@@ -91,6 +109,7 @@
 
   <p class="eyebrow">HOME GROW <span class="live" id="liveTag"></span></p>
   <nav class="tabs" id="tabs" aria-label="Tent"></nav>
+  <div id="tentView">
   <h1 id="title">—</h1>
   <div class="meta" id="meta">
     <div><span class="mk">Stage</span><span class="mv" id="mStage">—</span></div>
@@ -166,6 +185,117 @@
     </table></div>
     <p class="cap">Tent VPD is AC Infinity's own figure, with leaf temperature offset 0 °F (leaf assumed equal to air). Data: <span id="srcTxt">—</span>, updated <span id="updated">—</span>.</p>
   </section>
+
+  </div>
+
+  <div id="nutView" hidden>
+  <h1>Nutrients</h1>
+  <p class="lede">The four feed lines in use, with the makers' own mixing rates and links to their full charts. Dose from the official chart; these are the key numbers at a glance.</p>
+
+  <div class="nut-index">
+    <a href="#n-athena">Athena Pro Line</a><a href="#n-drip">Drip Hydro</a><a href="#n-jacks">Jack's 321</a><a href="#n-terp">Roots Organics Terp Tea</a>
+  </div>
+
+  <section class="nut" id="n-athena">
+    <div class="nut-head"><h2>Athena Pro Line</h2><span class="nut-use">Mom / veg: Pro Grow · Bloom 1: Pro Bloom</span></div>
+    <p class="cap">Dry soluble salts, mixed into liquid concentrates and then dosed into the reservoir to a target EC. Built for drip and fertigation; Athena's run is 2–3 weeks veg and 8–9 weeks flower.</p>
+    <div class="tblwrap"><table class="ntbl">
+      <thead><tr><th>Product</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Pro Grow</td><td>Veg base. Nitrogen for vegetative growth, no urea or ammoniacal N.</td></tr>
+        <tr><td>Pro Core</td><td>Calcium nitrate base used through every stage, alongside Grow or Bloom.</td></tr>
+        <tr><td>Pro Bloom</td><td>Flower base: phosphorus, potassium (as sulfate) and micros.</td></tr>
+        <tr><td>Pro Fade</td><td>Replaces Pro Core for the last 2 weeks of flower to take nitrogen out.</td></tr>
+        <tr><td>Pro Balance</td><td>Potassium carbonate pH up; buffers RO water. Not a nutrient.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Mixing</h3>
+    <ul class="nut-list">
+      <li><b>Concentrate strength:</b> 2 lb per gallon (imperial). Metric charts assume 2 lb per 4 L, a different dilution, so use the matching chart.</li>
+      <li><b>Making a concentrate:</b> fill the container to 80% of final volume, empty the whole pouch in, top up to final volume, then mix until fully dissolved. Always use a full pouch.</li>
+      <li><b>Check it:</b> weigh 1000 g of RO water, add the chart's amount of concentrate and read EC with a calibrated meter before mixing a full batch.</li>
+      <li>Mixed at a different strength? Adjust the reservoir dose to hit the chart's EC.</li>
+    </ul>
+    <div class="nut-links">
+      <a href="https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules" target="_blank" rel="noopener">Pro Line feed schedules ↗</a>
+      <a href="https://drive.google.com/file/d/13zdOjl0iMDlZ6i3CZ-hVWhYvQmnqYaKw/view" target="_blank" rel="noopener">Feed schedules, all Pro (PDF) ↗</a>
+      <a href="https://drive.google.com/file/d/1LcqEJnZjmtW5qxflk4m3TJ8fILQt8XQN/view" target="_blank" rel="noopener">Pro dosage reference guide ↗</a>
+      <a href="https://support.athenaag.com/hc/en-us/articles/15810155328667-Pro-Line-Concentrate-Procedure" target="_blank" rel="noopener">Concentrate procedure ↗</a>
+    </div>
+  </section>
+
+  <section class="nut" id="n-drip">
+    <div class="nut-head"><h2>Drip Hydro (powder)</h2><span class="nut-use">Bloom 2</span></div>
+    <p class="cap">Four-part powder program (A, B, C, D) mixed into stock concentrates, with Flow and Ooze as additives.</p>
+    <div class="tblwrap"><table class="ntbl">
+      <thead><tr><th>Stock</th><th>Mix at</th></tr></thead>
+      <tbody>
+        <tr><td>Powder A</td><td>2 lb per gallon of stock</td></tr>
+        <tr><td>Powder B</td><td>1 lb per gallon of stock (must be this rate)</td></tr>
+        <tr><td>Powder C</td><td>1 lb per gallon of stock</td></tr>
+        <tr><td>Powder D</td><td>40 g per gallon of stock</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Notes from the chart</h3>
+    <ul class="nut-list">
+      <li><b>pH:</b> coco and rockwool 5.5–6.0 early, 5.7–6.2 later; soil 5.9–6.2 early, 6.0–6.4 later.</li>
+      <li>Blend stocks for 10 minutes and let them sit 10 minutes before use. B and C can look cloudy at first.</li>
+      <li>Stop Powder A at least 10 days before harvest.</li>
+      <li>Don't use Flow alongside beneficial bacteria.</li>
+    </ul>
+    <p class="cap">The week-by-week amounts are on the chart below.</p>
+    <div class="nut-links">
+      <a href="https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf" target="_blank" rel="noopener">Drip Hydro powder feeding schedule (PDF) ↗</a>
+    </div>
+  </section>
+
+  <section class="nut" id="n-jacks">
+    <div class="nut-head"><h2>Jack's 321</h2><span class="nut-use" id="jacksUse">Not assigned to a tent</span></div>
+    <p class="cap">Three dry salts mixed straight into the reservoir: Part A (5-12-26), Part B calcium nitrate (15-0-0) and Epsom salt. The name comes from the roughly 3 : 2 : 1 ratio.</p>
+    <div class="tblwrap"><table class="ntbl">
+      <thead><tr><th>Product</th><th>Per gallon</th><th class="hide-sm">Per 100 gal</th><th>Supplies</th></tr></thead>
+      <tbody>
+        <tr><td>Part A 5-12-26</td><td>3.69 g</td><td class="hide-sm">369.2 g</td><td>50 ppm N</td></tr>
+        <tr><td>Part B 15-0-0</td><td>2.44 g</td><td class="hide-sm">244.2 g</td><td>100 ppm N</td></tr>
+        <tr><td>Epsom salt</td><td>1.00 g</td><td class="hide-sm">100.0 g</td><td>30 ppm Mg</td></tr>
+        <tr class="sub-row"><td>10-30-20 Bloom</td><td>5.68 g</td><td class="hide-sm">568.0 g</td><td>1–2 weeks at the start of 12/12</td></tr>
+        <tr class="sub-row"><td>7-15-30 Finish</td><td>5.40 g</td><td class="hide-sm">539.6 g</td><td>Late flower</td></tr>
+        <tr class="sub-row"><td>15-6-17 Clone</td><td>3.12 g</td><td class="hide-sm">312.4 g</td><td>Clones and seedlings</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Mixing</h3>
+    <ul class="nut-list">
+      <li>Per-gallon amounts are Jack's per-100-gallon figures divided by 100. Many growers round to 3.6 g A, 2.4 g B, 1.2 g Epsom.</li>
+      <li>Dissolve Part A fully first, then Epsom, then Part B. Never add dry calcium nitrate straight into Part A solution: it can drop out as calcium sulfate.</li>
+      <li>Finish with a 4–7 day clear-water flush.</li>
+    </ul>
+    <div class="nut-links">
+      <a href="https://cdn.shopify.com/s/files/1/0533/3847/2647/files/Jacks_Nutrient_Schedule_Jacks_321.pdf" target="_blank" rel="noopener">Jack's 321 schedule (PDF) ↗</a>
+    </div>
+  </section>
+
+  <section class="nut" id="n-terp">
+    <div class="nut-head"><h2>Roots Organics Terp Tea</h2><span class="nut-use" id="terpUse">Not assigned to a tent</span></div>
+    <p class="cap">Organic dry nutrients, one part for veg and one for flower, with beneficial bacteria and mycorrhizae built in. Use as a tea, fed directly, or as a top dress.</p>
+    <div class="tblwrap"><table class="ntbl">
+      <thead><tr><th>Product</th><th>NPK</th><th>Liquid / tea</th><th>Top dress</th></tr></thead>
+      <tbody>
+        <tr><td>Terp Tea Grow</td><td>7-1-1</td><td>1 tsp – 1 Tbsp per gal</td><td>1 tsp per gal of mix</td></tr>
+        <tr><td>Terp Tea Bloom</td><td>3-7-4</td><td>1 tsp – 1 Tbsp per gal</td><td>1 tsp per gal of mix</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Mixing</h3>
+    <ul class="nut-list">
+      <li>Brew 24 hours in an aerated, well-ventilated spot, or feed directly.</li>
+      <li>For a big reservoir, mix it up in a 5-gallon bucket first, then add it.</li>
+      <li>Grow adds 3% humic acid; both carry Bacillus species and mycorrhizal fungi, so skip harsh sterilizers in the same water.</li>
+    </ul>
+    <div class="nut-links">
+      <a href="https://haddock-elephant-r9kt.squarespace.com/terp-tea-grow" target="_blank" rel="noopener">Terp Tea Grow ↗</a>
+      <a href="https://haddock-elephant-r9kt.squarespace.com/terp-tea-bloom" target="_blank" rel="noopener">Terp Tea Bloom ↗</a>
+    </div>
+  </section>
+  </div>
 
   <footer>73 DE KC1FQA</footer>
 </div>
@@ -545,6 +675,7 @@ async function load(k) {
 }
 
 function drawLiveTag() {
+  if (!$('nutView').hidden) return;
   const el = $('liveTag'), T = TENTS[key], devs = (liveStatus && liveStatus.devices) || {};
   // freshest online reading among this tent's live sensors
   const cand = [T.live, T.canopyLive, T.roomLive].map((s) => s && devs[s]).filter((d) => d && d.lastReading);
@@ -558,6 +689,15 @@ function drawLiveTag() {
 }
 
 async function show(k) {
+  const nut = k === 'nutrients' || k.startsWith('n-');
+  $('nutView').hidden = !nut; $('tentView').hidden = nut;
+  if (nut) {
+    document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === 'nutrients' ? 'page' : 'false'));
+    document.title = 'KC1FQA · Home Grow · Nutrients';
+    $('liveTag').textContent = ''; $('liveTag').className = 'live';
+    if (k.startsWith('n-')) { const el = $(k); if (el) el.scrollIntoView(); }
+    return;
+  }
   if (!TENTS[k]) k = 'bloom1';
   key = k;
   document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === k ? 'page' : 'false'));
@@ -579,6 +719,7 @@ async function show(k) {
 for (const [k, T] of Object.entries(TENTS)) {
   const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + k; a.dataset.k = k; a.textContent = T.tab; $('tabs').append(a);
 }
+{ const a = document.createElement('a'); a.className = 'tab'; a.href = '#nutrients'; a.dataset.k = 'nutrients'; a.textContent = 'NUTRIENTS'; $('tabs').append(a); }
 $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTimeline(); drawHourly(); });
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
