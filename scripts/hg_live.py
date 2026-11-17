@@ -200,6 +200,10 @@ def merge(slug, rows):
 
 
 def main():
+    # Secrets pasted into GitHub often carry a trailing newline or spaces
+    for k in ("ACI_EMAIL", "ACI_PASSWORD", "PULSE_API_KEY", "GOVEE_API_KEY"):
+        if k in os.environ:
+            os.environ[k] = os.environ[k].strip()
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     status_path = DATA_DIR / "status.json"
     status = json.loads(status_path.read_text()) if status_path.exists() else {}
