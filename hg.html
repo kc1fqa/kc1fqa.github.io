@@ -102,9 +102,10 @@
 
   <div class="cards">
     <div class="card"><div class="k">Tent · latest · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
+    <div class="card canopy-only"><div class="k">Govee in tent · latest · <span id="cWhen">—</span></div><div class="big"><span id="cTemp">—</span>°F</div><div class="sub"><span id="cRh">—</span>% RH · <span id="cVpd">—</span> kPa VPD</div></div>
     <div class="card room-only"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big" id="rBig">—</div><div class="sub" id="rSub">—</div></div>
-    <div class="card"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
-    <div class="card"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
+    <div class="card sched-only"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
+    <div class="card sched-only"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
   </div>
 
   <section id="plantsSec">
@@ -126,11 +127,12 @@
     </div>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
+      <span class="canopy-only"><i class="sw" style="background:#6cc4ff"></i>Tent (Govee)</span>
       <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i><span id="roomLegend">Lung room</span></span>
-      <span><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
+      <span class="sched-only"><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
     </div>
     <div class="chart" id="timeline"></div>
-    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its export: <span id="gaps">—</span>. <span id="roomVpdNote"></span></span></p>
+    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its data: <span id="gaps">—</span>. <span id="roomVpdNote"></span></span></p>
   </section>
 
   <section class="room-only">
@@ -146,7 +148,7 @@
     <div class="chart" id="co2"></div>
   </section>
 
-  <section>
+  <section class="sched-only">
     <h2>Average by hour of day</h2>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Lights on</span>
@@ -155,7 +157,7 @@
     <div class="chart" id="hourly"></div>
   </section>
 
-  <section>
+  <section class="sched-only">
     <h2>Day by day</h2>
     <p class="cap">Each day starts when the lights go off and runs to the next lights-off. Swing is lights-on minus lights-off temperature.</p>
     <div class="tblwrap"><table>
@@ -173,10 +175,10 @@
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
   bloom1: {
-    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: null,
+    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: 'bloom1_room', canopyLive: 'bloom1_canopy',
     roomLabel: 'Lung room (Govee)',
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
-    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports',
+    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
     feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     flip: '2026-11-07',
     plants: [
@@ -188,10 +190,10 @@ const TENTS = {
     schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
   veg: {
-    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room',
+    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room', canopyLive: 'veg_canopy',
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
-    src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports',
+    src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
     feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     stage: 'Moms, veg & seedlings',
     plants: [
@@ -211,6 +213,14 @@ const TENTS = {
       { from: null, offStart: '10:04', offEnd: '16:04' },
       { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
     ]
+  },
+  bloom2: {
+    name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: null, room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
+    src: 'live readings from AC Infinity controller "4x2" and the Govee H5110 "Bloom 2"',
+    feed: 'Drip nutrients',
+    stage: 'Getting set up',
+    plants: [],
+    schedule: []   // add once the lights are on a timer
   }
 };
 
@@ -222,7 +232,7 @@ const CULTIVARS = {
   'End Game': { breeder: 'Happy Valley Genetics' }
 };
 
-const C = { tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
+const C = { canopy: '#6cc4ff', tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
 const M = { temp_f: { label: 'Temperature', unit: '°F', dp: 1 }, rh: { label: 'Humidity', unit: '% RH', dp: 1 }, vpd: { label: 'VPD', unit: ' kPa', dp: 2 } };
 
 // ---- Helpers ----
@@ -238,7 +248,7 @@ const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
 const cache = {};
-let key = 'bloom1', tent = [], room = [], sched = [], metric = 'temp_f';
+let key = 'bloom1', tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
 
 function prepSchedule(s) {
   return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
@@ -246,12 +256,14 @@ function prepSchedule(s) {
 }
 const entryAt = (t) => { let e = sched[0]; for (const x of sched) if (x.from <= t) e = x; return e; };
 function isOn(t) {
+  if (!sched.length) return false;
   const e = entryAt(t), m = t.getHours() * 60 + t.getMinutes();
   const off = e.offStart < e.offEnd ? (m >= e.offStart && m < e.offEnd) : (m >= e.offStart || m < e.offEnd);
   return !off;
 }
 // lights-on intervals between t0 and t1
 function onBands(t0, t1) {
+  if (!sched.length) return [];
   const offs = [];
   for (let d = d3.timeDay.offset(d3.timeDay.floor(t0), -1); d <= t1; d = d3.timeDay.offset(d, 1)) {
     const e = entryAt(d3.timeHour.offset(d, 12));
@@ -266,6 +278,7 @@ function onBands(t0, t1) {
   return bands;
 }
 function scheduleText() {
+  if (!sched.length) return 'Light schedule not set yet';
   const parts = sched.map((e, i) => {
     const span = `off ${fmtClock(e.offStart)}–${fmtClock(e.offEnd)}`;
     if (sched.length === 1) return span;
@@ -303,17 +316,23 @@ function timeChart(el, series, o) {
   el.replaceChildren();
   if (!all.length) { el.innerHTML = '<div class="msg">No data</div>'; return; }
   const W = Math.max(300, el.clientWidth - 12), H = o.H || 260, mg = { t: 10, r: 12, b: 26, l: 40 };
-  const y = d3.scaleLinear().domain(d3.extent(all, (p) => p.v)).nice().range([H - mg.b, mg.t]);
+  let [y0, y1] = d3.extent(all, (p) => p.v);
+  if (y1 - y0 < 1e-6) { y0 -= 1; y1 += 1; }  // a single reading still gets a sensible axis
+  const y = d3.scaleLinear().domain([y0, y1]).nice().range([H - mg.b, mg.t]);
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', o.aria);
   yAxis(svg, y, W, mg, 5);
-  const x = d3.scaleTime().domain(d3.extent(all, (p) => p.t)).range([mg.l, W - mg.r]);
+  let [xt0, xt1] = d3.extent(all, (p) => p.t);
+  if (xt1 - xt0 < 36e5) { xt0 = new Date(+xt1 - 6 * 36e5); }  // show at least 6 hours
+  const x = d3.scaleTime().domain([xt0, xt1]).range([mg.l, W - mg.r]);
   const [t0, t1] = x.domain();
   svg.insert('g', ':first-child').selectAll('rect').data(onBands(t0, t1)).join('rect')
     .attr('x', (b) => x(b[0])).attr('width', (b) => x(b[1]) - x(b[0])).attr('y', mg.t).attr('height', H - mg.b - mg.t).attr('fill', C.band);
   const n = Math.max(2, Math.min(10, Math.floor((W - mg.l - mg.r) / 70)));
-  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).ticks(n).tickFormat(d3.timeFormat('%b %-d')).tickSizeOuter(0));
+  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).ticks(n).tickFormat(d3.timeFormat(t1 - t0 < 2 * 864e5 ? '%-I %p' : '%b %-d')).tickSizeOuter(0));
   const line = d3.line().defined((p) => !isNaN(p.v)).x((p) => x(p.t)).y((p) => y(p.v));
   series.forEach((s) => svg.append('path').datum(withGaps(s.pts)).attr('d', line).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 1.25));
+  // sparse series (live polls only) also get dots, so a lone reading is visible
+  series.forEach((s) => { if (s.pts.length && s.pts.length < 60) svg.append('g').selectAll('circle').data(s.pts.filter((p) => !isNaN(p.v))).join('circle').attr('cx', (p) => x(p.t)).attr('cy', (p) => y(p.v)).attr('r', 2.5).attr('fill', s.color); });
   const dots = series.map((s) => svg.append('circle').attr('r', 3.5).attr('fill', s.color).style('display', 'none'));
   const tip = d3.select(el).append('div').attr('class', 'tip').style('display', 'none');
   const bis = d3.bisector((p) => p.t).center;
@@ -337,6 +356,7 @@ function timeChart(el, series, o) {
 function drawTimeline() {
   const m = M[metric];
   const series = [{ name: 'Tent', pts: tent.map((r) => ({ t: r.t, v: r[metric] })), color: C.tent }];
+  if (canopy.length) series.push({ name: 'Tent (Govee)', pts: canopy.map((r) => ({ t: r.t, v: r[metric] })), color: C.canopy });
   if (room.length) series.push({ name: 'Lung room', pts: room.map((r) => ({ t: r.t, v: r[metric] })), color: C.room });
   timeChart($('timeline'), series, { H: 260, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute, lights-on periods shaded` });
 }
@@ -394,6 +414,10 @@ function writeLede(el, parts) {
 function drawStatic() {
   const T = TENTS[key];
   set('title', T.name);
+  document.querySelectorAll('.canopy-only').forEach((e) => { e.hidden = !canopy.length; });
+  document.querySelectorAll('.sched-only').forEach((e) => { e.hidden = !sched.length; });
+  const lc = canopy[canopy.length - 1];
+  if (lc) { set('cWhen', fmtWhen(lc.t)); set('cTemp', f(lc.temp_f)); set('cRh', f(lc.rh)); set('cVpd', f(lc.vpd, 2)); }
   // Stage, feed, plants
   let stage = T.stage || '—';
   if (T.flip) {
@@ -438,16 +462,19 @@ function drawStatic() {
 
   const lt = tent[tent.length - 1], lr = room[room.length - 1];
   if (lt) { set('tWhen', fmtWhen(lt.t)); set('tTemp', f(lt.temp_f)); set('tRh', f(lt.rh)); set('tVpd', f(lt.vpd, 2)); }
+  else { set('tWhen', 'controller offline'); set('tTemp', '—'); set('tRh', '—'); set('tVpd', '—'); }
   if (lr) {
     set('rWhen', fmtWhen(lr.t));
     if (hasCo2) { set('rBig', `${f(lr.co2, 0)} ppm`); set('rSub', `CO₂ · ${f(lr.temp_f)}°F · ${f(lr.rh)}% RH`); }
     else { set('rBig', `${f(lr.temp_f)}°F`); set('rSub', `${f(lr.rh)}% RH · ${f(lr.vpd, 2)} kPa VPD`); }
   }
-  const latest = d3.max([lt && lt.t, lr && lr.t].filter(Boolean));
+  const latest = d3.max([lt && lt.t, lr && lr.t, lc && lc.t].filter(Boolean));
   set('updated', latest ? fmtWhen(latest) : '—');
 
   const days = tent.length ? (tent[tent.length - 1].t - tent[0].t) / 864e5 : 0;
-  writeLede($('lede'), [['Over '], [f(days), 1], [' days this tent averaged '], [f(sOn.t.mean) + '°F', 1], [' at '], [f(sOn.vpd, 2) + ' kPa', 1],
+  if (!sched.length || !tent.length) {
+    writeLede($('lede'), [['Not running yet. Readings show up here as its sensors report'], lc ? [`; the Govee in the tent last read ${f(lc.temp_f)}°F and ${f(lc.rh)}% RH.`] : ['.']]);
+  } else writeLede($('lede'), [['Over '], [f(days), 1], [' days this tent averaged '], [f(sOn.t.mean) + '°F', 1], [' at '], [f(sOn.vpd, 2) + ' kPa', 1],
     [' VPD with lights on, and '], [f(sOff.t.mean) + '°F', 1], [' at '], [f(sOff.vpd, 2) + ' kPa', 1], [' with lights off, a '], [f(sOn.t.mean - sOff.t.mean) + '°F', 1], [' day/night swing.']]);
 
   // Same-minute comparison with the lung room
@@ -503,21 +530,25 @@ function combine(exp, live) {
 async function load(k) {
   if (!cache[k]) {
     const T = TENTS[k];
-    const [t, r, lt, lr] = await Promise.all([
-      d3.csv(T.file), tryCsv(T.room),
-      tryCsv(T.live && LIVE_BASE + T.live + '.csv' + bust()), tryCsv(T.roomLive && LIVE_BASE + T.roomLive + '.csv' + bust())
+    const [t, r, lt, lr, lc] = await Promise.all([
+      tryCsv(T.file), tryCsv(T.room),
+      tryCsv(T.live && LIVE_BASE + T.live + '.csv' + bust()), tryCsv(T.roomLive && LIVE_BASE + T.roomLive + '.csv' + bust()),
+      tryCsv(T.canopyLive && LIVE_BASE + T.canopyLive + '.csv' + bust())
     ]);
     const tentRow = (d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd });
     const roomRow = (d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN });
     const clean = (rows, fn) => rows.map(fn).filter((d) => d.t && !isNaN(d.temp_f)).sort((a, b) => a.t - b.t);
-    cache[k] = { tent: combine(clean(t, tentRow), clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)) };
+    cache[k] = { tent: combine(clean(t, tentRow), clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)), canopy: combine([], clean(lc, tentRow)) };
     cache[k].room.forEach((d) => { if (isNaN(d.vpd)) d.vpd = vpdOf(d.temp_f, d.rh); });
   }
   return cache[k];
 }
 
 function drawLiveTag() {
-  const el = $('liveTag'), T = TENTS[key], dev = liveStatus && liveStatus.devices && liveStatus.devices[T.live];
+  const el = $('liveTag'), T = TENTS[key], devs = (liveStatus && liveStatus.devices) || {};
+  // freshest online reading among this tent's live sensors
+  const cand = [T.live, T.canopyLive, T.roomLive].map((s) => s && devs[s]).filter((d) => d && d.lastReading);
+  const dev = cand.sort((a, b) => (b.online - a.online) || (parse(b.lastReading.time) - parse(a.lastReading.time)))[0];
   el.className = 'live';
   if (!dev || !dev.lastReading) { el.textContent = '· FROM EXPORTS'; return; }
   const t = parse(dev.lastReading.time), mins = t ? Math.round((Date.now() - t) / 6e4) : NaN;
@@ -535,7 +566,7 @@ async function show(k) {
     const d = await load(k);
     if (key !== k) return;
     sched = prepSchedule(TENTS[k].schedule);
-    tent = d.tent; room = d.room;
+    tent = d.tent; room = d.room; canopy = d.canopy;
     tent.forEach((r) => { r.on = isOn(r.t); });
     drawStatic(); drawCharts(); drawLiveTag();
   } catch (err) {
