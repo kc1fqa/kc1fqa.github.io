@@ -552,30 +552,14 @@
 // ---- Tents ----
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
-  bloom1: {
-    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: 'bloom1_room', canopyLive: 'bloom1_canopy',
-    roomLabel: 'Lung room (Govee)',
-    roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
-    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
-    program: 'athena-fade', phase: 'flower',
-    feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
-    flip: '2026-11-07',
-    plants: [
-      { group: 'In flower', items: [
-        { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
-        { name: 'Bishop', count: 1 }
-      ] }
-    ],
-    schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
-  },
   veg: {
-    name: 'Mom / veg tent', tab: 'MOM / VEG', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room', canopyLive: 'veg_canopy',
+    name: 'Mom / veg / clone tent', tab: 'MOM / VEG / CLONE', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room', canopyLive: 'veg_canopy',
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
     program: 'athena-fade', phase: 'veg',
     feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
-    stage: 'Moms, veg & seedlings',
+    stage: 'Moms, clones, veg & seedlings',
     plants: [
       { group: 'Moms', items: [
         { name: 'Cap Junky', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Apples and Bananas', count: 1 },
@@ -593,6 +577,22 @@ const TENTS = {
       { from: null, offStart: '10:04', offEnd: '16:04' },
       { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
     ]
+  },
+  bloom1: {
+    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: 'bloom1_room', canopyLive: 'bloom1_canopy',
+    roomLabel: 'Lung room (Govee)',
+    roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
+    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
+    program: 'athena-fade', phase: 'flower',
+    feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
+    flip: '2026-11-07',
+    plants: [
+      { group: 'In flower', items: [
+        { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
+        { name: 'Bishop', count: 1 }
+      ] }
+    ],
+    schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
   bloom2: {
     name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: null, room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
@@ -638,7 +638,7 @@ const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
 const cache = {};
-let key = 'bloom1', tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
+let key = 'veg', tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
 
 function prepSchedule(s) {
   return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
@@ -975,7 +975,7 @@ async function show(k) {
     if (k !== vk) { const el = $(k); if (el) el.scrollIntoView(); }
     return;
   }
-  if (!TENTS[k]) k = 'bloom1';
+  if (!TENTS[k]) k = Object.keys(TENTS)[0];
   key = k;
   document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === k ? 'page' : 'false'));
   set('lede', 'Loading readings…');
@@ -1001,7 +1001,7 @@ $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTim
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
-show(location.hash.slice(1) || 'bloom1');
+show(location.hash.slice(1) || Object.keys(TENTS)[0]);
 </script>
 </body>
 </html>
