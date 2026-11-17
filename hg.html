@@ -59,6 +59,11 @@
   .fchart tr.tg td { color: var(--dim); }
   .fchart td.nt { font-size: 0.68rem; color: var(--accent-2); }
   .fchart td:last-child { min-width: 0; }
+  .fchart tr.cv td { color: var(--dim); background: rgba(108,196,255,0.05); }
+  .fchart tr.cv td:first-child { background: #0f171b; font-weight: 400; }
+  .fchart tr.cv-head td { text-align: left; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6cc4ff; padding-top: 12px; }
+  .tag-cur { display: inline-block; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.08em; color: var(--bg); background: var(--accent); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; margin-left: 6px; }
+  .tag-inl { display: inline-block; margin: 0 0 0 6px; }
   .nut-mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 6px; }
   .nut-mini .ntbl td:last-child { min-width: 0; }
   .tag-new { display: block; width: fit-content; margin-top: 4px; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.08em; color: var(--bg); background: var(--accent-2); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; white-space: nowrap; }
@@ -76,6 +81,7 @@
   .meta .mv { font-weight: 700; }
   .meta .mv a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
   .meta .mv a:hover { border-bottom-style: solid; }
+  .meta .mv .mnote { display: block; font-weight: 400; font-size: 0.8rem; color: var(--dim); }
   .ptbl th, .ptbl td { text-align: left; }
   .ptbl td.qty { color: var(--accent); width: 3.5em; }
   .ptbl td.cv { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
@@ -128,6 +134,7 @@
     <div><span class="mk">Stage</span><span class="mv" id="mStage">—</span></div>
     <div><span class="mk">Feed</span><span class="mv" id="mFeed">—</span></div>
     <div><span class="mk">Plants</span><span class="mv" id="mPlants">—</span></div>
+    <div id="mWeekBox"><span class="mk">This week's mix</span><span class="mv" id="mWeek">—</span></div>
   </div>
   <p class="lede" id="lede">Loading readings…</p>
   <p class="lede room-only" id="lede2"></p>
@@ -231,7 +238,39 @@
       <li>Mixed at a different strength? Adjust the reservoir dose to hit the chart's EC.</li>
       <li><b>With Proper:</b> it goes into the water first in the mixing order, before the other concentrates.</li>
     </ul>
-    <h3>Feed chart: Modified Pro Program with Proper</h3>
+    <h3>Feed chart: Pro Program with Fade <span class="tag-cur">In use now</span></h3>
+    <p class="cap">As Athena prints it (metric): mL per 10 L of 226 g/L stock concentrate. The shaded rows underneath convert the base salts to mL per gallon of 2 lb/gal stock, which lines up with Athena's own imperial chart (90 → 32, 54 → 19).</p>
+    <div class="tblwrap"><table class="ntbl fchart">
+      <thead>
+        <tr><th></th><th>Clone</th><th colspan="4" class="fl">Veg</th><th colspan="9" class="fl">Flower</th></tr>
+        <tr><th>mL/10 L</th><th>Pre-soak<br>&amp; feed</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th><th>W8</th><th>W9</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Pro Grow</td><td></td><td>90</td><td>90</td><td>90</td><td>90</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>Pro Bloom</td><td>57</td><td></td><td></td><td></td><td></td><td>90</td><td>90</td><td>90</td><td>90</td><td>90</td><td>90</td><td>90</td><td>90</td><td>90</td></tr>
+        <tr><td>Pro Core</td><td>34</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54</td><td>54*</td><td colspan="2" class="nt">Swap to Fade</td></tr>
+        <tr><td>Fade</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>*</td><td>51</td><td>51</td></tr>
+        <tr><td>Cleanse</td><td>3</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td><td>5–13</td></tr>
+        <tr class="tg"><td>EC</td><td>2.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td></tr>
+        <tr class="tg"><td>PPM 500</td><td>1000</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td><td>1500</td></tr>
+        <tr class="tg"><td>PPM 700</td><td>1400</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td><td>2100</td></tr>
+        <tr class="tg"><td>pH</td><td>5.6</td><td colspan="4">5.8–6.2 coco/rockwool · 6.0–6.4 peat</td><td colspan="8">5.8–6.2 coco/rockwool · 6.0–6.4 peat</td><td>6.0–6.4 all</td></tr>
+        <tr class="cv-head"><td colspan="15">≈ mL per gallon of 2 lb/gal stock</td></tr>
+        <tr class="cv"><td>Pro Grow</td><td></td><td>32</td><td>32</td><td>32</td><td>32</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="cv"><td>Pro Bloom</td><td>20</td><td></td><td></td><td></td><td></td><td>32</td><td>32</td><td>32</td><td>32</td><td>32</td><td>32</td><td>32</td><td>32</td><td>32</td></tr>
+        <tr class="cv"><td>Pro Core</td><td>12</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19</td><td>19*</td><td></td><td></td></tr>
+        <tr class="cv"><td>Fade</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>*</td><td>18</td><td>18</td></tr>
+      </tbody>
+    </table></div>
+    <ul class="nut-list">
+      <li><b>Fade timing is cultivar dependent:</b> swap Core for Fade in flower weeks 8–9. If a cultivar shows resiliency, run Fade (51 mL per 10 L) weeks 7–9. Check pH when you switch.</li>
+      <li><b>Pre-soak media:</b> coco at pH 5.5–5.8 and EC 3.5–4.0; rockwool at pH 5.0–5.5 and EC 2.5–3.0.</li>
+      <li><b>Flush:</b> RO + Cleanse at 26 mL per 10 L, to EC under 0.1 and pH 6.0–6.4. Coco the last 3 days, rockwool the last day.</li>
+      <li><b>Spray (mL per L):</b> IPM 24 preventative twice a week or 32 under pressure 3× a week, Stack 2 twice a week, veg weeks 1–4 and flower weeks 1–3.</li>
+      <li>Cleanse is listed as 5–13 on both Athena charts, per 10 L here and per gallon on the imperial one, so it isn't converted. Go by the bottle.</li>
+    </ul>
+
+    <h3>Feed chart: Modified Pro Program with Proper <span class="tag-new tag-inl">When Proper is available</span></h3>
     <p class="cap">mL per gallon of 2 lb/gal stock concentrate (imperial). Add in the order listed, top to bottom. Pro Balance goes in first as needed for pH up.</p>
     <div class="tblwrap"><table class="ntbl fchart">
       <thead>
@@ -383,6 +422,7 @@ const TENTS = {
     roomLabel: 'Lung room (Govee)',
     roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
     src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
+    program: 'athena-fade', phase: 'flower',
     feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     flip: '2026-11-07',
     plants: [
@@ -398,6 +438,7 @@ const TENTS = {
     roomLabel: 'Lung room (Pulse)',
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
+    program: 'athena-fade', phase: 'veg',
     feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     stage: 'Moms, veg & seedlings',
     plants: [
@@ -425,6 +466,16 @@ const TENTS = {
     stage: 'Getting set up',
     plants: [],
     schedule: []   // add once the lights are on a timer
+  }
+};
+
+// This week's mix, from Athena's "Pro Program with Fade" chart (mL per 10 L, ≈ mL/gal at 2 lb/gal stock)
+const PROGRAMS = {
+  'athena-fade': (phase, week) => {
+    if (phase === 'veg') return { parts: [['Pro Grow', 90, 32], ['Pro Core', 54, 19]], ec: '3.0' };
+    if (week > 9) return { text: 'Past week 9 on the chart: flush (RO + Cleanse) or extend week 9' };
+    const parts = week >= 8 ? [['Pro Bloom', 90, 32], ['Fade', 51, 18]] : [['Pro Bloom', 90, 32], ['Pro Core', 54, 19]];
+    return { parts, ec: '3.0', note: week === 7 ? 'Fade can start now if the cultivar is resilient' : week >= 8 ? 'Fade replaces Core' : '' };
   }
 };
 
@@ -629,6 +680,20 @@ function drawStatic() {
     stage = `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`;
   }
   set('mStage', stage);
+  // This week's mix
+  const wk = $('mWeek'); wk.replaceChildren();
+  let mix = null;
+  if (T.program && PROGRAMS[T.program]) {
+    const week = T.flip ? Math.floor((d3.timeDay.floor(new Date()) - parseDay(T.flip)) / (7 * 864e5)) + 1 : null;
+    mix = PROGRAMS[T.program](T.phase, week);
+  }
+  $('mWeekBox').hidden = !mix;
+  if (mix) {
+    const a = document.createElement('a'); a.href = '#n-athena';
+    a.textContent = mix.text || `${mix.parts.map((p) => `${p[0]} ${p[1]}`).join(' + ')} mL/10 L (≈ ${mix.parts.map((p) => p[2]).join(' + ')} mL/gal) · EC ${mix.ec}`;
+    wk.append(a);
+    if (mix.note) { const n = document.createElement('span'); n.className = 'mnote'; n.textContent = mix.note; wk.append(n); }
+  }
   const mf = $('mFeed'); mf.replaceChildren();
   if (T.feed && T.feedUrl) { const a = document.createElement('a'); a.href = T.feedUrl; a.target = '_blank'; a.rel = 'noopener'; a.textContent = T.feed + ' ↗'; a.title = 'Official feed chart'; mf.append(a); }
   else mf.textContent = T.feed || '—';
