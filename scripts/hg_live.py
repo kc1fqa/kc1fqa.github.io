@@ -13,10 +13,13 @@ Sources
                Gives the current reading only, so this keeps one row per run.
   Pulse        official API (api.pulsegrow.com, needs an API key from a paid plan).
                Gives minute data, so each run backfills the last few hours.
+  Govee        official Developer API (openapi.api.govee.com). Current reading only.
+               Not every model reports through it (Wi-Fi thermo-hygrometers usually do).
 
 Secrets (repo Settings > Secrets and variables > Actions)
   ACI_EMAIL, ACI_PASSWORD   AC Infinity app login
   PULSE_API_KEY             Pulse API key (optional)
+  GOVEE_API_KEY             Govee Developer API key (optional)
 
 Uses only the Python standard library.
 """
@@ -29,6 +32,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -48,7 +52,9 @@ DEVICES = {
 
 ACI_HOST = "https://www.acinfinityserver.com"
 PULSE_HOST = "https://api.pulsegrow.com"
+GOVEE_HOST = "https://openapi.api.govee.com"
 FIELDS = ["time", "temp_f", "rh", "vpd"]
+OPTIONAL_FIELDS = ["co2"]
 
 
 def slug_for(name, prefix):
@@ -57,8 +63,14 @@ def slug_for(name, prefix):
     return prefix + "-" + (re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "device")
 
 
-def http(method, url, headers=None, data=None, timeout=30):
-    body = urllib.parse.urlencode(data).encode() if data is not None else None
+def http(method, url, headers=None, data=None, timeout=30, as_json=False):
+    if data is None:
+        body = None
+    elif as_json:
+        body = json.dumps(data).encode()
+        headers = {**(headers or {}), "Content-Type": "application/json"}
+    else:
+        body = urllib.parse.urlencode(data).encode()
     req = urllib.request.Request(url, data=body, method=method, headers=headers or {})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode())
@@ -125,20 +137,63 @@ def read_pulse(api_key, hours=3):
     return out
 
 
+# ---------------- Govee ----------------
+def vpd_kpa(temp_f, rh):
+    import math
+    c = (temp_f - 32) * 5 / 9
+    return 0.6108 * math.exp(17.27 * c / (c + 237.3)) * (1 - rh / 100)
+
+
+def read_govee(api_key):
+    hdr = {"Govee-API-Key": api_key}
+    devs = http("GET", GOVEE_HOST + "/router/api/v1/user/devices", hdr)
+    if devs.get("code") != 200:
+        raise RuntimeError(f"Govee device list failed (code {devs.get('code')}): {devs.get('message') or devs.get('msg')}")
+    now = datetime.now(timezone.utc)
+    out = []
+    for d in devs.get("data") or []:
+        caps = {c.get("instance") for c in d.get("capabilities") or []}
+        if "sensorTemperature" not in caps:
+            continue  # lights, plugs, etc.
+        name = d.get("deviceName") or d.get("device")
+        st = http("POST", GOVEE_HOST + "/router/api/v1/device/state", hdr,
+                  {"requestId": str(uuid.uuid4()), "payload": {"sku": d["sku"], "device": d["device"]}}, as_json=True)
+        vals = {}
+        for c in (st.get("payload") or {}).get("capabilities") or []:
+            v = (c.get("state") or {}).get("value")
+            if isinstance(v, dict):  # some models wrap it, e.g. {"currentHumidity": 55}
+                v = next((x for x in v.values() if isinstance(x, (int, float))), None)
+            if isinstance(v, (int, float)):
+                vals[c.get("instance")] = float(v)
+        t, h = vals.get("sensorTemperature"), vals.get("sensorHumidity")
+        row = None
+        if t is not None and h is not None:
+            temp_f = c_to_f(t) if t < 45 else t   # the API reports °F for most models, °C for a few
+            row = {"time": local_minute(now), "temp_f": round(temp_f, 2), "rh": round(h, 1), "vpd": round(vpd_kpa(temp_f, h), 2)}
+            if "carbonDioxideConcentration" in vals:
+                row["co2"] = round(vals["carbonDioxideConcentration"])
+        out.append({"source": f"Govee {d.get('sku', '')}".strip(), "name": name, "slug": slug_for(name, "govee"),
+                    "online": row is not None, "rows": [row] if row else []})
+    return out
+
+
 # ---------------- Files ----------------
 def merge(slug, rows):
     path = DATA_DIR / f"{slug}.csv"
-    have = {}
+    have, fields = {}, list(FIELDS)
     if path.exists():
         with path.open() as f:
-            for r in csv.DictReader(f):
+            rd = csv.DictReader(f)
+            fields += [x for x in OPTIONAL_FIELDS if x in (rd.fieldnames or []) and x not in fields]
+            for r in rd:
                 have[r["time"]] = r
     for r in rows:
-        have[r["time"]] = {k: r[k] for k in FIELDS}
+        fields += [x for x in OPTIONAL_FIELDS if x in r and x not in fields]
+        have[r["time"]] = r
     cutoff = (datetime.now(TZ) - timedelta(days=KEEP_DAYS)).strftime("%Y-%m-%d %H:%M")
     keep = [have[k] for k in sorted(have) if k >= cutoff]
     with path.open("w", newline="") as f:
-        w = csv.DictWriter(f, FIELDS)
+        w = csv.DictWriter(f, fields, extrasaction="ignore", restval="")
         w.writeheader()
         w.writerows(keep)
     return len(keep)
@@ -167,6 +222,14 @@ def main():
             errors.append(f"Pulse: {e}")
     else:
         print("Pulse: no PULSE_API_KEY secret set, skipping")
+
+    if os.environ.get("GOVEE_API_KEY"):
+        try:
+            readings += read_govee(os.environ["GOVEE_API_KEY"])
+        except (urllib.error.URLError, RuntimeError, KeyError, ValueError) as e:
+            errors.append(f"Govee: {e}")
+    else:
+        print("Govee: no GOVEE_API_KEY secret set, skipping")
 
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     for d in readings:
