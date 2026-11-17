@@ -159,6 +159,7 @@
       <ol>
         <li>In the AC Infinity app, open the <b id="rCtrl">controller</b> and go to the <b>DATA</b> tab.</li>
         <li>Export the data as CSV, covering at least the days since the last export.</li>
+        <li id="rAlso" hidden>—</li>
         <li>Upload the CSV to Claude and say which tent it's from. Claude adds it here.</li>
       </ol>
     </details>
@@ -578,6 +579,7 @@ const TENTS = {
     roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
     src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
     program: 'athena-fade', phase: 'veg',
+    exportEvery: 7, controller: 'Veg', alsoExport: 'Also export the Pulse sensor "Edd Veg" from the Exports tab in the Pulse app (the free plan allows one export a week).',
     feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     stage: 'Moms, clones, veg & seedlings',
     plants: [
@@ -842,6 +844,7 @@ function drawStatic() {
   rb.hidden = !T.exportEvery;
   if (T.exportEvery) {
     set('rCtrl', `"${T.controller}"`);
+    $('rAlso').hidden = !T.alsoExport; set('rAlso', T.alsoExport || '');
     const today = d3.timeDay.floor(new Date()), fd = d3.timeFormat('%a %b %-d');
     if (!exportLast) {
       rb.className = 'remind';
