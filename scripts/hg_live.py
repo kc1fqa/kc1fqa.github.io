@@ -48,6 +48,11 @@ DEVICES = {
     "Veg": "veg",
     "4x2": "bloom2",                # Bloom 2, coming online soon
     "Edd Veg": "veg_room",          # Pulse sensor in the mom room lung room
+    # Govee (names as in the Govee app)
+    "Bloom 1": "bloom1_canopy",     # H5110 in Bloom 1
+    "Bloom 2": "bloom2_canopy",     # H5110 in Bloom 2
+    "Mom Tent": "veg_canopy",       # H5110 in the mom/veg tent
+    "Smart CO₂ Monitor": "bloom1_room",  # H5140 in Bloom 1's lung room
 }
 
 ACI_HOST = "https://www.acinfinityserver.com"
