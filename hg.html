@@ -155,6 +155,10 @@
   th { color: var(--dim); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
   tr:last-child td { border-bottom: 0; }
   .msg { color: var(--dim); font-family: var(--mono); font-size: 0.8rem; padding: 24px 10px; }
+  .multi { margin-top: 6px; }
+  .ph { margin-top: 12px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .chart.sm { min-height: 170px; margin-top: 6px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
   [hidden] { display: none !important; }
   footer { margin-top: 40px; text-align: center; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); }
 </style>
@@ -192,38 +196,42 @@
   <p class="lede room-only" id="lede2"></p>
 
   <div class="cards">
-    <div class="card"><div class="k">Tent · latest · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
-    <div class="card canopy-only"><div class="k">Govee in tent · latest · <span id="cWhen">—</span></div><div class="big"><span id="cTemp">—</span>°F</div><div class="sub"><span id="cRh">—</span>% RH · <span id="cVpd">—</span> kPa VPD</div></div>
-    <div class="card room-only"><div class="k">Lung room · latest · <span id="rWhen">—</span></div><div class="big" id="rBig">—</div><div class="sub" id="rSub">—</div></div>
+    <div class="card"><div class="k">Tent now · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
+    <div class="card canopy-only"><div class="k">Govee in tent · <span id="cWhen">—</span></div><div class="big"><span id="cTemp">—</span>°F</div><div class="sub"><span id="cRh">—</span>% RH · <span id="cVpd">—</span> kPa VPD</div></div>
     <div class="card sched-only"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
     <div class="card sched-only"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
+    <div class="card room-only sched-only"><div class="k">Tent − lung room · lights off</div><div class="big"><span id="vsTemp">—</span>°F</div><div class="sub"><span id="vsRh">—</span> RH points</div></div>
+    <div class="card room-only"><div class="k">Lung room now · <span id="rWhen">—</span></div><div class="big" id="rBig">—</div><div class="sub" id="rSub">—</div></div>
   </div>
 
-  <section id="plantsSec">
-    <h2>Plants</h2>
-    <div class="tblwrap"><table class="ptbl">
-      <thead><tr><th>Qty</th><th>Cultivar</th><th>Breeder / lineage</th></tr></thead>
-      <tbody id="plantsTb"></tbody>
-    </table></div>
-  </section>
-
   <section>
-    <div class="row">
-      <h2 id="timelineH">Every minute</h2>
-      <select id="metric" aria-label="Reading to chart">
-        <option value="temp_f">Temperature (°F)</option>
-        <option value="rh">Humidity (%)</option>
-        <option value="vpd">VPD (kPa)</option>
-      </select>
-    </div>
+    <h2 id="timelineH">Every minute, three ways</h2>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
       <span class="canopy-only"><i class="sw" style="background:#6cc4ff"></i>Tent (Govee)</span>
       <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i><span id="roomLegend">Lung room</span></span>
       <span class="sched-only"><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
     </div>
-    <div class="chart" id="timeline"></div>
+    <div class="multi">
+      <p class="ph">Temperature °F</p><div class="chart sm" id="tl-temp_f"></div>
+      <p class="ph">Humidity % RH</p><div class="chart sm" id="tl-rh"></div>
+      <p class="ph">VPD kPa</p><div class="chart sm" id="tl-vpd"></div>
+      <p class="ph co2-only">Lung room CO₂ ppm</p><div class="chart sm co2-only" id="co2"></div>
+    </div>
     <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its data: <span id="gaps">—</span>. <span id="roomVpdNote"></span></span></p>
+  </section>
+
+  <section class="sched-only">
+    <h2>The average day in the tent</h2>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--accent)"></i>Lights on</span>
+      <span><i class="sw" style="background:var(--accent-2)"></i>Lights off</span>
+    </div>
+    <div class="grid3">
+      <div><p class="ph">Temperature °F by hour</p><div class="chart sm" id="hr-temp_f"></div></div>
+      <div><p class="ph">Humidity % by hour</p><div class="chart sm" id="hr-rh"></div></div>
+      <div><p class="ph">VPD kPa by hour</p><div class="chart sm" id="hr-vpd"></div></div>
+    </div>
   </section>
 
   <section class="room-only">
@@ -234,28 +242,22 @@
     </table></div>
   </section>
 
-  <section class="room-only co2-only">
-    <h2>Lung room CO₂</h2>
-    <div class="chart" id="co2"></div>
-  </section>
-
   <section class="sched-only">
-    <h2>Average by hour of day</h2>
-    <div class="legend">
-      <span><i class="sw" style="background:var(--accent)"></i>Lights on</span>
-      <span><i class="sw" style="background:var(--accent-2)"></i>Lights off</span>
-    </div>
-    <div class="chart" id="hourly"></div>
-  </section>
-
-  <section class="sched-only">
-    <h2>Day by day</h2>
+    <h2>Tent day by day</h2>
     <p class="cap">Each day starts when the lights go off and runs to the next lights-off. Swing is lights-on minus lights-off temperature.</p>
     <div class="tblwrap"><table>
       <thead><tr><th>Day</th><th>Hours logged</th><th>On °F</th><th>Off °F</th><th>Swing °F</th><th>On RH %</th><th>Off RH %</th><th>On VPD</th><th>Off VPD</th></tr></thead>
       <tbody id="daily"></tbody>
     </table></div>
     <p class="cap">Tent VPD is AC Infinity's own figure, with leaf temperature offset 0 °F (leaf assumed equal to air). Data: <span id="srcTxt">—</span>, updated <span id="updated">—</span>.</p>
+  </section>
+
+  <section id="plantsSec">
+    <h2>Plants</h2>
+    <div class="tblwrap"><table class="ptbl">
+      <thead><tr><th>Qty</th><th>Cultivar</th><th>Breeder / lineage</th></tr></thead>
+      <tbody id="plantsTb"></tbody>
+    </table></div>
   </section>
 
   </div>
@@ -735,7 +737,7 @@ const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
 const cache = {};
-let key = 'nursery', exportLast = null, tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
+let key = 'nursery', exportLast = null, tent = [], room = [], canopy = [], sched = [];
 
 function prepSchedule(s) {
   return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
@@ -808,7 +810,7 @@ function timeChart(el, series, o) {
   const y = d3.scaleLinear().domain([y0, y1]).nice().range([H - mg.b, mg.t]);
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', o.aria);
   yAxis(svg, y, W, mg, 5);
-  let [xt0, xt1] = d3.extent(all, (p) => p.t);
+  let [xt0, xt1] = o.span && o.span[0] ? o.span : d3.extent(all, (p) => p.t);
   if (xt1 - xt0 < 36e5) { xt0 = new Date(+xt1 - 6 * 36e5); }  // show at least 6 hours
   const x = d3.scaleTime().domain([xt0, xt1]).range([mg.l, W - mg.r]);
   const [t0, t1] = x.domain();
@@ -841,43 +843,50 @@ function timeChart(el, series, o) {
 
 // ---- Drawing ----
 function drawTimeline() {
-  const m = M[metric];
-  const series = [{ name: 'Tent', pts: tent.map((r) => ({ t: r.t, v: r[metric] })), color: C.tent }];
-  if (canopy.length) series.push({ name: 'Tent (Govee)', pts: canopy.map((r) => ({ t: r.t, v: r[metric] })), color: C.canopy });
-  if (room.length) series.push({ name: 'Lung room', pts: room.map((r) => ({ t: r.t, v: r[metric] })), color: C.room });
-  timeChart($('timeline'), series, { H: 260, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute, lights-on periods shaded` });
+  const span = d3.extent([...tent, ...canopy, ...room], (r) => r.t);
+  for (const k of Object.keys(M)) {
+    const m = M[k];
+    const series = [{ name: 'Tent', pts: tent.map((r) => ({ t: r.t, v: r[k] })), color: C.tent }];
+    if (canopy.length) series.push({ name: 'Tent (Govee)', pts: canopy.map((r) => ({ t: r.t, v: r[k] })), color: C.canopy });
+    if (room.length) series.push({ name: 'Lung room', pts: room.map((r) => ({ t: r.t, v: r[k] })), color: C.room });
+    timeChart($('tl-' + k), series, { H: 170, span, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute, lights-on periods shaded` });
+  }
 }
 function drawCo2() {
   if (!room.length) return;
+  const span = d3.extent([...tent, ...canopy, ...room], (r) => r.t);
   timeChart($('co2'), [{ name: 'CO₂', pts: room.map((r) => ({ t: r.t, v: r.co2 })), color: C.room }],
-    { H: 220, fmt: (v) => f(v, 0) + ' ppm', aria: 'Lung room CO2 every minute in ppm, lights-on periods shaded' });
+    { H: 170, span, fmt: (v) => f(v, 0) + ' ppm', aria: 'Lung room CO2 every minute in ppm, lights-on periods shaded' });
 }
 function drawHourly() {
-  const el = $('hourly'), m = M[metric];
   const by = d3.group(tent, (r) => r.t.getHours());
   const rows = d3.range(24).filter((h) => by.has(h)).map((h) => {
     const xs = by.get(h);
     return { hour: h, on: d3.mean(xs, (r) => r.on ? 1 : 0) >= 0.5, temp_f: d3.mean(xs, (r) => r.temp_f), rh: d3.mean(xs, (r) => r.rh), vpd: d3.mean(xs, (r) => r.vpd) };
   });
+  for (const metric of Object.keys(M)) hourChart($('hr-' + metric), rows, metric);
+}
+function hourChart(el, rows, metric) {
+  const m = M[metric];
   el.replaceChildren();
   if (!rows.length) return;
   const col = (d) => d.on ? C.tent : C.room;
-  const W = Math.max(300, el.clientWidth - 12), H = 220, mg = { t: 10, r: 12, b: 26, l: 40 };
+  const W = Math.max(260, el.clientWidth - 12), H = 170, mg = { t: 10, r: 10, b: 26, l: 40 };
   const y = d3.scaleLinear().domain(d3.extent(rows, (d) => d[metric])).nice().range([H - mg.b, mg.t]);
   const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `Average ${m.label.toLowerCase()} for each hour of the day`);
   yAxis(svg, y, W, mg, 4);
-  const x = d3.scalePoint().domain(d3.range(24)).range([mg.l + 8, W - mg.r - 8]);
-  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).tickValues(d3.range(0, 24, W < 480 ? 6 : 3)).tickFormat(hourLabel).tickSizeOuter(0));
+  const x = d3.scalePoint().domain(d3.range(24)).range([mg.l + 6, W - mg.r - 6]);
+  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).tickValues(d3.range(0, 24, 6)).tickFormat(hourLabel).tickSizeOuter(0));
   svg.append('path').datum(rows).attr('d', d3.line().x((d) => x(d.hour)).y((d) => y(d[metric]))).attr('fill', 'none').attr('stroke', C.ref);
-  svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.hour)).attr('cy', (d) => y(d[metric])).attr('r', 4).attr('fill', col);
-  const ring = svg.append('circle').attr('r', 7).attr('fill', 'none').attr('stroke-width', 1.5).style('display', 'none');
+  svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.hour)).attr('cy', (d) => y(d[metric])).attr('r', 3.5).attr('fill', col);
+  const ring = svg.append('circle').attr('r', 6.5).attr('fill', 'none').attr('stroke-width', 1.5).style('display', 'none');
   const tip = d3.select(el).append('div').attr('class', 'tip').style('display', 'none');
   const show = (ev) => {
     const [px] = d3.pointer(ev, svg.node()), p = rows.reduce((a, b) => Math.abs(x(b.hour) - px) < Math.abs(x(a.hour) - px) ? b : a);
     ring.style('display', null).attr('cx', x(p.hour)).attr('cy', y(p[metric])).attr('stroke', col(p));
     tip.style('display', null).selectAll('*').remove();
     tip.append('div').attr('class', 't').text(`${hourLabel(p.hour)} hour · lights ${p.on ? 'on' : 'off'} (mostly)`);
-    tip.append('div').text(`${f(p.temp_f)}°F · ${f(p.rh)}% RH · ${f(p.vpd, 2)} kPa`);
+    tip.append('div').text(f(p[metric], m.dp) + m.unit);
     placeTip(el, tip, x(p.hour), W);
   };
   svg.append('rect').attr('x', mg.l).attr('y', mg.t).attr('width', W - mg.l - mg.r).attr('height', H - mg.t - mg.b)
@@ -893,6 +902,7 @@ function fillTable(id, rows) {
     tb.append(tr);
   }
 }
+const sg0 = (v) => isNaN(v) ? '—' : d3.format('+.1f')(v).replace('-', '−');
 function writeLede(el, parts) {
   el.replaceChildren();
   for (const [txt, bold] of parts) { if (bold) { const b = document.createElement('b'); b.textContent = txt; el.append(b); } else el.append(document.createTextNode(txt)); }
@@ -984,7 +994,6 @@ function drawStatic() {
   document.querySelectorAll('.co2-only').forEach((e) => { e.hidden = !room.length || !hasCo2; });
   set('roomLegend', T.roomLabel || 'Lung room');
   set('roomVpdNote', T.roomVpdNote || '');
-  set('timelineH', room.length ? 'Tent vs lung room, every minute' : 'Every minute');
   set('lightsTxt', scheduleText());
   set('srcTxt', T.src);
 
@@ -1021,6 +1030,7 @@ function drawStatic() {
     };
     const cmp = both.length ? [agg('Lights on', both.filter((p) => p.a.on)), agg('Lights off', both.filter((p) => !p.a.on))] : [];
     fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
+    set('vsTemp', cmp.length ? sg0(cmp[1].tt - cmp[1].rt) : '—'); set('vsRh', cmp.length ? sg0(cmp[1].tr - cmp[1].rr) : '—');
     if (cmp.length) {
       const sg = (v) => isNaN(v) ? '—' : d3.format('+.1f')(v).replace('-', '−');
       const parts = [['Compared minute for minute with the lung room, the tent ran '], [sg(cmp[0].tt - cmp[0].rt) + '°F', 1], [' and '], [sg(cmp[0].tr - cmp[0].rr) + ' RH points', 1],
@@ -1204,7 +1214,6 @@ for (const [k, T] of Object.entries(TENTS)) {
   const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + k; a.dataset.k = k; a.textContent = T.tab; $('tabs').append(a);
 }
 for (const [v, [, label]] of Object.entries(VIEWS)) { const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + v; a.dataset.k = v; a.textContent = label.toUpperCase(); $('tabs').append(a); }
-$('metric').addEventListener('change', (e) => { metric = e.target.value; drawTimeline(); drawHourly(); });
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
