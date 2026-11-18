@@ -69,7 +69,9 @@
   .e47tbl td a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
   .e47tbl td .lin { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
   .e47tbl td.cx { min-width: 14em; }
-  .e47-mark { color: var(--accent); }
+  .e47-hero { margin: 24px 0 18px; display: flex; justify-content: center; }
+  .e47-hero img { width: min(260px, 62vw); height: auto; filter: drop-shadow(0 0 22px rgba(38,120,170,0.35)); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
   .dd-card { margin-top: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .dd-line { font-size: 1rem; }
   .dd-line b { color: var(--accent); }
@@ -601,7 +603,10 @@
   </div>
 
   <div id="e47View" hidden>
-  <h1>Element 47</h1>
+  <div class="e47-hero">
+    <img src="/assets/hg/element47-logo-dark.png" alt="Element 47" width="560" height="509">
+    <h1 class="sr-only">Element 47</h1>
+  </div>
   <p class="lede">Breeding project. First run: the Digital Dream Series, seven crosses with Digital Dream as one parent.</p>
 
   <section class="nut" id="e-dd">
