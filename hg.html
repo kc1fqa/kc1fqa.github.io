@@ -102,6 +102,7 @@
   .ptbl td.qty { color: var(--accent); width: 3.5em; }
   .ptbl td.cv { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
   .ptbl td.br { text-align: left; color: var(--dim); white-space: normal; min-width: 9em; }
+  .ptbl td.cv .lin { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); white-space: normal; }
   .ptbl td.br .lin { display: block; font-size: 0.72rem; opacity: 0.85; }
   .ptbl tr.grp td { color: var(--accent-2); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding-top: 14px; background: rgba(255,179,71,0.04); }
   .lede b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -148,6 +149,7 @@
   <h1 id="title">—</h1>
   <div class="meta" id="meta">
     <div><span class="mk">Stage</span><span class="mv" id="mStage">—</span></div>
+    <div id="mHarvestBox"><span class="mk">Planned harvest</span><span class="mv" id="mHarvest">—</span></div>
     <div><span class="mk">Feed</span><span class="mv" id="mFeed">—</span></div>
     <div><span class="mk">Plants</span><span class="mv" id="mPlants">—</span></div>
     <div id="mWeekBox"><span class="mk">This week's mix</span><span class="mv" id="mWeek">—</span></div>
@@ -159,7 +161,6 @@
       <ol>
         <li>In the AC Infinity app, open the <b id="rCtrl">controller</b> and go to the <b>DATA</b> tab.</li>
         <li>Export the data as CSV, covering at least the days since the last export.</li>
-        <li id="rAlso" hidden>—</li>
         <li>Upload the CSV to Claude and say which tent it's from. Claude adds it here.</li>
       </ol>
     </details>
@@ -574,12 +575,10 @@
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
   veg: {
-    name: 'Mom / veg / clone tent', tab: 'MOM / VEG / CLONE', file: '/assets/hg/veg.csv', room: '/assets/hg/veg_room.csv', live: 'veg', roomLive: 'veg_room', canopyLive: 'veg_canopy',
-    roomLabel: 'Lung room (Pulse)',
-    roomVpdNote: 'Lung-room VPD is the Pulse sensor\'s own figure, leaf offset 0.',
-    src: 'AC Infinity controller "Veg" and Pulse sensor "Edd Veg" (mom room lung room) exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
+    name: 'Mom / veg / clone tent', tab: 'MOM / VEG / CLONE', file: '/assets/hg/veg.csv', room: null, live: 'veg', roomLive: null, canopyLive: 'veg_canopy',
+    src: 'AC Infinity controller "Veg" exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
     program: 'athena-fade', phase: 'veg',
-    exportEvery: 7, controller: 'Veg', alsoExport: 'Also export the Pulse sensor "Edd Veg" from the Exports tab in the Pulse app (the free plan allows one export a week).',
+    exportEvery: 7, controller: 'Veg',
     feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
     stage: 'Moms, clones, veg & seedlings',
     plants: [
@@ -588,7 +587,7 @@ const TENTS = {
         { name: 'Galactic Derailer', count: 1 }, { name: 'Northern Lights', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Blue Dream', count: 1 }
       ] },
       { group: 'Veg', items: [
-        { name: 'Bishop', count: 3 }, { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
+        { name: 'Bishop', count: 3, note: '2 fresh backups, 1 for Bloom 2' }, { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
         { name: 'Blue Dream', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Galactic Derailer', count: 1 }
       ] },
       { group: 'Seedlings', items: [
@@ -608,7 +607,7 @@ const TENTS = {
     program: 'athena-fade', phase: 'flower',
     exportEvery: 7, controller: 'Bloom 3x3',
     feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
-    flip: '2026-11-07',
+    flip: '2026-11-07', harvest: '2027-01-09',
     plants: [
       { group: 'In flower', items: [
         { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
@@ -622,8 +621,13 @@ const TENTS = {
     src: 'live readings from AC Infinity controller "4x2" and the Govee H5110 "Bloom 2"',
     exportEvery: 7, controller: '4x2',
     feed: 'Drip nutrients', feedUrl: 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf',
-    stage: 'Getting set up',
-    plants: [],
+    flip: '2026-11-21', harvest: '2027-01-23',
+    plants: [
+      { group: 'Going in', items: [
+        { name: 'Bishop', count: 1 }, { name: 'Blue Dream', count: 1 }, { name: 'Galactic Derailer', count: 1 },
+        { name: 'Apple Fritter', count: 1 }, { name: 'Black Maple', count: 1 }
+      ] }
+    ],
     schedule: []   // add once the lights are on a timer
   }
 };
@@ -834,17 +838,27 @@ function drawStatic() {
   if (lc) { set('cWhen', fmtWhen(lc.t)); set('cTemp', f(lc.temp_f)); set('cRh', f(lc.rh)); set('cVpd', f(lc.vpd, 2)); }
   // Stage, feed, plants
   let stage = T.stage || '—';
+  const today0 = d3.timeDay.floor(new Date()), fday = d3.timeFormat('%a %b %-d'), plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   if (T.flip) {
-    const flip = parseDay(T.flip), days = Math.floor((d3.timeDay.floor(new Date()) - flip) / 864e5);
-    stage = `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`;
+    const flip = parseDay(T.flip), days = Math.round((today0 - flip) / 864e5);
+    stage = days >= 0
+      ? `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`
+      : `Veg · flips to 12/12 ${fday(flip)} (${days === -1 ? 'tomorrow' : 'in ' + plural(-days, 'day')})`;
   }
   set('mStage', stage);
+  $('mHarvestBox').hidden = !T.harvest;
+  if (T.harvest) {
+    const hv = parseDay(T.harvest), left = Math.round((hv - today0) / 864e5);
+    let txt = `${fday(hv)}, ${hv.getFullYear()} · `;
+    txt += left > 0 ? `${plural(left, 'day')} to go` : left === 0 ? 'today' : `${plural(-left, 'day')} ago`;
+    if (T.flip) { const run = Math.round((hv - parseDay(T.flip)) / 864e5); txt += ` (${run}-day flower)`; }
+    set('mHarvest', txt);
+  }
   // Weekly export reminder
   const rb = $('exportRemind');
   rb.hidden = !T.exportEvery;
   if (T.exportEvery) {
     set('rCtrl', `"${T.controller}"`);
-    $('rAlso').hidden = !T.alsoExport; set('rAlso', T.alsoExport || '');
     const today = d3.timeDay.floor(new Date()), fd = d3.timeFormat('%a %b %-d');
     if (!exportLast) {
       rb.className = 'remind';
@@ -889,7 +903,9 @@ function drawStatic() {
       const info = CULTIVARS[c.name] || {}, tr = document.createElement('tr');
       const br = td('br', info.breeder || '');
       if (info.lineage) { const l = document.createElement('span'); l.className = 'lin'; l.textContent = info.lineage; br.append(l); }
-      tr.append(td('qty', `${count(c)}×`), td('cv', c.phenos ? `${c.name} ${c.phenos.join(' ')}` : c.name), br);
+      const cv = td('cv', c.phenos ? `${c.name} ${c.phenos.join(' ')}` : c.name);
+      if (c.note) { const n = document.createElement('span'); n.className = 'lin'; n.textContent = c.note; cv.append(n); }
+      tr.append(td('qty', `${count(c)}×`), cv, br);
       tb.append(tr);
     }
   }

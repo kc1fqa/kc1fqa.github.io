@@ -11,14 +11,11 @@ Sources
   AC Infinity  unofficial cloud API used by the AC Infinity app (same calls as the
                Home Assistant integration github.com/dalinicus/homeassistant-acinfinity).
                Gives the current reading only, so this keeps one row per run.
-  Pulse        official API (api.pulsegrow.com, needs an API key from a paid plan).
-               Gives minute data, so each run backfills the last few hours.
   Govee        official Developer API (openapi.api.govee.com). Current reading only.
                Not every model reports through it (Wi-Fi thermo-hygrometers usually do).
 
 Secrets (repo Settings > Secrets and variables > Actions)
   ACI_EMAIL, ACI_PASSWORD   AC Infinity app login
-  PULSE_API_KEY             Pulse API key (optional)
   GOVEE_API_KEY             Govee Developer API key (optional)
 
 Uses only the Python standard library.
@@ -47,7 +44,6 @@ DEVICES = {
     "Bloom 3x3": "bloom1",
     "Veg": "veg",
     "4x2": "bloom2",                # Bloom 2, coming online soon
-    "Edd Veg": "veg_room",          # Pulse sensor in the mom room lung room
     # Govee (names as in the Govee app)
     "Bloom 1": "bloom1_canopy",     # H5110 in Bloom 1
     "Bloom 2": "bloom2_canopy",     # H5110 in Bloom 2
@@ -56,7 +52,6 @@ DEVICES = {
 }
 
 ACI_HOST = "https://www.acinfinityserver.com"
-PULSE_HOST = "https://api.pulsegrow.com"
 GOVEE_HOST = "https://openapi.api.govee.com"
 FIELDS = ["time", "temp_f", "rh", "vpd"]
 OPTIONAL_FIELDS = ["co2"]
@@ -114,31 +109,6 @@ def read_ac_infinity(email, password):
             row = {"time": local_minute(now), "temp_f": round(c_to_f(t / 100), 2), "rh": round(h / 100, 2),
                    "vpd": round(v / 100, 2) if v is not None else ""}
         out.append({"source": "AC Infinity", "name": name, "slug": slug_for(name, "aci"), "online": online, "rows": [row] if row else []})
-    return out
-
-
-# ---------------- Pulse ----------------
-def read_pulse(api_key, hours=3):
-    hdr = {"X-API-Key": api_key, "Accept": "application/json"}
-    devices = http("GET", PULSE_HOST + "/devices/details", hdr)
-    end = datetime.now(timezone.utc)
-    start = end - timedelta(hours=hours)
-    q = urllib.parse.urlencode({"start": start.strftime("%Y-%m-%dT%H:%M:%SZ"), "end": end.strftime("%Y-%m-%dT%H:%M:%SZ")})
-    out = []
-    for d in devices or []:
-        name = d.get("name") or str(d.get("id"))
-        pts = http("GET", f"{PULSE_HOST}/devices/{d['id']}/data-range?{q}", hdr) or []
-        rows = []
-        for p in pts:
-            ts = p.get("createdAt")
-            if not ts or p.get("temperatureF") is None:
-                continue
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            rows.append({"time": local_minute(dt), "temp_f": round(p["temperatureF"], 2), "rh": round(p.get("humidityRh") or 0, 1),
-                         "vpd": round(p["vpd"], 2) if p.get("vpd") is not None else ""})
-        out.append({"source": "Pulse", "name": name, "slug": slug_for(name, "pulse"), "online": bool(rows), "rows": rows})
     return out
 
 
@@ -206,7 +176,7 @@ def merge(slug, rows):
 
 def main():
     # Secrets pasted into GitHub often carry a trailing newline or spaces
-    for k in ("ACI_EMAIL", "ACI_PASSWORD", "PULSE_API_KEY", "GOVEE_API_KEY"):
+    for k in ("ACI_EMAIL", "ACI_PASSWORD", "GOVEE_API_KEY"):
         if k in os.environ:
             os.environ[k] = os.environ[k].strip()
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -223,14 +193,6 @@ def main():
             errors.append(f"AC Infinity: {e}")
     else:
         print("AC Infinity: no ACI_EMAIL / ACI_PASSWORD secrets set, skipping")
-
-    if os.environ.get("PULSE_API_KEY"):
-        try:
-            readings += read_pulse(os.environ["PULSE_API_KEY"])
-        except (urllib.error.URLError, RuntimeError, KeyError, ValueError) as e:
-            errors.append(f"Pulse: {e}")
-    else:
-        print("Pulse: no PULSE_API_KEY secret set, skipping")
 
     if os.environ.get("GOVEE_API_KEY"):
         try:

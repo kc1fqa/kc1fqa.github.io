@@ -38,7 +38,6 @@ jobs:
         env:
           ACI_EMAIL: ${{ secrets.ACI_EMAIL }}
           ACI_PASSWORD: ${{ secrets.ACI_PASSWORD }}
-          PULSE_API_KEY: ${{ secrets.PULSE_API_KEY }}
           GOVEE_API_KEY: ${{ secrets.GOVEE_API_KEY }}
 
       - name: Save to hg-data
