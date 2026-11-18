@@ -59,6 +59,19 @@
   .ntbl td:first-child { white-space: nowrap; font-weight: 700; color: var(--fg); }
   .ntbl tr.sub-row td { color: var(--dim); }
   .ntbl td.nw { white-space: nowrap; }
+  .stbl td { white-space: normal; vertical-align: top; }
+  .stbl td.rk { color: var(--accent); font-family: var(--mono); width: 2em; }
+  .stbl td.cv { font-weight: 700; color: var(--fg); min-width: 8em; }
+  .stbl td.cv .lin { display: block; font-weight: 400; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
+  .stbl td.cx { color: var(--dim); min-width: 10em; }
+  .stbl td.wh span { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--accent-2); white-space: nowrap; }
+  .stbl tr.unr td { opacity: 0.8; }
+  .stbl .m-only { display: none; font-weight: 400; margin-top: 3px; }
+  .stbl .m-only .mb { color: var(--fg); font-size: 0.85rem; }
+  .stbl .m-only .mx { color: var(--dim); font-size: 0.8rem; }
+  .stbl .m-only .mw { color: var(--accent-2); font-family: var(--mono); font-size: 0.7rem; }
+  @media (max-width: 640px) { .stbl .d-only { display: none; } .stbl .m-only { display: block; } }
+  .stbl td:first-child { font-weight: 400; }
   #ipmView .ntbl td:first-child { white-space: normal; }
   #ipmView .ntbl td:last-child { min-width: 0; }
   #ipmView .ntbl th, #ipmView .ntbl td { padding-left: 8px; padding-right: 8px; }
@@ -567,6 +580,18 @@
   </section>
   </div>
 
+  <div id="strainView" hidden>
+  <h1>Strains</h1>
+  <p class="lede">Keepers and moms ranked, with breeder and cross. The plant lists on each tent tab pull their breeder and cross from here.</p>
+  <section class="nut" id="s-list">
+    <div class="tblwrap"><table class="ntbl stbl">
+      <thead><tr><th>#</th><th>Cultivar</th><th class="d-only">Breeder / provider</th><th class="d-only">Cross</th><th class="d-only">Where now</th></tr></thead>
+      <tbody id="strainTb"></tbody>
+    </table></div>
+    <p class="cap">Unranked rows are in the collection but not on the keeper list.</p>
+  </section>
+  </div>
+
   <footer>73 DE KC1FQA</footer>
 </div>
 
@@ -584,7 +609,7 @@ const TENTS = {
     plants: [
       { group: 'Moms', items: [
         { name: 'Cap Junky', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Apples and Bananas', count: 1 },
-        { name: 'Galactic Derailer', count: 1 }, { name: 'Northern Lights', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Blue Dream', count: 1 }
+        { name: 'Galactic Derailer', count: 1 }, { name: 'Northern Lights 5 IBL', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Blue Dream', count: 1 }
       ] },
       { group: 'Veg', items: [
         { name: 'Bishop', count: 3, note: '2 fresh backups, 1 for Bloom 2' }, { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
@@ -643,12 +668,21 @@ const PROGRAMS = {
 };
 
 // Breeder and lineage, shared across tents
+// Ed's keeper / mom reference: rank, breeder and cross. "aka" lists the names used in the tent plant lists.
 const CULTIVARS = {
-  'Apple Cloud': { breeder: 'Bloom Seed Co.' },
-  'Bishop': { breeder: 'Paul @ INSA', lineage: 'Golden Goat × Lemon Jeffrey × Pineapple Express' },
-  'Downtown Haze': { breeder: 'Happy Valley Genetics' },
-  'End Game': { breeder: 'Happy Valley Genetics' }
+  'The Bishop':            { rank: 1, breeder: 'Paul from INSA', lineage: 'Lemon Jeffrey × Pineapple Express', aka: ['Bishop'] },
+  'Apple Fritter':         { rank: 2, breeder: "Lumpy's Flowers", lineage: 'Sour Apple × Animal Cookies' },
+  'Apples and Bananas':    { rank: 3, breeder: 'Compound Genetics', lineage: 'Platinum Cookies × GDP × Blue Power × Gelatti' },
+  'Galactic Derailer':     { rank: 4, breeder: 'Bokashi Earthworkx', lineage: 'Blueberry × Trainwreck × Mac F3 Crinkle Cut' },
+  'Black Maple':           { rank: 5, breeder: 'Bloom Seed Co', lineage: 'Dulcha De Ulva × Sherbanger 22' },
+  'Northern Lights 5 IBL': { rank: 6, breeder: 'AG Seed Co', lineage: 'Purest Indica × Hawaiian', aka: ['Northern Lights'] },
+  'Blue Dream':            { rank: 7, breeder: 'Santa Cruz Cut', lineage: 'Blueberry × Super Silver Haze' },
+  'Cap Junky':             { rank: 8, breeder: 'Capulator & Seed Junky', lineage: 'Alien Cookies × Kush Mintz #11' },
+  'Apple Cloud':           { breeder: 'Bloom Seed Co', lineage: 'Apple Fritter × Black Maple', note: 'Phenos #1–#4' },
+  'Downtown Haze':         { breeder: 'Happy Valley Genetics' },
+  'End Game':              { breeder: 'Happy Valley Genetics' }
 };
+for (const [n, c] of Object.entries(CULTIVARS)) for (const a of c.aka || []) CULTIVARS[a] = { ...c, canonical: n };
 
 const C = { canopy: '#6cc4ff', tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
 const M = { temp_f: { label: 'Temperature', unit: '°F', dp: 1 }, rh: { label: 'Humidity', unit: '% RH', dp: 1 }, vpd: { label: 'VPD', unit: ' kPa', dp: 2 } };
@@ -1025,7 +1059,7 @@ function drawLiveTag() {
 }
 
 // Reference tabs: key -> [view element, title, anchor prefix]
-const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'] };
+const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'] };
 async function show(k) {
   const vk = Object.keys(VIEWS).find((v) => k === v || k.startsWith(VIEWS[v][2]));
   for (const [v, [id]] of Object.entries(VIEWS)) $(id).hidden = v !== vk;
@@ -1054,6 +1088,36 @@ async function show(k) {
   }
 }
 
+// ---- Strains reference ----
+function drawStrains() {
+  const tb = $('strainTb'); tb.replaceChildren();
+  const where = (name) => {
+    const names = [name, ...((CULTIVARS[name] || {}).aka || [])], out = [];
+    for (const T of Object.values(TENTS)) for (const g of T.plants || []) for (const c of g.items) {
+      if (!names.includes(c.name)) continue;
+      const n = c.phenos ? c.phenos.length : c.count;
+      out.push(`${T.tab.charAt(0) + T.tab.slice(1).toLowerCase()} · ${g.group.toLowerCase()}${n > 1 ? ' ×' + n : ''}`);
+    }
+    return out;
+  };
+  const rows = Object.entries(CULTIVARS).filter(([, c]) => !c.canonical)
+    .sort((a, b) => (a[1].rank || 99) - (b[1].rank || 99) || a[0].localeCompare(b[0]));
+  for (const [name, c] of rows) {
+    const tr = document.createElement('tr'); if (!c.rank) tr.className = 'unr';
+    const cell = (cls, txt) => { const d = document.createElement('td'); if (cls) d.className = cls; d.textContent = txt; return d; };
+    const nm = cell('cv', name);
+    if (c.note) { const n = document.createElement('span'); n.className = 'lin'; n.textContent = c.note; nm.append(n); }
+    const w = where(name), wc = cell('wh d-only', '');
+    if (w.length) for (const x of w) { const sp = document.createElement('span'); sp.textContent = x; wc.append(sp); } else wc.textContent = '—';
+    // phone layout: breeder, cross and location stacked under the name
+    const mob = document.createElement('div'); mob.className = 'm-only';
+    for (const [cls, txt] of [['mb', c.breeder], ['mx', c.lineage], ...w.map((x) => ['mw', x])]) if (txt) { const d = document.createElement('div'); d.className = cls; d.textContent = txt; mob.append(d); }
+    nm.append(mob);
+    tr.append(cell('rk', c.rank || '–'), nm, cell('d-only', c.breeder || '—'), cell('cx d-only', c.lineage || '—'), wc);
+    tb.append(tr);
+  }
+}
+
 // ---- Start ----
 for (const [k, T] of Object.entries(TENTS)) {
   const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + k; a.dataset.k = k; a.textContent = T.tab; $('tabs').append(a);
@@ -1063,6 +1127,7 @@ $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTim
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
+drawStrains();
 show(location.hash.slice(1) || Object.keys(TENTS)[0]);
 </script>
 </body>
