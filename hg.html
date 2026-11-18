@@ -66,6 +66,14 @@
   .stbl td.cx { color: var(--dim); min-width: 10em; }
   .stbl td.wh span { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--accent-2); white-space: nowrap; }
   .stbl tr.unr td { opacity: 0.8; }
+  .e47tbl td a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  .e47tbl td .lin { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
+  .e47tbl td.cx { min-width: 14em; }
+  .e47-mark { color: var(--accent); }
+  .dd-card { margin-top: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .dd-line { font-size: 1rem; }
+  .dd-line b { color: var(--accent); }
+  .dd-line.sub { margin-top: 4px; font-size: 0.9rem; color: var(--dim); }
   .stbl .m-only { display: none; font-weight: 400; margin-top: 3px; }
   .stbl .m-only .mb { color: var(--fg); font-size: 0.85rem; }
   .stbl .m-only .mx { color: var(--dim); font-size: 0.8rem; }
@@ -592,6 +600,28 @@
   </section>
   </div>
 
+  <div id="e47View" hidden>
+  <h1>Element 47</h1>
+  <p class="lede">Breeding project. First run: the Digital Dream Series, seven crosses with Digital Dream as one parent.</p>
+
+  <section class="nut" id="e-dd">
+    <div class="nut-head"><h2>Digital Dream</h2><span class="nut-use">The common parent</span></div>
+    <div class="dd-card">
+      <div class="dd-line"><b>Digital Dream</b> = White Fire OG #3 × Snowlotus</div>
+      <div class="dd-line sub"><b>Snowlotus</b> = Afgooey × Blockhead</div>
+    </div>
+  </section>
+
+  <section class="nut" id="e-series">
+    <div class="nut-head"><h2>Digital Dream Series</h2><span class="nut-use">Run 1 · 7 crosses</span></div>
+    <div class="tblwrap"><table class="ntbl stbl e47tbl">
+      <thead><tr><th>#</th><th>Cross</th><th class="d-only">Other parent</th><th class="d-only">Full lineage</th></tr></thead>
+      <tbody id="e47Tb"></tbody>
+    </table></div>
+    <p class="cap">"Other parent" links to the keeper list on the Strains tab where that mom is on it.</p>
+  </section>
+  </div>
+
   <footer>73 DE KC1FQA</footer>
 </div>
 
@@ -1059,7 +1089,7 @@ function drawLiveTag() {
 }
 
 // Reference tabs: key -> [view element, title, anchor prefix]
-const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'] };
+const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'], element47: ['e47View', 'Element 47', 'e-'] };
 const ALIASES = { veg: 'nursery' };  // old links
 async function show(k) {
   k = ALIASES[k] || k;
@@ -1088,6 +1118,50 @@ async function show(k) {
     set('lede', 'Could not load the readings.');
     console.error(err);
   }
+}
+
+// ---- Element 47 breeding project ----
+const DD = 'Digital Dream';
+const E47_RUNS = [{
+  series: 'Digital Dream Series', run: 1,
+  crosses: [
+    { name: 'APBN × Digital Dream', parent: 'Apples and Bananas', parentLabel: 'APBN (Apples and Bananas)',
+      lineage: '((Platinum Cookies × Granddaddy Purple) × Blue Power) × Gelatti × Digital Dream' },
+    { name: 'Cap Junky × Digital Dream', parent: 'Cap Junky',
+      lineage: 'Alien Cookies [probably] × Kush Mints [#11] × Digital Dream' },
+    { name: 'White Truffle × Digital Dream', parentLabel: 'White Truffle',
+      lineage: '(Gorilla Glue #4 × Peanut Butter Breath) × (White Fire OG #3 × Snowlotus)' },
+    { name: 'Santa Cruz Blue Dream × Digital Dream', parent: 'Blue Dream', parentLabel: 'Santa Cruz Blue Dream',
+      lineage: 'Blue Dream × (White Fire OG #3 × Snowlotus)' },
+    { name: 'Peyote WiFi × Digital Dream', parentLabel: 'Peyote WiFi',
+      lineage: '(Peyote Purple × WiFi) × (White Fire OG #3 × Snowlotus)' },
+    { name: 'Zoap × Digital Dream', parentLabel: 'Zoap',
+      lineage: '(RS11 × Pink Guava) × (White Fire OG #3 × Snowlotus)' },
+    { name: 'Bishop × Digital Dream', parent: 'The Bishop', parentLabel: 'The Bishop',
+      lineage: '(Lemon Jeffrey × Pineapple Express) × (White Fire OG #3 × Snowlotus)' }
+  ]
+}];
+
+function drawE47() {
+  const tb = $('e47Tb'); tb.replaceChildren();
+  const cell = (cls, txt) => { const d = document.createElement('td'); if (cls) d.className = cls; if (txt != null) d.textContent = txt; return d; };
+  E47_RUNS[0].crosses.forEach((c, i) => {
+    const tr = document.createElement('tr');
+    const info = c.parent ? CULTIVARS[c.parent] : null;
+    const label = c.parentLabel || c.parent;
+    const nm = cell('cv', c.name);
+    const mob = document.createElement('div'); mob.className = 'm-only';
+    const ml = document.createElement('div'); ml.className = 'mx'; ml.textContent = c.lineage; mob.append(ml);
+    if (info) { const mb = document.createElement('div'); mb.className = 'mw'; mb.textContent = `${label} · ${info.breeder}`; mob.append(mb); }
+    nm.append(mob);
+    const pc = cell('d-only', '');
+    if (info) {
+      const a = document.createElement('a'); a.href = '#strains'; a.textContent = label; pc.append(a);
+      const b = document.createElement('span'); b.className = 'lin'; b.textContent = info.breeder + (info.rank ? ` · keeper #${info.rank}` : ''); pc.append(b);
+    } else pc.textContent = label;
+    tr.append(cell('rk', String(i + 1)), nm, pc, cell('cx d-only', c.lineage));
+    tb.append(tr);
+  });
 }
 
 // ---- Strains reference ----
@@ -1129,7 +1203,7 @@ $('metric').addEventListener('change', (e) => { metric = e.target.value; drawTim
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
-drawStrains();
+drawStrains(); drawE47();
 show(location.hash.slice(1) || Object.keys(TENTS)[0]);
 </script>
 </body>
