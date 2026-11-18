@@ -599,8 +599,8 @@
 // ---- Tents ----
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
 const TENTS = {
-  veg: {
-    name: 'Mom / veg / clone tent', tab: 'MOM / VEG / CLONE', file: '/assets/hg/veg.csv', room: null, live: 'veg', roomLive: null, canopyLive: 'veg_canopy',
+  nursery: {
+    name: 'The Nursery', tab: 'THE NURSERY', file: '/assets/hg/veg.csv', room: null, live: 'veg', roomLive: null, canopyLive: 'veg_canopy',
     src: 'AC Infinity controller "Veg" exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
     program: 'athena-fade', phase: 'veg',
     exportEvery: 7, controller: 'Veg',
@@ -700,7 +700,7 @@ const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
 const cache = {};
-let key = 'veg', exportLast = null, tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
+let key = 'nursery', exportLast = null, tent = [], room = [], canopy = [], sched = [], metric = 'temp_f';
 
 function prepSchedule(s) {
   return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
@@ -1060,7 +1060,9 @@ function drawLiveTag() {
 
 // Reference tabs: key -> [view element, title, anchor prefix]
 const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'] };
+const ALIASES = { veg: 'nursery' };  // old links
 async function show(k) {
+  k = ALIASES[k] || k;
   const vk = Object.keys(VIEWS).find((v) => k === v || k.startsWith(VIEWS[v][2]));
   for (const [v, [id]] of Object.entries(VIEWS)) $(id).hidden = v !== vk;
   $('tentView').hidden = !!vk;
@@ -1096,7 +1098,7 @@ function drawStrains() {
     for (const T of Object.values(TENTS)) for (const g of T.plants || []) for (const c of g.items) {
       if (!names.includes(c.name)) continue;
       const n = c.phenos ? c.phenos.length : c.count;
-      out.push(`${T.tab.charAt(0) + T.tab.slice(1).toLowerCase()} · ${g.group.toLowerCase()}${n > 1 ? ' ×' + n : ''}`);
+      out.push(`${T.tab.toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase())} · ${g.group.toLowerCase()}${n > 1 ? ' ×' + n : ''}`);
     }
     return out;
   };
