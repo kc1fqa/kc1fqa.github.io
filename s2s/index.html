@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Seed to Stash</title>
+<meta name="apple-mobile-web-app-title" content="Seed to Stash">
+<meta name="theme-color" content="#0a1230">
+<link rel="apple-touch-icon" href="/s2s/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/s2s/favicon.png">
+<link rel="manifest" href="/s2s/manifest.webmanifest">
+<script>
+  // Shortcut launcher for the Seed to Stash app.
+  // Opening /s2s/ goes straight to the app. Opening /s2s/?add stays here so the
+  // page can be added to the home screen, then drops "?add" from the address so
+  // the saved shortcut points at plain /s2s/.
+  var APP = 'https://claude.ai/artifact/LNXzdNoY9bTjhXqNfWiLow';
+  var adding = /[?&]add\b/.test(location.search);
+  if (adding) history.replaceState(null, '', location.pathname);
+  else location.replace(APP);
+</script>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: linear-gradient(160deg, #06080c 0%, #0a1230 60%, #163c63 100%); color: #e4e8ed; font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+  main { max-width: 420px; padding: 32px 24px; text-align: center; }
+  img { width: 112px; height: 112px; border-radius: 24px; box-shadow: 0 0 28px rgba(80,150,220,.35); }
+  h1 { margin: 18px 0 6px; font-size: 30px; }
+  p { color: #a3adba; margin: 8px 0; }
+  a.btn { display: inline-block; margin-top: 18px; padding: 12px 22px; border-radius: 10px; background: #2b6ea3; color: #fff; font-weight: 600; text-decoration: none; }
+  ol { text-align: left; color: #c9cfd6; padding-left: 22px; }
+  .add { display: none; }
+  .adding .add { display: block; }
+  .adding .go { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/s2s/apple-touch-icon.png" alt="Element 47">
+  <h1>Seed to Stash</h1>
+  <p class="go">Opening the app…</p>
+  <div class="add">
+    <p>Add this page to your home screen and the shortcut gets the 47 icon. Tapping it opens the app.</p>
+    <ol>
+      <li><b>iPhone (Safari):</b> Share, then Add to Home Screen.</li>
+      <li><b>Android (Chrome):</b> ⋮ menu, then Add to Home screen.</li>
+    </ol>
+  </div>
+  <a class="btn" href="https://claude.ai/artifact/LNXzdNoY9bTjhXqNfWiLow">Open Seed to Stash</a>
+</main>
+<script>if (adding) document.body.className = 'adding';</script>
+</body>
+</html>
