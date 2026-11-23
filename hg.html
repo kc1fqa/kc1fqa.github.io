@@ -679,13 +679,13 @@ const TENTS = {
     schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
   },
   bloom2: {
-    name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: null, room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
-    src: 'live readings from AC Infinity controller "4x2" and the Govee H5110 "Bloom 2"',
+    name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: '/assets/hg/bloom2.csv', room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
+    src: 'AC Infinity controller "4x2" exports, plus live readings from the controller and the Govee H5110 "Bloom 2"',
     exportEvery: 7, controller: '4x2',
     feed: 'Drip nutrients', feedUrl: 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf',
-    flip: '2026-11-21', harvest: '2027-01-23',
+    flip: '2026-11-28', harvest: '2027-01-23',   // flip pushed a week (moved in Nov 21); harvest not yet re-planned
     plants: [
-      { group: 'Going in', items: [
+      { group: 'Veg in tent (moved in Nov 21, 3 gal)', items: [
         { name: 'Bishop', count: 1 }, { name: 'Blue Dream', count: 1 }, { name: 'Galactic Derailer', count: 1 },
         { name: 'Apple Fritter', count: 1 }, { name: 'Black Maple', count: 1 }
       ] }
