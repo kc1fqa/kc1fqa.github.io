@@ -7,34 +7,53 @@
 <title>KC1FQA · Home Grow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23070b0d'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%2333ff99' stroke-width='2.5' fill='none'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a1230'/><path d='M4 20 Q8 8 12 20 T20 20 T28 20' stroke='%236fb4e6' stroke-width='2.5' fill='none'/></svg>">
 <script src="/assets/d3.min.js"></script>
 <style>
   :root {
-    --bg: #070b0d;
-    --panel: #0c1316;
-    --fg: #e6f2ec;
-    --dim: #7d978d;
-    --accent: #33ff99;
-    --accent-2: #ffb347;
-    --line: rgba(51, 255, 153, 0.18);
-    --grid: rgba(230, 242, 236, 0.07);
-    --mono: "JetBrains Mono", ui-monospace, monospace;
+    /* Seed to Stash palette: navy field, sky-blue accent, silver, Barlow type */
+    color-scheme: dark;
+    --bg: #06080c;
+    --panel: #0e141d;
+    --fg: #e4e8ed;
+    --dim: #98a3b0;
+    --accent: #6fb4e6;
+    --accent-2: #c9cfd6;
+    --warn: #ff9070;
+    --btn: #2b6ea3;
+    --canopy: #c9cfd6;
+    --room: #ff9070;
+    --line: #1d2836;
+    --grid: rgba(228, 232, 237, 0.07);
+    --cond: "Barlow Condensed", Barlow, sans-serif;
+    --mono: Barlow, system-ui, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--fg); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.5; }
+  body { background: var(--bg); color: var(--fg); font-family: Barlow, system-ui, sans-serif; line-height: 1.5; }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 16px 48px; }
+  .top { background: linear-gradient(135deg, #050810 0%, #0a1230 55%, #163c63 100%); border-bottom: 1px solid #22344d; }
+  .top header { max-width: 1200px; margin: 0 auto; padding: 22px 16px 20px; border-bottom: 0; align-items: end; }
+  .top .ttl { font-family: var(--cond); font-weight: 600; font-size: clamp(2rem, 6vw, 2.9rem); line-height: 1.05; color: #e4e8ed; }
+  .top .ttl-sub { color: #a3adba; font-size: 0.95rem; margin-top: 4px; }
+  .wrap { padding-top: 6px; }
+  h1, h2, h3, .big, .brand { font-family: var(--cond); font-weight: 600; letter-spacing: 0; }
+  h1 { font-size: clamp(2rem, 6vw, 2.6rem) !important; }
+  h2 { font-size: 1.6rem !important; }
+  .big { font-size: 2.3rem !important; line-height: 1.05; }
+  .k, .mk, .rk, .nut-use, .ph, th, .eyebrow, .legend, .back { font-family: var(--cond) !important; font-weight: 600; letter-spacing: 0.06em !important; }
+  .card, .chart, .tblwrap, .dd-card, .remind { border-radius: 14px !important; }
   header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
-  .brand { font-weight: 700; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--fg); text-decoration: none; text-shadow: 0 0 14px rgba(51,255,153,0.35); }
-  .brand .digit { color: var(--accent); }
+  .brand { font-size: 1rem; letter-spacing: 0.12em; color: #a3adba; text-decoration: none; }
+  .brand .digit { color: var(--accent); } .brand:hover { color: #e4e8ed; }
   .back { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--dim); text-decoration: none; }
   .back:hover { color: var(--accent); }
-  .eyebrow { margin-top: 30px; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
+  .eyebrow .live { margin-left: 0; }
+  .eyebrow { margin-top: 16px; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.25em; color: var(--accent-2); }
   .remind { margin-top: 16px; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--panel); padding: 12px 14px; }
-  .remind.due { border-left-color: var(--accent-2); background: rgba(255,179,71,0.06); }
+  .remind.due { border-left-color: var(--warn); background: rgba(255,144,112,0.07); }
   .remind .rk { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
-  .remind.due .rk { color: var(--accent-2); }
+  .remind.due .rk { color: var(--warn); }
   .remind .rt { margin-top: 4px; font-size: 0.92rem; }
   .remind details { margin-top: 6px; font-size: 0.88rem; color: var(--dim); }
   .remind summary { cursor: pointer; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; }
@@ -54,7 +73,7 @@
   .nut-list li { margin-top: 5px; }
   .nut-list b { color: var(--accent); font-weight: 700; }
   .nut-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-  .ntbl td { font-family: "Space Grotesk", system-ui, sans-serif; white-space: normal; }
+  .ntbl td { font-family: Barlow, system-ui, sans-serif; white-space: normal; }
   .ntbl th, .ntbl td { text-align: left; }
   .ntbl td:first-child { white-space: nowrap; font-weight: 700; color: var(--fg); }
   .ntbl tr.sub-row td { color: var(--dim); }
@@ -70,7 +89,7 @@
   .e47tbl td .lin { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
   .e47tbl td.cx { min-width: 14em; }
   .e47-hero { margin: 24px 0 18px; display: flex; justify-content: center; }
-  .e47-hero img { width: min(260px, 62vw); height: auto; filter: drop-shadow(0 0 22px rgba(38,120,170,0.35)); }
+  .e47-hero img { width: min(260px, 62vw); height: auto; filter: drop-shadow(0 0 22px rgba(80,150,220,0.35)); }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
   .dd-card { margin-top: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .dd-line { font-size: 1rem; }
@@ -91,17 +110,17 @@
   .fchart th, .fchart td { text-align: center; padding: 6px 7px; white-space: nowrap; }
   .fchart td:first-child, .fchart th:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); z-index: 1; }
   .fchart td { font-family: var(--mono); font-size: 0.8rem; color: var(--fg); }
-  .fchart td:first-child { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; }
+  .fchart td:first-child { font-family: Barlow, system-ui, sans-serif; font-weight: 700; }
   .fchart th.fl { text-align: center; color: var(--accent); }
-  .fchart tr.hl td { background: rgba(255,179,71,0.10); color: var(--accent-2); }
-  .fchart tr.hl td:first-child { background: #1a1a12; }
+  .fchart tr.hl td { background: rgba(111,180,230,0.12); color: var(--accent-2); }
+  .fchart tr.hl td:first-child { background: #13233a; }
   .fchart tr.tg td { color: var(--dim); }
   .fchart td.nt { font-size: 0.68rem; color: var(--accent-2); }
   .fchart td:last-child { min-width: 0; }
-  .fchart tr.cv td { color: var(--dim); background: rgba(108,196,255,0.05); }
-  .fchart tr.cv td:first-child { background: #0f171b; font-weight: 400; }
-  .fchart tr.cv-head td { text-align: left; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6cc4ff; padding-top: 12px; }
-  .tag-cur { display: inline-block; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.08em; color: var(--bg); background: var(--accent); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; margin-left: 6px; }
+  .fchart tr.cv td { color: var(--dim); background: rgba(201,207,214,0.04); }
+  .fchart tr.cv td:first-child { background: #0b1119; font-weight: 400; }
+  .fchart tr.cv-head td { text-align: left; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding-top: 12px; }
+  .tag-cur { display: inline-block; font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; color: var(--bg); background: var(--accent); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; margin-left: 6px; }
   .tag-inl { display: inline-block; margin: 0 0 0 6px; }
   .nut-mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 6px; }
   .nut-mini .ntbl td:last-child { min-width: 0; }
@@ -109,9 +128,9 @@
   .ntbl td:last-child { min-width: 9em; }
   @media (max-width: 520px) { .hide-sm { display: none; } }
   .ntbl tr.sub-row td:first-child { font-weight: 400; color: var(--dim); }
-  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .tab { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); cursor: pointer; text-decoration: none; }
-  .tab[aria-current="page"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .tabs { display: flex; gap: 4px; overflow-x: auto; margin: 4px -16px 0; padding: 0 16px; position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .tab { flex: none; font-family: var(--cond); font-weight: 600; font-size: 1rem; letter-spacing: 0.04em; padding: 14px 10px 11px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--dim); cursor: pointer; text-decoration: none; }
+  .tab[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
   h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.1; margin-top: 16px; }
   .lede { color: var(--dim); margin-top: 10px; max-width: 72ch; }
   .meta { display: flex; gap: 10px 28px; flex-wrap: wrap; margin-top: 12px; }
@@ -123,11 +142,11 @@
   .meta .mv .mnote { display: block; font-weight: 400; font-size: 0.8rem; color: var(--dim); }
   .ptbl th, .ptbl td { text-align: left; }
   .ptbl td.qty { color: var(--accent); width: 3.5em; }
-  .ptbl td.cv { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
+  .ptbl td.cv { font-family: Barlow, system-ui, sans-serif; font-size: 0.95rem; color: var(--fg); white-space: nowrap; }
   .ptbl td.br { text-align: left; color: var(--dim); white-space: normal; min-width: 9em; }
   .ptbl td.cv .lin { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); white-space: normal; }
   .ptbl td.br .lin { display: block; font-size: 0.72rem; opacity: 0.85; }
-  .ptbl tr.grp td { color: var(--accent-2); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding-top: 14px; background: rgba(255,179,71,0.04); }
+  .ptbl tr.grp td { color: var(--accent-2); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; padding-top: 14px; background: rgba(111,180,230,0.05); }
   .lede b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
   .cards { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
@@ -146,7 +165,7 @@
   .chart .tick text { fill: var(--dim); font-family: var(--mono); font-size: 10px; }
   .chart .domain { stroke: var(--line); }
   .chart .grid .tick line { stroke: var(--grid); }
-  .tip { position: absolute; top: 6px; pointer-events: none; background: #111b1f; border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-family: var(--mono); font-size: 0.75rem; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,0.5); z-index: 2; }
+  .tip { position: absolute; top: 6px; pointer-events: none; background: #13233a; border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-family: var(--mono); font-size: 0.75rem; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,0.5); z-index: 2; }
   .tip .t { color: var(--dim); }
   .tblwrap { overflow-x: auto; margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
   table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
@@ -164,13 +183,18 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="top">
   <header>
-    <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+    <div>
+      <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
+      <div class="ttl">Home Grow</div>
+      <div class="ttl-sub">Climate, plants and feed for every tent</div>
+    </div>
     <a class="back" href="/">← HOME</a>
   </header>
-
-  <p class="eyebrow">HOME GROW <span class="live" id="liveTag"></span></p>
+</div>
+<div class="wrap">
+  <p class="eyebrow"><span class="live" id="liveTag"></span></p>
   <nav class="tabs" id="tabs" aria-label="Tent"></nav>
   <div id="tentView">
   <h1 id="title">—</h1>
@@ -208,9 +232,9 @@
     <h2 id="timelineH">Every minute, three ways</h2>
     <div class="legend">
       <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
-      <span class="canopy-only"><i class="sw" style="background:#6cc4ff"></i>Tent (Govee)</span>
-      <span class="room-only"><i class="sw" style="background:var(--accent-2)"></i><span id="roomLegend">Lung room</span></span>
-      <span class="sched-only"><i class="sw" style="background:rgba(255,179,71,0.3)"></i>Lights on</span>
+      <span class="canopy-only"><i class="sw" style="background:var(--canopy)"></i>Tent (Govee)</span>
+      <span class="room-only"><i class="sw" style="background:var(--room)"></i><span id="roomLegend">Lung room</span></span>
+      <span class="sched-only"><i class="sw" style="background:rgba(201,207,214,0.25)"></i>Lights on</span>
     </div>
     <div class="multi">
       <p class="ph">Temperature °F</p><div class="chart sm" id="tl-temp_f"></div>
@@ -721,7 +745,7 @@ const CULTIVARS = {
 };
 for (const [n, c] of Object.entries(CULTIVARS)) for (const a of c.aka || []) CULTIVARS[a] = { ...c, canonical: n };
 
-const C = { canopy: '#6cc4ff', tent: '#33ff99', room: '#ffb347', band: 'rgba(255,179,71,0.09)', ref: 'rgba(230,242,236,0.25)' };
+const C = { canopy: '#c9cfd6', tent: '#6fb4e6', room: '#ff9070', band: 'rgba(201,207,214,0.07)', ref: 'rgba(228,232,237,0.25)' };
 const M = { temp_f: { label: 'Temperature', unit: '°F', dp: 1 }, rh: { label: 'Humidity', unit: '% RH', dp: 1 }, vpd: { label: 'VPD', unit: ' kPa', dp: 2 } };
 
 // ---- Helpers ----
@@ -1096,11 +1120,11 @@ function drawLiveTag() {
   const cand = [T.live, T.canopyLive, T.roomLive].map((s) => s && devs[s]).filter((d) => d && d.lastReading);
   const dev = cand.sort((a, b) => (b.online - a.online) || (parse(b.lastReading.time) - parse(a.lastReading.time)))[0];
   el.className = 'live';
-  if (!dev || !dev.lastReading) { el.textContent = '· FROM EXPORTS'; return; }
+  if (!dev || !dev.lastReading) { el.textContent = 'FROM EXPORTS'; return; }
   const t = parse(dev.lastReading.time), mins = t ? Math.round((Date.now() - t) / 6e4) : NaN;
   const fresh = dev.online && mins <= 45;
   el.className = fresh ? 'live on' : 'live';
-  el.textContent = fresh ? `LIVE · ${mins < 1 ? 'just now' : mins + ' MIN AGO'}` : `· LAST LIVE READING ${t ? fmtWhen(t).toUpperCase() : '—'}`;
+  el.textContent = fresh ? `LIVE · ${mins < 1 ? 'just now' : mins + ' MIN AGO'}` : `LAST LIVE READING ${t ? fmtWhen(t).toUpperCase() : '—'}`;
 }
 
 // Reference tabs: key -> [view element, title, anchor prefix]
