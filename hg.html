@@ -30,6 +30,21 @@
     --mono: Barlow, system-ui, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  .scgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-top: 10px; }
+  .sck { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; min-width: 0; }
+  .sck img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #0a1018; }
+  .sck .b { padding: 10px 12px 12px; }
+  .sck h3 { font-size: 1.25rem; line-height: 1.15; }
+  .sck .st { color: var(--accent); }
+  .sck p { color: var(--dim); font-size: 0.9rem; margin-top: 2px; overflow-wrap: anywhere; }
+  .scph { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 0 6px; }
+  .scph figure { flex: none; width: min(78vw, 340px); scroll-snap-align: start; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .scph img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .scph figcaption { padding: 8px 12px 10px; font-size: 0.9rem; color: var(--dim); }
+  .scph figcaption b { color: var(--fg); font-weight: 600; display: block; }
+  .scnav { display: flex; gap: 8px; justify-content: flex-end; }
+  .scnav button { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 1.4rem; cursor: pointer; }
+  .scnav button:focus-visible, .sck:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
   body { background: var(--bg); color: var(--fg); font-family: Barlow, system-ui, sans-serif; line-height: 1.5; }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 16px 48px; }
   .top { background: linear-gradient(135deg, #050810 0%, #0a1230 55%, #163c63 100%); border-bottom: 1px solid #22344d; }
@@ -628,6 +643,15 @@
   </section>
   </div>
 
+  <div id="showView" hidden>
+  <h1>Showcase</h1>
+  <p class="lede" id="scLede">Keepers, harvests and photos, straight from the Seed to Stash grow log.</p>
+  <section id="scKeepSec"><h2>Keepers and moms</h2><div class="scgrid" id="scKeep"></div></section>
+  <section id="scRunSec"><h2>Running now</h2><div class="tblwrap"><table class="ptbl"><thead><tr><th>Tent</th><th>Stage</th><th>Plants</th><th class="d-only">Harvest</th></tr></thead><tbody id="scRun"></tbody></table></div></section>
+  <section id="scHvSec" hidden><h2>Harvests</h2><div class="tblwrap"><table class="ptbl"><thead><tr><th>Cultivar</th><th>Chopped</th><th>Stage</th><th class="d-only">Rating</th></tr></thead><tbody id="scHv"></tbody></table></div></section>
+  <section id="scPhSec" hidden><h2>Photo log</h2><div class="scph" id="scPh"></div><div class="scnav"><button type="button" id="scPrev" aria-label="Earlier photos">‹</button><button type="button" id="scNext" aria-label="Later photos">›</button></div></section>
+  </div>
+
   <div id="e47View" hidden>
   <div class="e47-hero">
     <img src="/assets/hg/element47-logo-dark.png" alt="Element 47" width="560" height="509">
@@ -980,7 +1004,14 @@ function drawStatic() {
   // This week's mix
   const wk = $('mWeek'); wk.replaceChildren();
   let mix = null;
-  if (T.program && PROGRAMS[T.program]) {
+  if (T.app && (T.app.sched || (T.app.recipe || []).length)) {
+    const a = T.app, sc = a.sched;
+    if (sc) {
+      const i = Math.max(0, Math.floor((d3.timeDay.floor(new Date()) - parseDay(a.start)) / (7 * 864e5)) + (a.wkOff || 0)), wk = sc.weeks[Math.min(i, sc.weeks.length - 1)];
+      const parts = sc.prods.map((p, j) => [p.n, wk.d[j], p.u]).filter((x) => x[1] > 0);
+      mix = { text: `${wk.l || 'Week ' + (Math.min(i, sc.weeks.length - 1) + 1)}: ` + (parts.length ? parts.map((x) => `${x[0]} ${x[1]} ${x[2]}`).join(' + ') + ' per gal' : 'plain water'), note: i >= sc.weeks.length ? 'Past the last week of the chart, holding the final week' : '' };
+    } else mix = { text: a.recipe.map((x) => `${x.n} ${x.dose} ${x.u}`).join(' + ') + ' per gal' };
+  } else if (T.program && PROGRAMS[T.program]) {
     const week = T.flip ? Math.floor((d3.timeDay.floor(new Date()) - parseDay(T.flip)) / (7 * 864e5)) + 1 : null;
     mix = PROGRAMS[T.program](T.phase, week);
   }
@@ -1127,8 +1158,74 @@ function drawLiveTag() {
   el.textContent = fresh ? `LIVE · ${mins < 1 ? 'just now' : mins + ' MIN AGO'}` : `LAST LIVE READING ${t ? fmtWhen(t).toUpperCase() : '—'}`;
 }
 
+// ---- Showcase: fed by the Seed to Stash app. The app writes a public snapshot (no costs or stock);
+// a scheduled job copies it to /assets/hg/showcase.json. Photos marked "Show on /hg" in the app
+// appear when their file is in /assets/hg/photos/<id>.jpg.
+const SC_URL = '/assets/hg/showcase.json', PH_BASE = '/assets/hg/photos/';
+const FEED_URLS = [[/athena/i, 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules'], [/drip/i, 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf'], [/jack/i, 'https://cdn.shopify.com/s/files/1/0533/3847/2647/files/Jacks_Nutrient_Schedule_Jacks_321.pdf']];
+let SHOW = null;
+function applyShowcase(sc) {
+  SHOW = sc;
+  const lab = { mother: 'Moms', flower: 'In flower', veg: 'Veg', clone: 'Rooting' };
+  for (const T of Object.values(TENTS)) {
+    const a = (sc.tents || []).find((t) => T.name === t.name || T.name.startsWith(t.name + ' '));
+    if (!a) continue;
+    T.app = a;
+    if (a.kind === 'flower' && a.start) { T.flip = a.start; T.harvest = a.hv || T.harvest; }
+    else if (a.planFlip) { T.flip = a.planFlip; T.harvest = a.planHv || T.harvest; }
+    else if (a.kind !== 'flower') { delete T.flip; delete T.harvest; }
+    if (a.kind === 'veg' && !a.planFlip) T.stage = 'Veg';
+    if (a.sched) { T.feed = a.sched.name; const u = FEED_URLS.find(([re]) => re.test(a.sched.name)); T.feedUrl = u ? u[1] : null; }
+    T.plants = ['mother', 'flower', 'veg', 'clone'].map((st) => {
+      const ps = a.plants.filter((p) => p.status === st); if (!ps.length) return null;
+      const by = new Map(); ps.forEach((p) => { if (!by.has(p.strain)) by.set(p.strain, []); by.get(p.strain).push(p); });
+      return { group: lab[st], items: [...by].map(([name, list]) => { const ph = list.map((p) => p.pheno).filter(Boolean); return ph.length === list.length && ph.length > 1 ? { name, phenos: ph.map((x) => '#' + x) } : { name, count: list.length }; }) };
+    }).filter(Boolean);
+    for (const p of a.plants) if (!CULTIVARS[p.strain] && !Object.values(CULTIVARS).some((c) => (c.aka || []).includes(p.strain)) && (p.breeder || p.cross)) CULTIVARS[p.strain] = { breeder: p.breeder, lineage: p.cross };
+  }
+}
+function drawShowcase() {
+  const sc = SHOW; if (!sc) { set('scLede', 'The grow log hasn’t published a showcase yet.'); return; }
+  const fd = d3.timeFormat('%b %-d, %Y'), pd = (s) => (s ? fd(parseDay(s)) : '—'), el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const img = (a, alt) => { const i = el('img'); i.loading = 'lazy'; i.alt = alt; i.src = PH_BASE + encodeURIComponent(a) + '.jpg'; return i; };
+  set('scLede', `Keepers, harvests and photos, straight from the Seed to Stash grow log. Updated ${sc.at ? fd(new Date(sc.at)) : '—'}.`);
+  const all = (sc.tents || []).flatMap((t) => t.plants.map((p) => ({ ...p, tn: t.name }))).concat((sc.past || []).map((p) => ({ ...p, tn: '' })));
+  const keep = all.filter((p) => p.keeper || p.status === 'mother').sort((a, b) => (b.keeper - a.keeper) || a.strain.localeCompare(b.strain));
+  const kg = $('scKeep'); kg.replaceChildren(); $('scKeepSec').hidden = !keep.length;
+  for (const p of keep) {
+    const c = el('article', 'sck'), ph = (p.ph || []).slice().sort((x, y) => (x.d < y.d ? 1 : -1))[0];
+    if (ph) { const i = img(ph.a, p.strain); i.onerror = () => i.remove(); c.append(i); }
+    const b = el('div', 'b'); b.append(el('h3', null, p.strain + (p.pheno ? ' #' + p.pheno : '') + (p.keeper ? ' ★' : '')));
+    b.append(el('p', 'st', `${p.status === 'mother' ? 'Mom' : ({ flower: 'In flower', veg: 'Veg', clone: 'Rooting', done: 'Harvested' })[p.status] || p.status}${p.tn ? ' · ' + p.tn : ''} · ${p.tag}`));
+    if (p.breeder) b.append(el('p', null, p.breeder)); if (p.cross) b.append(el('p', null, p.cross));
+    c.append(b); kg.append(c);
+  }
+  const rt = $('scRun'); rt.replaceChildren(); const today0 = d3.timeDay.floor(new Date());
+  for (const t of sc.tents || []) {
+    const n = t.plants.length, tr = el('tr'); let stg = { flower: 'Flower', veg: 'Veg', nursery: 'Moms & clones' }[t.kind] || t.kind;
+    if (t.kind === 'flower' && t.start) { const d = Math.round((today0 - parseDay(t.start)) / 864e5); stg = `Flower day ${d} · week ${Math.floor(d / 7) + 1}`; }
+    else if (t.planFlip) stg += ` · flips ${d3.timeFormat('%b %-d')(parseDay(t.planFlip))}`;
+    const hv = t.kind === 'flower' ? t.hv : t.planHv;
+    tr.append(el('td', null, t.name), el('td', null, stg), el('td', 'qty', String(n)), el('td', 'd-only', hv ? pd(hv) : '—')); rt.append(tr);
+  }
+  const lots = (sc.lots || []).slice().sort((a, b) => (a.chop < b.chop ? 1 : -1)), ht = $('scHv'); ht.replaceChildren(); $('scHvSec').hidden = !lots.length;
+  for (const l of lots) { const tr = el('tr'); tr.append(el('td', 'cv', l.strain), el('td', null, pd(l.chop)), el('td', null, ({ drying: 'Drying', curing: 'Curing', ready: 'In the jar' })[l.stage] || l.stage), el('td', 'd-only', l.rating ? '★'.repeat(l.rating) : '—')); ht.append(tr); }
+  const phs = [...all.flatMap((p) => (p.ph || []).map((x) => ({ ...x, who: p.strain + (p.pheno ? ' #' + p.pheno : ''), tag: p.tag }))), ...(sc.lots || []).flatMap((l) => (l.ph || []).map((x) => ({ ...x, who: l.strain + ' · harvest', tag: '' })))].sort((a, b) => (a.d < b.d ? 1 : -1));
+  const pr = $('scPh'); pr.replaceChildren(); let shown = 0;
+  for (const x of phs) {
+    const f = el('figure'), i = img(x.a, x.who); shown++;
+    i.onerror = () => { f.remove(); if (!pr.children.length) $('scPhSec').hidden = true; };
+    const cap = el('figcaption'); cap.append(el('b', null, x.who)); cap.append(document.createTextNode(pd(x.d) + (x.n ? ' · ' + x.n : '')));
+    f.append(i, cap); pr.append(f);
+  }
+  $('scPhSec').hidden = !shown;
+  const step = (dir) => pr.scrollBy({ left: dir * Math.min(pr.clientWidth, 352), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  $('scPrev').onclick = () => step(-1); $('scNext').onclick = () => step(1);
+  pr.onkeydown = (e) => { if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1); }; pr.tabIndex = 0;
+}
+
 // Reference tabs: key -> [view element, title, anchor prefix]
-const VIEWS = { nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'], element47: ['e47View', 'Element 47', 'e-'] };
+const VIEWS = { showcase: ['showView', 'Showcase', 'g-'], nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'], element47: ['e47View', 'Element 47', 'e-'] };
 const ALIASES = { veg: 'nursery' };  // old links
 async function show(k) {
   k = ALIASES[k] || k;
@@ -1242,7 +1339,7 @@ window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
 drawStrains(); drawE47();
-show(location.hash.slice(1) || Object.keys(TENTS)[0]);
+d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); show(location.hash.slice(1) || Object.keys(TENTS)[0]); });
 </script>
 </body>
 </html>
