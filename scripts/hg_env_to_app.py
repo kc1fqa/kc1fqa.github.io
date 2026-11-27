@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Seed to Stash climate import. When Ed sends an AC Infinity export for /hg, also run this on the
-same CSV and write the result to the app database with db_write (set or merge):
+"""Seed to Stash climate import. As of Nov 27 2026 Ed's AC Infinity exports go to the app only
+(not /hg). Run this on the CSV and write the result to the app database with db_write (set or merge):
   data/users/u_CdsNX_0Pay4npL3isTXUIQ/core/env/<tentId>             {"d": env}
   data/users/u_CdsNX_0Pay4npL3isTXUIQ/core/envh/<tentId>_<yyyymm>   {"d": envh[yyyymm]}
 Tent ids: Bloom 1 mwmpv0j7imqg, Bloom 2 mwmpv0j75e3a, The Nursery mwmpv0j7xwh3.
-Merge new dates into existing docs (read first, keep other dates).
+Merge into existing docs (db_get first): keep other dates; on an overlapping date, hours in the new
+file replace those hours and other hours stay; rebuild that day's summary (min of lows, max of highs).
 
 Turn AC Infinity / site CSVs (time,temp_f,rh[,vpd]) into Seed to Stash climate docs.
 Usage: env_to_app.py OUT.json FROM_DATE file.csv [file.csv ...]
