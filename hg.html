@@ -203,104 +203,13 @@
     <div>
       <a class="brand" href="/">KC<span class="digit">1</span>FQA</a>
       <div class="ttl">Home Grow</div>
-      <div class="ttl-sub">Climate, plants and feed for every tent</div>
+      <div class="ttl-sub">Showcase, feed, IPM and genetics</div>
     </div>
     <a class="back" href="/">← HOME</a>
   </header>
 </div>
 <div class="wrap">
-  <p class="eyebrow"><span class="live" id="liveTag"></span></p>
-  <nav class="tabs" id="tabs" aria-label="Tent"></nav>
-  <div id="tentView">
-  <h1 id="title">—</h1>
-  <div class="meta" id="meta">
-    <div><span class="mk">Stage</span><span class="mv" id="mStage">—</span></div>
-    <div id="mHarvestBox"><span class="mk">Planned harvest</span><span class="mv" id="mHarvest">—</span></div>
-    <div><span class="mk">Feed</span><span class="mv" id="mFeed">—</span></div>
-    <div><span class="mk">Plants</span><span class="mv" id="mPlants">—</span></div>
-    <div id="mWeekBox"><span class="mk">This week's mix</span><span class="mv" id="mWeek">—</span></div>
-  </div>
-  <div class="remind" id="exportRemind" hidden>
-    <div class="rk" id="rTitle">Weekly export</div>
-    <div class="rt" id="rText">—</div>
-    <details><summary>How to export</summary>
-      <ol>
-        <li>In the AC Infinity app, open the <b id="rCtrl">controller</b> and go to the <b>DATA</b> tab.</li>
-        <li>Export the data as CSV, covering at least the days since the last export.</li>
-        <li>Upload the CSV to Claude and say which tent it's from. Claude adds it here.</li>
-      </ol>
-    </details>
-  </div>
-  <p class="lede" id="lede">Loading readings…</p>
-  <p class="lede room-only" id="lede2"></p>
-
-  <div class="cards">
-    <div class="card"><div class="k">Tent now · <span id="tWhen">—</span></div><div class="big"><span id="tTemp">—</span>°F</div><div class="sub"><span id="tRh">—</span>% RH · <span id="tVpd">—</span> kPa VPD</div></div>
-    <div class="card canopy-only"><div class="k">Govee in tent · <span id="cWhen">—</span></div><div class="big"><span id="cTemp">—</span>°F</div><div class="sub"><span id="cRh">—</span>% RH · <span id="cVpd">—</span> kPa VPD</div></div>
-    <div class="card sched-only"><div class="k">Lights on · avg</div><div class="big"><span id="onTemp">—</span>°F</div><div class="sub"><span id="onRh">—</span>% RH · <span id="onVpd">—</span> kPa</div><div class="sub">Range <span id="onRange">—</span>°F</div></div>
-    <div class="card sched-only"><div class="k">Lights off · avg</div><div class="big"><span id="offTemp">—</span>°F</div><div class="sub"><span id="offRh">—</span>% RH · <span id="offVpd">—</span> kPa</div><div class="sub">Range <span id="offRange">—</span>°F</div></div>
-    <div class="card room-only sched-only"><div class="k">Tent − lung room · lights off</div><div class="big"><span id="vsTemp">—</span>°F</div><div class="sub"><span id="vsRh">—</span> RH points</div></div>
-    <div class="card room-only"><div class="k">Lung room now · <span id="rWhen">—</span></div><div class="big" id="rBig">—</div><div class="sub" id="rSub">—</div></div>
-  </div>
-
-  <section>
-    <h2 id="timelineH">Every minute, three ways</h2>
-    <div class="legend">
-      <span><i class="sw" style="background:var(--accent)"></i>Tent (AC Infinity)</span>
-      <span class="canopy-only"><i class="sw" style="background:var(--canopy)"></i>Tent (Govee)</span>
-      <span class="room-only"><i class="sw" style="background:var(--room)"></i><span id="roomLegend">Lung room</span></span>
-      <span class="sched-only"><i class="sw" style="background:rgba(201,207,214,0.25)"></i>Lights on</span>
-    </div>
-    <div class="multi">
-      <p class="ph">Temperature °F</p><div class="chart sm" id="tl-temp_f"></div>
-      <p class="ph">Humidity % RH</p><div class="chart sm" id="tl-rh"></div>
-      <p class="ph">VPD kPa</p><div class="chart sm" id="tl-vpd"></div>
-      <p class="ph co2-only">Lung room CO₂ ppm</p><div class="chart sm co2-only" id="co2"></div>
-    </div>
-    <p class="cap"><span id="lightsTxt">—</span>, read from the temperature jump at each switch.<span class="room-only"> Breaks in the lung-room line are gaps in its data: <span id="gaps">—</span>. <span id="roomVpdNote"></span></span></p>
-  </section>
-
-  <section class="sched-only">
-    <h2>The average day in the tent</h2>
-    <div class="legend">
-      <span><i class="sw" style="background:var(--accent)"></i>Lights on</span>
-      <span><i class="sw" style="background:var(--accent-2)"></i>Lights off</span>
-    </div>
-    <div class="grid3">
-      <div><p class="ph">Temperature °F by hour</p><div class="chart sm" id="hr-temp_f"></div></div>
-      <div><p class="ph">Humidity % by hour</p><div class="chart sm" id="hr-rh"></div></div>
-      <div><p class="ph">VPD kPa by hour</p><div class="chart sm" id="hr-vpd"></div></div>
-    </div>
-  </section>
-
-  <section class="room-only">
-    <h2>Tent vs lung room, same minutes only</h2>
-    <div class="tblwrap"><table>
-      <thead><tr><th>Period</th><th>Tent °F</th><th>Room °F</th><th>Tent − room °F</th><th>Tent RH %</th><th>Room RH %</th><th>Tent − room RH</th><th>Tent VPD</th><th>Room VPD</th><th>Room CO₂ ppm</th><th>Hours matched</th></tr></thead>
-      <tbody id="compare"></tbody>
-    </table></div>
-  </section>
-
-  <section class="sched-only">
-    <h2>Tent day by day</h2>
-    <p class="cap">Each day starts when the lights go off and runs to the next lights-off. Swing is lights-on minus lights-off temperature.</p>
-    <div class="tblwrap"><table>
-      <thead><tr><th>Day</th><th>Hours logged</th><th>On °F</th><th>Off °F</th><th>Swing °F</th><th>On RH %</th><th>Off RH %</th><th>On VPD</th><th>Off VPD</th></tr></thead>
-      <tbody id="daily"></tbody>
-    </table></div>
-    <p class="cap">Tent VPD is AC Infinity's own figure, with leaf temperature offset 0 °F (leaf assumed equal to air). Data: <span id="srcTxt">—</span>, updated <span id="updated">—</span>.</p>
-  </section>
-
-  <section id="plantsSec">
-    <h2>Plants</h2>
-    <div class="tblwrap"><table class="ptbl">
-      <thead><tr><th>Qty</th><th>Cultivar</th><th>Breeder / lineage</th></tr></thead>
-      <tbody id="plantsTb"></tbody>
-    </table></div>
-  </section>
-
-  </div>
-
+  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
   <div id="nutView" hidden>
   <h1>Nutrients</h1>
   <p class="lede">The four feed lines in use, with the makers' own mixing rates and links to their full charts. Dose from the official chart; these are the key numbers at a glance.</p>
@@ -633,7 +542,7 @@
 
   <div id="strainView" hidden>
   <h1>Strains</h1>
-  <p class="lede">Keepers and moms ranked, with breeder and cross. The plant lists on each tent tab pull their breeder and cross from here.</p>
+  <p class="lede">Keepers and moms ranked, with breeder and cross. Where now comes from the Seed to Stash grow log.</p>
   <section class="nut" id="s-list">
     <div class="tblwrap"><table class="ntbl stbl">
       <thead><tr><th>#</th><th>Cultivar</th><th class="d-only">Breeder / provider</th><th class="d-only">Cross</th><th class="d-only">Where now</th></tr></thead>
@@ -784,379 +693,7 @@ const $ = (id) => document.getElementById(id);
 const set = (id, txt) => { const e = $(id); if (e) e.textContent = txt; };
 const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 
-const cache = {};
-let key = 'nursery', exportLast = null, tent = [], room = [], canopy = [], sched = [];
-
-function prepSchedule(s) {
-  return s.map((e) => ({ from: e.from ? parseDay(e.from) : new Date(0), offStart: toMin(e.offStart), offEnd: toMin(e.offEnd) }))
-    .sort((a, b) => a.from - b.from);
-}
-const entryAt = (t) => { let e = sched[0]; for (const x of sched) if (x.from <= t) e = x; return e; };
-function isOn(t) {
-  if (!sched.length) return false;
-  const e = entryAt(t), m = t.getHours() * 60 + t.getMinutes();
-  const off = e.offStart < e.offEnd ? (m >= e.offStart && m < e.offEnd) : (m >= e.offStart || m < e.offEnd);
-  return !off;
-}
-// lights-on intervals between t0 and t1
-function onBands(t0, t1) {
-  if (!sched.length) return [];
-  const offs = [];
-  for (let d = d3.timeDay.offset(d3.timeDay.floor(t0), -1); d <= t1; d = d3.timeDay.offset(d, 1)) {
-    const e = entryAt(d3.timeHour.offset(d, 12));
-    const s = new Date(+d + e.offStart * 6e4), en = new Date(+d + (e.offEnd < e.offStart ? e.offEnd + 1440 : e.offEnd) * 6e4);
-    offs.push([s, en]);
-  }
-  const bands = [];
-  for (let i = 0; i < offs.length - 1; i++) {
-    const a = offs[i][1] > t0 ? offs[i][1] : t0, b = offs[i + 1][0] < t1 ? offs[i + 1][0] : t1;
-    if (b > a) bands.push([a, b]);
-  }
-  return bands;
-}
-function scheduleText() {
-  if (!sched.length) return 'Light schedule not set yet';
-  const parts = sched.map((e, i) => {
-    const span = `off ${fmtClock(e.offStart)}–${fmtClock(e.offEnd)}`;
-    if (sched.length === 1) return span;
-    if (i === 0) return `${span} until ${d3.timeFormat('%b %-d')(d3.timeDay.offset(sched[1].from, -1))}`;
-    return `${span} from ${d3.timeFormat('%b %-d')(e.from)}`;
-  });
-  const onMin = (1440 - ((sched[sched.length - 1].offEnd - sched[sched.length - 1].offStart + 1440) % 1440)) / 60;
-  return `Lights ${parts.join(', ')} (${f(onMin, 0)}/${f(24 - onMin, 0)})`;
-}
-
-function stats(xs, k) { return { mean: d3.mean(xs, (r) => r[k]), min: d3.min(xs, (r) => r[k]), max: d3.max(xs, (r) => r[k]) }; }
-
-function yAxis(svg, y, W, mg, ticks) {
-  const g = svg.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(ticks).tickSize(0));
-  let w = 0; g.selectAll('text').each(function () { w = Math.max(w, this.getComputedTextLength()); });
-  mg.l = Math.ceil(w) + 12;
-  g.attr('transform', `translate(${mg.l},0)`).call(d3.axisLeft(y).ticks(ticks).tickSize(-(W - mg.l - mg.r)).tickPadding(6));
-  g.select('.domain').remove();
-}
-function placeTip(el, tip, xPx, W) {
-  const sx = el.clientWidth / W, tw = tip.node().offsetWidth;
-  tip.style('left', Math.max(0, Math.min(xPx * sx - tw / 2, el.clientWidth - tw)) + 'px');
-}
-function withGaps(pts) {
-  const out = [];
-  for (let i = 0; i < pts.length; i++) {
-    if (i && pts[i].t - pts[i - 1].t > 20 * 6e4) out.push({ t: new Date((+pts[i].t + +pts[i - 1].t) / 2), v: NaN });
-    out.push(pts[i]);
-  }
-  return out;
-}
-
-function timeChart(el, series, o) {
-  const all = series.flatMap((s) => s.pts.filter((p) => !isNaN(p.v)));
-  el.replaceChildren();
-  if (!all.length) { el.innerHTML = '<div class="msg">No data</div>'; return; }
-  const W = Math.max(300, el.clientWidth - 12), H = o.H || 260, mg = { t: 10, r: 12, b: 26, l: 40 };
-  let [y0, y1] = d3.extent(all, (p) => p.v);
-  if (y1 - y0 < 1e-6) { y0 -= 1; y1 += 1; }  // a single reading still gets a sensible axis
-  const y = d3.scaleLinear().domain([y0, y1]).nice().range([H - mg.b, mg.t]);
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', o.aria);
-  yAxis(svg, y, W, mg, 5);
-  let [xt0, xt1] = o.span && o.span[0] ? o.span : d3.extent(all, (p) => p.t);
-  if (xt1 - xt0 < 36e5) { xt0 = new Date(+xt1 - 6 * 36e5); }  // show at least 6 hours
-  const x = d3.scaleTime().domain([xt0, xt1]).range([mg.l, W - mg.r]);
-  const [t0, t1] = x.domain();
-  svg.insert('g', ':first-child').selectAll('rect').data(onBands(t0, t1)).join('rect')
-    .attr('x', (b) => x(b[0])).attr('width', (b) => x(b[1]) - x(b[0])).attr('y', mg.t).attr('height', H - mg.b - mg.t).attr('fill', C.band);
-  const n = Math.max(2, Math.min(10, Math.floor((W - mg.l - mg.r) / 70)));
-  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).ticks(n).tickFormat(d3.timeFormat(t1 - t0 < 2 * 864e5 ? '%-I %p' : '%b %-d')).tickSizeOuter(0));
-  const line = d3.line().defined((p) => !isNaN(p.v)).x((p) => x(p.t)).y((p) => y(p.v));
-  series.forEach((s) => svg.append('path').datum(withGaps(s.pts)).attr('d', line).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 1.25));
-  // sparse series (live polls only) also get dots, so a lone reading is visible
-  series.forEach((s) => { if (s.pts.length && s.pts.length < 60) svg.append('g').selectAll('circle').data(s.pts.filter((p) => !isNaN(p.v))).join('circle').attr('cx', (p) => x(p.t)).attr('cy', (p) => y(p.v)).attr('r', 2.5).attr('fill', s.color); });
-  const dots = series.map((s) => svg.append('circle').attr('r', 3.5).attr('fill', s.color).style('display', 'none'));
-  const tip = d3.select(el).append('div').attr('class', 'tip').style('display', 'none');
-  const bis = d3.bisector((p) => p.t).center;
-  const show = (ev) => {
-    const [px] = d3.pointer(ev, svg.node()), t = x.invert(px);
-    tip.style('display', null).selectAll('*').remove();
-    tip.append('div').attr('class', 't').text(`${d3.timeFormat('%a %b %-d, %-I:%M %p')(t)} · lights ${isOn(t) ? 'on' : 'off'}`);
-    series.forEach((s, i) => {
-      const p = s.pts.length ? s.pts[bis(s.pts, t)] : null, ok = p && Math.abs(p.t - t) <= 3 * 6e4;
-      dots[i].style('display', ok ? null : 'none'); if (ok) dots[i].attr('cx', x(p.t)).attr('cy', y(p.v));
-      tip.append('div').text(`${s.name}: ${ok ? o.fmt(p.v) : 'no data'}`);
-    });
-    placeTip(el, tip, px, W);
-  };
-  svg.append('rect').attr('x', mg.l).attr('y', mg.t).attr('width', W - mg.l - mg.r).attr('height', H - mg.t - mg.b)
-    .attr('fill', 'transparent').style('touch-action', 'pan-y').on('pointermove pointerdown', show)
-    .on('pointerleave', () => { tip.style('display', 'none'); dots.forEach((d) => d.style('display', 'none')); });
-}
-
-// ---- Drawing ----
-function drawTimeline() {
-  const span = d3.extent([...tent, ...canopy, ...room], (r) => r.t);
-  for (const k of Object.keys(M)) {
-    const m = M[k];
-    const series = [{ name: 'Tent', pts: tent.map((r) => ({ t: r.t, v: r[k] })), color: C.tent }];
-    if (canopy.length) series.push({ name: 'Tent (Govee)', pts: canopy.map((r) => ({ t: r.t, v: r[k] })), color: C.canopy });
-    if (room.length) series.push({ name: 'Lung room', pts: room.map((r) => ({ t: r.t, v: r[k] })), color: C.room });
-    timeChart($('tl-' + k), series, { H: 170, span, fmt: (v) => f(v, m.dp) + m.unit, aria: `${m.label} every minute, lights-on periods shaded` });
-  }
-}
-function drawCo2() {
-  if (!room.length) return;
-  const span = d3.extent([...tent, ...canopy, ...room], (r) => r.t);
-  timeChart($('co2'), [{ name: 'CO₂', pts: room.map((r) => ({ t: r.t, v: r.co2 })), color: C.room }],
-    { H: 170, span, fmt: (v) => f(v, 0) + ' ppm', aria: 'Lung room CO2 every minute in ppm, lights-on periods shaded' });
-}
-function drawHourly() {
-  const by = d3.group(tent, (r) => r.t.getHours());
-  const rows = d3.range(24).filter((h) => by.has(h)).map((h) => {
-    const xs = by.get(h);
-    return { hour: h, on: d3.mean(xs, (r) => r.on ? 1 : 0) >= 0.5, temp_f: d3.mean(xs, (r) => r.temp_f), rh: d3.mean(xs, (r) => r.rh), vpd: d3.mean(xs, (r) => r.vpd) };
-  });
-  for (const metric of Object.keys(M)) hourChart($('hr-' + metric), rows, metric);
-}
-function hourChart(el, rows, metric) {
-  const m = M[metric];
-  el.replaceChildren();
-  if (!rows.length) return;
-  const col = (d) => d.on ? C.tent : C.room;
-  const W = Math.max(260, el.clientWidth - 12), H = 170, mg = { t: 10, r: 10, b: 26, l: 40 };
-  const y = d3.scaleLinear().domain(d3.extent(rows, (d) => d[metric])).nice().range([H - mg.b, mg.t]);
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `Average ${m.label.toLowerCase()} for each hour of the day`);
-  yAxis(svg, y, W, mg, 4);
-  const x = d3.scalePoint().domain(d3.range(24)).range([mg.l + 6, W - mg.r - 6]);
-  svg.append('g').attr('transform', `translate(0,${H - mg.b})`).call(d3.axisBottom(x).tickValues(d3.range(0, 24, 6)).tickFormat(hourLabel).tickSizeOuter(0));
-  svg.append('path').datum(rows).attr('d', d3.line().x((d) => x(d.hour)).y((d) => y(d[metric]))).attr('fill', 'none').attr('stroke', C.ref);
-  svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.hour)).attr('cy', (d) => y(d[metric])).attr('r', 3.5).attr('fill', col);
-  const ring = svg.append('circle').attr('r', 6.5).attr('fill', 'none').attr('stroke-width', 1.5).style('display', 'none');
-  const tip = d3.select(el).append('div').attr('class', 'tip').style('display', 'none');
-  const show = (ev) => {
-    const [px] = d3.pointer(ev, svg.node()), p = rows.reduce((a, b) => Math.abs(x(b.hour) - px) < Math.abs(x(a.hour) - px) ? b : a);
-    ring.style('display', null).attr('cx', x(p.hour)).attr('cy', y(p[metric])).attr('stroke', col(p));
-    tip.style('display', null).selectAll('*').remove();
-    tip.append('div').attr('class', 't').text(`${hourLabel(p.hour)} hour · lights ${p.on ? 'on' : 'off'} (mostly)`);
-    tip.append('div').text(f(p[metric], m.dp) + m.unit);
-    placeTip(el, tip, x(p.hour), W);
-  };
-  svg.append('rect').attr('x', mg.l).attr('y', mg.t).attr('width', W - mg.l - mg.r).attr('height', H - mg.t - mg.b)
-    .attr('fill', 'transparent').style('touch-action', 'pan-y').on('pointermove pointerdown', show)
-    .on('pointerleave', () => { tip.style('display', 'none'); ring.style('display', 'none'); });
-}
-
-function fillTable(id, rows) {
-  const tb = $(id); tb.replaceChildren();
-  for (const cells of rows) {
-    const tr = document.createElement('tr');
-    for (const c of cells) { const td = document.createElement('td'); td.textContent = c; tr.append(td); }
-    tb.append(tr);
-  }
-}
-const sg0 = (v) => isNaN(v) ? '—' : d3.format('+.1f')(v).replace('-', '−');
-function writeLede(el, parts) {
-  el.replaceChildren();
-  for (const [txt, bold] of parts) { if (bold) { const b = document.createElement('b'); b.textContent = txt; el.append(b); } else el.append(document.createTextNode(txt)); }
-}
-
-function drawStatic() {
-  const T = TENTS[key];
-  set('title', T.name);
-  document.querySelectorAll('.canopy-only').forEach((e) => { e.hidden = !canopy.length; });
-  document.querySelectorAll('.sched-only').forEach((e) => { e.hidden = !sched.length; });
-  const lc = canopy[canopy.length - 1];
-  if (lc) { set('cWhen', fmtWhen(lc.t)); set('cTemp', f(lc.temp_f)); set('cRh', f(lc.rh)); set('cVpd', f(lc.vpd, 2)); }
-  // Stage, feed, plants
-  let stage = T.stage || '—';
-  const today0 = d3.timeDay.floor(new Date()), fday = d3.timeFormat('%a %b %-d'), plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-  if (T.flip) {
-    const flip = parseDay(T.flip), days = Math.round((today0 - flip) / 864e5);
-    stage = days >= 0
-      ? `Flower day ${days} · week ${Math.floor(days / 7) + 1} (flipped ${d3.timeFormat('%b %-d')(flip)})`
-      : `Veg · flips to 12/12 ${fday(flip)} (${days === -1 ? 'tomorrow' : 'in ' + plural(-days, 'day')})`;
-  }
-  set('mStage', stage);
-  $('mHarvestBox').hidden = !T.harvest;
-  if (T.harvest) {
-    const hv = parseDay(T.harvest), left = Math.round((hv - today0) / 864e5);
-    let txt = `${fday(hv)}, ${hv.getFullYear()} · `;
-    txt += left > 0 ? `${plural(left, 'day')} to go` : left === 0 ? 'today' : `${plural(-left, 'day')} ago`;
-    if (T.flip) { const run = Math.round((hv - parseDay(T.flip)) / 864e5); txt += ` (${run}-day flower)`; }
-    set('mHarvest', txt);
-  }
-  // Weekly export reminder
-  const rb = $('exportRemind');
-  rb.hidden = !T.exportEvery;
-  if (T.exportEvery) {
-    set('rCtrl', `"${T.controller}"`);
-    const today = d3.timeDay.floor(new Date()), fd = d3.timeFormat('%a %b %-d');
-    if (!exportLast) {
-      rb.className = 'remind';
-      set('rTitle', 'Weekly export');
-      set('rText', 'No AC Infinity export on file yet. Send the first one once this tent is running.');
-    } else {
-      const due = d3.timeDay.offset(d3.timeDay.floor(exportLast), T.exportEvery);
-      const late = Math.round((today - due) / 864e5);
-      rb.className = late >= 0 ? 'remind due' : 'remind';
-      set('rTitle', late > 0 ? `Export overdue by ${late} day${late === 1 ? '' : 's'}` : late === 0 ? 'Export due today' : 'Weekly export');
-      set('rText', `Last AC Infinity export runs to ${fmtWhen(exportLast)}. ` +
-        (late >= 0 ? 'Time to send a new one so the 1-minute history stays complete.' : `Next one due ${fd(due)}. Live readings fill the gap in between.`));
-    }
-  }
-
-  // This week's mix
-  const wk = $('mWeek'); wk.replaceChildren();
-  let mix = null;
-  if (T.app && (T.app.sched || (T.app.recipe || []).length)) {
-    const a = T.app, sc = a.sched;
-    if (sc) {
-      const i = Math.max(0, Math.floor((d3.timeDay.floor(new Date()) - parseDay(a.start)) / (7 * 864e5)) + (a.wkOff || 0)), wk = sc.weeks[Math.min(i, sc.weeks.length - 1)];
-      const parts = sc.prods.map((p, j) => [p.n, wk.d[j], p.u]).filter((x) => x[1] > 0);
-      mix = { text: `${wk.l || 'Week ' + (Math.min(i, sc.weeks.length - 1) + 1)}: ` + (parts.length ? parts.map((x) => `${x[0]} ${x[1]} ${x[2]}`).join(' + ') + ' per gal' : 'plain water'), note: i >= sc.weeks.length ? 'Past the last week of the chart, holding the final week' : '' };
-    } else mix = { text: a.recipe.map((x) => `${x.n} ${x.dose} ${x.u}`).join(' + ') + ' per gal' };
-  } else if (T.program && PROGRAMS[T.program]) {
-    const week = T.flip ? Math.floor((d3.timeDay.floor(new Date()) - parseDay(T.flip)) / (7 * 864e5)) + 1 : null;
-    mix = PROGRAMS[T.program](T.phase, week);
-  }
-  $('mWeekBox').hidden = !mix;
-  if (mix) {
-    const a = document.createElement('a'); a.href = '#n-athena';
-    a.textContent = mix.text || `${mix.parts.map((p) => `${p[0]} ${p[1]}`).join(' + ')} mL/gal · EC ${mix.ec}`;
-    wk.append(a);
-    if (mix.note) { const n = document.createElement('span'); n.className = 'mnote'; n.textContent = mix.note; wk.append(n); }
-  }
-  const mf = $('mFeed'); mf.replaceChildren();
-  if (T.feed && T.feedUrl) { const a = document.createElement('a'); a.href = T.feedUrl; a.target = '_blank'; a.rel = 'noopener'; a.textContent = T.feed + ' ↗'; a.title = 'Official feed chart'; mf.append(a); }
-  else mf.textContent = T.feed || '—';
-  const groups = T.plants || [], count = (c) => c.phenos ? c.phenos.length : c.count;
-  const total = d3.sum(groups, (g) => d3.sum(g.items, count));
-  set('mPlants', total ? `${total}` + (groups.length > 1 ? ` (${groups.map((g) => `${d3.sum(g.items, count)} ${g.group.toLowerCase()}`).join(', ')})` : '') : '—');
-  $('plantsSec').hidden = !total;
-  const tb = $('plantsTb'); tb.replaceChildren();
-  const td = (cls, txt) => { const e = document.createElement('td'); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-  for (const g of groups) {
-    if (groups.length > 1) { const tr = document.createElement('tr'); tr.className = 'grp'; const c = td(null, `${g.group} · ${d3.sum(g.items, count)}`); c.colSpan = 3; tr.append(c); tb.append(tr); }
-    for (const c of g.items) {
-      const info = CULTIVARS[c.name] || {}, tr = document.createElement('tr');
-      const br = td('br', info.breeder || '');
-      if (info.lineage) { const l = document.createElement('span'); l.className = 'lin'; l.textContent = info.lineage; br.append(l); }
-      const cv = td('cv', c.phenos ? `${c.name} ${c.phenos.join(' ')}` : c.name);
-      if (c.note) { const n = document.createElement('span'); n.className = 'lin'; n.textContent = c.note; cv.append(n); }
-      tr.append(td('qty', `${count(c)}×`), cv, br);
-      tb.append(tr);
-    }
-  }
-  document.title = `KC1FQA · Home Grow · ${T.tab}`;
-  const hasCo2 = room.some((r) => !isNaN(r.co2));
-  document.querySelectorAll('.room-only').forEach((e) => { e.hidden = !room.length; });
-  document.querySelectorAll('.co2-only').forEach((e) => { e.hidden = !room.length || !hasCo2; });
-  set('roomLegend', T.roomLabel || 'Lung room');
-  set('roomVpdNote', T.roomVpdNote || '');
-  set('lightsTxt', scheduleText());
-  set('srcTxt', T.src);
-
-  const on = tent.filter((r) => r.on), off = tent.filter((r) => !r.on);
-  const sOn = { t: stats(on, 'temp_f'), rh: d3.mean(on, (r) => r.rh), vpd: d3.mean(on, (r) => r.vpd) };
-  const sOff = { t: stats(off, 'temp_f'), rh: d3.mean(off, (r) => r.rh), vpd: d3.mean(off, (r) => r.vpd) };
-  set('onTemp', f(sOn.t.mean)); set('onRh', f(sOn.rh)); set('onVpd', f(sOn.vpd, 2)); set('onRange', `${f(sOn.t.min)}–${f(sOn.t.max)}`);
-  set('offTemp', f(sOff.t.mean)); set('offRh', f(sOff.rh)); set('offVpd', f(sOff.vpd, 2)); set('offRange', `${f(sOff.t.min)}–${f(sOff.t.max)}`);
-
-  const lt = tent[tent.length - 1], lr = room[room.length - 1];
-  if (lt) { set('tWhen', fmtWhen(lt.t)); set('tTemp', f(lt.temp_f)); set('tRh', f(lt.rh)); set('tVpd', f(lt.vpd, 2)); }
-  else { set('tWhen', 'controller offline'); set('tTemp', '—'); set('tRh', '—'); set('tVpd', '—'); }
-  if (lr) {
-    set('rWhen', fmtWhen(lr.t));
-    if (hasCo2) { set('rBig', `${f(lr.co2, 0)} ppm`); set('rSub', `CO₂ · ${f(lr.temp_f)}°F · ${f(lr.rh)}% RH`); }
-    else { set('rBig', `${f(lr.temp_f)}°F`); set('rSub', `${f(lr.rh)}% RH · ${f(lr.vpd, 2)} kPa VPD`); }
-  }
-  const latest = d3.max([lt && lt.t, lr && lr.t, lc && lc.t].filter(Boolean));
-  set('updated', latest ? fmtWhen(latest) : '—');
-
-  const days = tent.length ? (tent[tent.length - 1].t - tent[0].t) / 864e5 : 0;
-  if (!sched.length || !tent.length) {
-    writeLede($('lede'), [['Not running yet. Readings show up here as its sensors report'], lc ? [`; the Govee in the tent last read ${f(lc.temp_f)}°F and ${f(lc.rh)}% RH.`] : ['.']]);
-  } else writeLede($('lede'), [['Over '], [f(days), 1], [' days this tent averaged '], [f(sOn.t.mean) + '°F', 1], [' at '], [f(sOn.vpd, 2) + ' kPa', 1],
-    [' VPD with lights on, and '], [f(sOff.t.mean) + '°F', 1], [' at '], [f(sOff.vpd, 2) + ' kPa', 1], [' with lights off, a '], [f(sOn.t.mean - sOff.t.mean) + '°F', 1], [' day/night swing.']]);
-
-  // Same-minute comparison with the lung room
-  if (room.length) {
-    const byTime = new Map(room.map((r) => [+r.t, r]));
-    const both = tent.filter((a) => byTime.has(+a.t)).map((a) => ({ a, b: byTime.get(+a.t) }));
-    const agg = (label, xs) => {
-      const tt = d3.mean(xs, (p) => p.a.temp_f), rt = d3.mean(xs, (p) => p.b.temp_f), tr = d3.mean(xs, (p) => p.a.rh), rr = d3.mean(xs, (p) => p.b.rh);
-      return { label, tt, rt, tr, rr, tv: d3.mean(xs, (p) => p.a.vpd), rv: d3.mean(xs, (p) => p.b.vpd), co2: d3.mean(xs, (p) => p.b.co2), hours: d3.sum(xs, (p) => p.a.w) / 60 };
-    };
-    const cmp = both.length ? [agg('Lights on', both.filter((p) => p.a.on)), agg('Lights off', both.filter((p) => !p.a.on))] : [];
-    fillTable('compare', cmp.map((c) => [c.label, f(c.tt), f(c.rt), f(c.tt - c.rt), f(c.tr), f(c.rr), f(c.tr - c.rr), f(c.tv, 2), f(c.rv, 2), f(c.co2, 0), f(c.hours)]));
-    set('vsTemp', cmp.length ? sg0(cmp[1].tt - cmp[1].rt) : '—'); set('vsRh', cmp.length ? sg0(cmp[1].tr - cmp[1].rr) : '—');
-    if (cmp.length) {
-      const sg = (v) => isNaN(v) ? '—' : d3.format('+.1f')(v).replace('-', '−');
-      const parts = [['Compared minute for minute with the lung room, the tent ran '], [sg(cmp[0].tt - cmp[0].rt) + '°F', 1], [' and '], [sg(cmp[0].tr - cmp[0].rr) + ' RH points', 1],
-        [' with lights on, and '], [sg(cmp[1].tt - cmp[1].rt) + '°F', 1], [' and '], [sg(cmp[1].tr - cmp[1].rr) + ' RH points', 1], [' with lights off.']];
-      if (hasCo2) parts.push([' Lung-room CO₂ averaged '], [f(cmp[0].co2, 0) + ' ppm', 1], [' with lights on and '], [f(cmp[1].co2, 0) + ' ppm', 1], [' with lights off.']);
-      writeLede($('lede2'), parts);
-    }
-    const gaps = [];
-    for (let i = 1; i < room.length; i++) { const h = (room[i].t - room[i - 1].t) / 36e5; if (h > 1.5) gaps.push(`${d3.timeFormat('%b %-d %-I:%M %p')(room[i - 1].t)} to ${d3.timeFormat('%b %-d %-I:%M %p')(room[i].t)} (${f(h)} h)`); }
-    set('gaps', gaps.length ? gaps.join('; ') : 'none over 90 minutes');
-  }
-
-  // Daily: a day runs from that day's lights-off to the next lights-off
-  const fmtDay = d3.timeFormat('%Y-%m-%d'), showDay = d3.timeFormat('%a %b %-d');
-  const grouped = d3.group(tent.map((r) => { const s = new Date(+r.t - entryAt(r.t).offStart * 6e4); return { ...r, day: fmtDay(s), d: d3.timeDay.floor(s) }; }), (r) => r.day);
-  const daily = Array.from(grouped, ([day, xs]) => {
-    const on = xs.filter((r) => r.on), off = xs.filter((r) => !r.on), m = (a, k) => a.length ? d3.mean(a, (r) => r[k]) : NaN, hours = d3.sum(xs, (r) => r.w) / 60;
-    return [showDay(xs[0].d) + (hours < 23.5 ? ' (partial)' : ''), f(hours), f(m(on, 'temp_f')), f(m(off, 'temp_f')), f(m(on, 'temp_f') - m(off, 'temp_f')),
-      f(m(on, 'rh')), f(m(off, 'rh')), f(m(on, 'vpd'), 2), f(m(off, 'vpd'), 2)];
-  }).reverse();  // newest first
-  fillTable('daily', daily);
-}
-
-function drawCharts() { drawTimeline(); drawCo2(); drawHourly(); }
-
-// Live readings, written every 15 min by the hg-live job to the hg-data branch
-const LIVE_BASE = 'https://raw.githubusercontent.com/kc1fqa/kc1fqa.github.io/hg-data/live/';
 const bust = () => '?t=' + Math.floor(Date.now() / 6e4);
-const tryCsv = (url) => url ? d3.csv(url).catch(() => []) : Promise.resolve([]);
-let liveStatus = null;
-
-// Export rows, then any live rows newer than the export
-function combine(exp, live) {
-  const last = exp.length ? +exp[exp.length - 1].t : -Infinity;
-  const all = exp.concat(live.filter((r) => +r.t > last)).sort((a, b) => a.t - b.t);
-  // minutes each row stands for (1 for minute data, ~15 for live polls), capped so gaps don't count
-  all.forEach((r, i) => { r.w = i < all.length - 1 ? Math.min((all[i + 1].t - r.t) / 6e4, 20) : 1; });
-  return all;
-}
-
-async function load(k) {
-  if (!cache[k]) {
-    const T = TENTS[k];
-    const [t, r, lt, lr, lc] = await Promise.all([
-      tryCsv(T.file), tryCsv(T.room),
-      tryCsv(T.live && LIVE_BASE + T.live + '.csv' + bust()), tryCsv(T.roomLive && LIVE_BASE + T.roomLive + '.csv' + bust()),
-      tryCsv(T.canopyLive && LIVE_BASE + T.canopyLive + '.csv' + bust())
-    ]);
-    const tentRow = (d) => ({ t: parse(d.time), temp_f: +d.temp_f, rh: +d.rh, vpd: +d.vpd });
-    const roomRow = (d) => ({ t: parse(d.time), co2: d.co2 != null && d.co2 !== '' ? +d.co2 : NaN, temp_f: +d.temp_f, rh: +d.rh, vpd: d.vpd != null && d.vpd !== '' ? +d.vpd : NaN });
-    const clean = (rows, fn) => rows.map(fn).filter((d) => d.t && !isNaN(d.temp_f)).sort((a, b) => a.t - b.t);
-    const expRows = clean(t, tentRow);
-    cache[k] = { exportLast: expRows.length ? expRows[expRows.length - 1].t : null, tent: combine(expRows, clean(lt, tentRow)), room: combine(clean(r, roomRow), clean(lr, roomRow)), canopy: combine([], clean(lc, tentRow)) };
-    cache[k].room.forEach((d) => { if (isNaN(d.vpd)) d.vpd = vpdOf(d.temp_f, d.rh); });
-  }
-  return cache[k];
-}
-
-function drawLiveTag() {
-  if ($('tentView').hidden) return;
-  const el = $('liveTag'), T = TENTS[key], devs = (liveStatus && liveStatus.devices) || {};
-  // freshest online reading among this tent's live sensors
-  const cand = [T.live, T.canopyLive, T.roomLive].map((s) => s && devs[s]).filter((d) => d && d.lastReading);
-  const dev = cand.sort((a, b) => (b.online - a.online) || (parse(b.lastReading.time) - parse(a.lastReading.time)))[0];
-  el.className = 'live';
-  if (!dev || !dev.lastReading) { el.textContent = 'FROM EXPORTS'; return; }
-  const t = parse(dev.lastReading.time), mins = t ? Math.round((Date.now() - t) / 6e4) : NaN;
-  const fresh = dev.online && mins <= 45;
-  el.className = fresh ? 'live on' : 'live';
-  el.textContent = fresh ? `LIVE · ${mins < 1 ? 'just now' : mins + ' MIN AGO'}` : `LAST LIVE READING ${t ? fmtWhen(t).toUpperCase() : '—'}`;
-}
 
 // ---- Showcase: fed by the Seed to Stash app. The app writes a public snapshot (no costs or stock);
 // a scheduled job copies it to /assets/hg/showcase.json. Photos marked "Show on /hg" in the app
@@ -1226,34 +763,15 @@ function drawShowcase() {
 
 // Reference tabs: key -> [view element, title, anchor prefix]
 const VIEWS = { showcase: ['showView', 'Showcase', 'g-'], nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'], element47: ['e47View', 'Element 47', 'e-'] };
-const ALIASES = { veg: 'nursery' };  // old links
-async function show(k) {
+// old tent links (tents now live in Seed to Stash)
+const ALIASES = { veg: 'showcase', nursery: 'showcase', bloom1: 'showcase', bloom2: 'showcase' };
+function show(k) {
   k = ALIASES[k] || k;
-  const vk = Object.keys(VIEWS).find((v) => k === v || k.startsWith(VIEWS[v][2]));
+  const vk = Object.keys(VIEWS).find((v) => k === v || k.startsWith(VIEWS[v][2])) || 'showcase';
   for (const [v, [id]] of Object.entries(VIEWS)) $(id).hidden = v !== vk;
-  $('tentView').hidden = !!vk;
-  if (vk) {
-    document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === vk ? 'page' : 'false'));
-    document.title = 'KC1FQA · Home Grow · ' + VIEWS[vk][1];
-    $('liveTag').textContent = ''; $('liveTag').className = 'live';
-    if (k !== vk) { const el = $(k); if (el) el.scrollIntoView(); }
-    return;
-  }
-  if (!TENTS[k]) k = Object.keys(TENTS)[0];
-  key = k;
-  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === k ? 'page' : 'false'));
-  set('lede', 'Loading readings…');
-  try {
-    const d = await load(k);
-    if (key !== k) return;
-    sched = prepSchedule(TENTS[k].schedule);
-    tent = d.tent; room = d.room; canopy = d.canopy; exportLast = d.exportLast;
-    tent.forEach((r) => { r.on = isOn(r.t); });
-    drawStatic(); drawCharts(); drawLiveTag();
-  } catch (err) {
-    set('lede', 'Could not load the readings.');
-    console.error(err);
-  }
+  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-current', b.dataset.k === vk ? 'page' : 'false'));
+  document.title = 'KC1FQA · Home Grow · ' + VIEWS[vk][1];
+  if (k !== vk) { const el = $(k); if (el) el.scrollIntoView(); }
 }
 
 // ---- Element 47 breeding project ----
@@ -1331,15 +849,10 @@ function drawStrains() {
 }
 
 // ---- Start ----
-for (const [k, T] of Object.entries(TENTS)) {
-  const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + k; a.dataset.k = k; a.textContent = T.tab; $('tabs').append(a);
-}
 for (const [v, [, label]] of Object.entries(VIEWS)) { const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + v; a.dataset.k = v; a.textContent = label.toUpperCase(); $('tabs').append(a); }
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
-let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
-d3.json(LIVE_BASE + 'status.json' + bust()).then((st) => { liveStatus = st; drawLiveTag(); }).catch(() => {});
 drawStrains(); drawE47();
-d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); show(location.hash.slice(1) || Object.keys(TENTS)[0]); });
+d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); show(location.hash.slice(1) || 'showcase'); });
 </script>
 </body>
 </html>
