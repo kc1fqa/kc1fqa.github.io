@@ -592,75 +592,6 @@
 <script>
 // ---- Tents ----
 // Each schedule entry applies from its date on. offStart/offEnd are clock times the lights go off and back on.
-const TENTS = {
-  nursery: {
-    name: 'The Nursery', tab: 'THE NURSERY', file: '/assets/hg/veg.csv', room: null, live: 'veg', roomLive: null, canopyLive: 'veg_canopy',
-    src: 'AC Infinity controller "Veg" exports, plus live readings from the controller and the Govee H5110 "Mom Tent"',
-    program: 'athena-fade', phase: 'veg',
-    exportEvery: 7, controller: 'Veg',
-    feed: 'Athena Pro Line Grow', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
-    stage: 'Moms, clones, veg & seedlings',
-    plants: [
-      { group: 'Moms', items: [
-        { name: 'Cap Junky', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Apples and Bananas', count: 1 },
-        { name: 'Galactic Derailer', count: 1 }, { name: 'Northern Lights 5 IBL', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Blue Dream', count: 1 }
-      ] },
-      { group: 'Veg', items: [
-        { name: 'Bishop', count: 3, note: '2 fresh backups, 1 for Bloom 2' }, { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
-        { name: 'Blue Dream', count: 1 }, { name: 'Black Maple', count: 1 }, { name: 'Apple Fritter', count: 1 }, { name: 'Galactic Derailer', count: 1 }
-      ] },
-      { group: 'Seedlings', items: [
-        { name: 'Downtown Haze', count: 6 }, { name: 'End Game', count: 3 }
-      ] }
-    ],
-    schedule: [
-      { from: null, offStart: '10:04', offEnd: '16:04' },
-      { from: '2026-11-01', offStart: '09:04', offEnd: '15:04' }  // shifted an hour with the DST change
-    ]
-  },
-  bloom1: {
-    name: 'Bloom 1 · 3x3 tent', tab: 'BLOOM 1', file: '/assets/hg/bloom1.csv', room: '/assets/hg/bloom1_room.csv', live: 'bloom1', roomLive: 'bloom1_room', canopyLive: 'bloom1_canopy',
-    roomLabel: 'Lung room (Govee)',
-    roomVpdNote: 'Lung-room VPD is worked out from its temperature and humidity with leaf = air, the same way the AC Infinity figure is.',
-    src: 'AC Infinity controller "Bloom 3x3" and Govee Smart CO₂ Monitor (lung room) exports, plus live readings from both and the Govee H5110 "Bloom 1"',
-    program: 'athena-fade', phase: 'flower',
-    exportEvery: 7, controller: 'Bloom 3x3',
-    feed: 'Athena Pro Line Bloom', feedUrl: 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules',
-    flip: '2026-11-07', harvest: '2027-01-09',
-    plants: [
-      { group: 'In flower', items: [
-        { name: 'Apple Cloud', phenos: ['#1', '#2', '#3', '#4'] },
-        { name: 'Bishop', count: 1 }
-      ] }
-    ],
-    schedule: [{ from: null, offStart: '06:00', offEnd: '18:00' }]
-  },
-  bloom2: {
-    name: 'Bloom 2 · 4x2 tent', tab: 'BLOOM 2', file: '/assets/hg/bloom2.csv', room: null, live: 'bloom2', roomLive: null, canopyLive: 'bloom2_canopy',
-    src: 'AC Infinity controller "4x2" exports, plus live readings from the controller and the Govee H5110 "Bloom 2"',
-    exportEvery: 7, controller: '4x2',
-    feed: 'Drip nutrients', feedUrl: 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf',
-    flip: '2026-11-28', harvest: '2027-01-23',   // flip pushed a week (moved in Nov 21); harvest not yet re-planned
-    plants: [
-      { group: 'Veg in tent (moved in Nov 21, 3 gal)', items: [
-        { name: 'Bishop', count: 1 }, { name: 'Blue Dream', count: 1 }, { name: 'Galactic Derailer', count: 1 },
-        { name: 'Apple Fritter', count: 1 }, { name: 'Black Maple', count: 1 }
-      ] }
-    ],
-    schedule: [{ from: null, offStart: '18:00', offEnd: '06:00' }]   // lights 6am to 6pm
-  }
-};
-
-// This week's mix, from Athena's "Pro Program with Fade" chart, mL/gal of 2 lb/gal stock
-const PROGRAMS = {
-  'athena-fade': (phase, week) => {
-    if (phase === 'veg') return { parts: [['Pro Grow', 32], ['Pro Core', 19]], ec: '3.0' };
-    if (week > 9) return { text: 'Past week 9 on the chart: flush (RO + Cleanse) or extend week 9' };
-    const parts = week >= 8 ? [['Pro Bloom', 32], ['Fade', 18]] : [['Pro Bloom', 32], ['Pro Core', 19]];
-    return { parts, ec: '3.0', note: week === 7 ? 'Fade can start now if the cultivar is resilient' : week >= 8 ? 'Fade replaces Core' : '' };
-  }
-};
-
 // Breeder and lineage, shared across tents
 // Ed's keeper / mom reference: rank, breeder and cross. "aka" lists the names used in the tent plant lists.
 const CULTIVARS = {
@@ -703,23 +634,8 @@ const FEED_URLS = [[/athena/i, 'https://support.athenaag.com/hc/en-us/articles/1
 let SHOW = null;
 function applyShowcase(sc) {
   SHOW = sc;
-  const lab = { mother: 'Moms', flower: 'In flower', veg: 'Veg', clone: 'Rooting' };
-  for (const T of Object.values(TENTS)) {
-    const a = (sc.tents || []).find((t) => T.name === t.name || T.name.startsWith(t.name + ' '));
-    if (!a) continue;
-    T.app = a;
-    if (a.kind === 'flower' && a.start) { T.flip = a.start; T.harvest = a.hv || T.harvest; }
-    else if (a.planFlip) { T.flip = a.planFlip; T.harvest = a.planHv || T.harvest; }
-    else if (a.kind !== 'flower') { delete T.flip; delete T.harvest; }
-    if (a.kind === 'veg' && !a.planFlip) T.stage = 'Veg';
-    if (a.sched) { T.feed = a.sched.name; const u = FEED_URLS.find(([re]) => re.test(a.sched.name)); T.feedUrl = u ? u[1] : null; }
-    T.plants = ['mother', 'flower', 'veg', 'clone'].map((st) => {
-      const ps = a.plants.filter((p) => p.status === st); if (!ps.length) return null;
-      const by = new Map(); ps.forEach((p) => { if (!by.has(p.strain)) by.set(p.strain, []); by.get(p.strain).push(p); });
-      return { group: lab[st], items: [...by].map(([name, list]) => { const ph = list.map((p) => p.pheno).filter(Boolean); return ph.length === list.length && ph.length > 1 ? { name, phenos: ph.map((x) => '#' + x) } : { name, count: list.length }; }) };
-    }).filter(Boolean);
-    for (const p of a.plants) if (!CULTIVARS[p.strain] && !Object.values(CULTIVARS).some((c) => (c.aka || []).includes(p.strain)) && (p.breeder || p.cross)) CULTIVARS[p.strain] = { breeder: p.breeder, lineage: p.cross };
-  }
+  // fill breeder / lineage for strains the hand list doesn't know, so older code paths still find them
+  for (const x of sc.strains || []) if (!CULTIVARS[x.name]) CULTIVARS[x.name] = { breeder: x.breeder, lineage: x.cross, note: x.note };
 }
 function drawShowcase() {
   const sc = SHOW; if (!sc) { set('scLede', 'The grow log hasn’t published a showcase yet.'); return; }
@@ -821,27 +737,20 @@ function drawE47() {
 // ---- Strains reference ----
 function drawStrains() {
   const tb = $('strainTb'); tb.replaceChildren();
-  const where = (name) => {
-    const names = [name, ...((CULTIVARS[name] || {}).aka || [])], out = [];
-    for (const T of Object.values(TENTS)) for (const g of T.plants || []) for (const c of g.items) {
-      if (!names.includes(c.name)) continue;
-      const n = c.phenos ? c.phenos.length : c.count;
-      out.push(`${T.tab.toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase())} · ${g.group.toLowerCase()}${n > 1 ? ' ×' + n : ''}`);
-    }
-    return out;
-  };
-  const rows = Object.entries(CULTIVARS).filter(([, c]) => !c.canonical)
-    .sort((a, b) => (a[1].rank || 99) - (b[1].rank || 99) || a[0].localeCompare(b[0]));
-  for (const [name, c] of rows) {
+  // From Seed to Stash: ranked strains plus every strain with live plants, with where each one is now.
+  // Without the snapshot, fall back to the hand list above (no locations).
+  const rows = SHOW && SHOW.strains ? SHOW.strains.map((x) => ({ name: x.name, rank: x.rank || 0, breeder: x.breeder, lineage: x.cross, note: x.note, where: x.where || [] }))
+    : Object.entries(CULTIVARS).filter(([, c]) => !c.canonical).map(([name, c]) => ({ name, rank: c.rank || 0, breeder: c.breeder, lineage: c.lineage, note: c.note, where: [] }));
+  rows.sort((a, b) => (a.rank || 99) - (b.rank || 99) || a.name.localeCompare(b.name));
+  for (const c of rows) {
     const tr = document.createElement('tr'); if (!c.rank) tr.className = 'unr';
     const cell = (cls, txt) => { const d = document.createElement('td'); if (cls) d.className = cls; d.textContent = txt; return d; };
-    const nm = cell('cv', name);
+    const nm = cell('cv', c.name);
     if (c.note) { const n = document.createElement('span'); n.className = 'lin'; n.textContent = c.note; nm.append(n); }
-    const w = where(name), wc = cell('wh d-only', '');
-    if (w.length) for (const x of w) { const sp = document.createElement('span'); sp.textContent = x; wc.append(sp); } else wc.textContent = '—';
-    // phone layout: breeder, cross and location stacked under the name
+    const wc = cell('wh d-only', '');
+    if (c.where.length) for (const x of c.where) { const sp = document.createElement('span'); sp.textContent = x; wc.append(sp); } else wc.textContent = '—';
     const mob = document.createElement('div'); mob.className = 'm-only';
-    for (const [cls, txt] of [['mb', c.breeder], ['mx', c.lineage], ...w.map((x) => ['mw', x])]) if (txt) { const d = document.createElement('div'); d.className = cls; d.textContent = txt; mob.append(d); }
+    for (const [cls, txt] of [['mb', c.breeder], ['mx', c.lineage], ...c.where.map((x) => ['mw', x])]) if (txt) { const d = document.createElement('div'); d.className = cls; d.textContent = txt; mob.append(d); }
     nm.append(mob);
     tr.append(cell('rk', c.rank || '–'), nm, cell('d-only', c.breeder || '—'), cell('cx d-only', c.lineage || '—'), wc);
     tb.append(tr);
@@ -851,8 +760,8 @@ function drawStrains() {
 // ---- Start ----
 for (const [v, [, label]] of Object.entries(VIEWS)) { const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + v; a.dataset.k = v; a.textContent = label.toUpperCase(); $('tabs').append(a); }
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
-drawStrains(); drawE47();
-d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); show(location.hash.slice(1) || 'showcase'); });
+drawE47();
+d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); drawStrains(); show(location.hash.slice(1) || 'showcase'); });
 </script>
 </body>
 </html>

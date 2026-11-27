@@ -13,13 +13,14 @@ OUT = Path(__file__).resolve().parent.parent / "assets" / "hg" / "showcase.json"
 PLANT = ["tag", "strain", "breeder", "cross", "pheno", "status", "keeper", "born", "flip", "hd", "ph"]
 TENT = ["name", "kind", "start", "hv", "wkOff", "planFlip", "planHv", "sched", "recipe", "plants"]
 LOT = ["strain", "tn", "chop", "cure", "stage", "rating", "ph"]
+STRAIN = ["name", "rank", "breeder", "cross", "note", "where"]
 
 def pick(o, keys):
     return {k: o[k] for k in keys if k in o}
 
 def clean(d):
     ph = lambda xs: [pick(x, ["a", "d", "n"]) for x in (xs or [])]
-    out = {"v": 1, "at": d.get("at", ""), "tents": [], "lots": [], "past": []}
+    out = {"v": 1, "at": d.get("at", ""), "strains": [pick(x, STRAIN) for x in d.get("strains", [])], "tents": [], "lots": [], "past": []}
     for t in d.get("tents", []):
         t = pick(t, TENT)
         t["plants"] = [dict(pick(p, PLANT), ph=ph(p.get("ph"))) for p in t.get("plants", [])]
