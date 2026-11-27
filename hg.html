@@ -540,18 +540,6 @@
   </section>
   </div>
 
-  <div id="strainView" hidden>
-  <h1>Strains</h1>
-  <p class="lede">Keepers and moms ranked, with breeder and cross. Where now comes from the Seed to Stash grow log.</p>
-  <section class="nut" id="s-list">
-    <div class="tblwrap"><table class="ntbl stbl">
-      <thead><tr><th>#</th><th>Cultivar</th><th class="d-only">Breeder / provider</th><th class="d-only">Cross</th><th class="d-only">Where now</th></tr></thead>
-      <tbody id="strainTb"></tbody>
-    </table></div>
-    <p class="cap">Unranked rows are in the collection but not on the keeper list.</p>
-  </section>
-  </div>
-
   <div id="showView" hidden>
   <h1>Showcase</h1>
   <p class="lede" id="scLede">Keepers, harvests and what's running, straight from the Seed to Stash grow log.</p>
@@ -581,7 +569,7 @@
       <thead><tr><th>#</th><th>Cross</th><th class="d-only">Other parent</th><th class="d-only">Full lineage</th></tr></thead>
       <tbody id="e47Tb"></tbody>
     </table></div>
-    <p class="cap">"Other parent" links to the keeper list on the Strains tab where that mom is on it.</p>
+    <p class="cap">"Other parent" shows the mom's breeder and keeper rank where she's on the keeper list.</p>
   </section>
   </div>
 
@@ -632,8 +620,6 @@ const FEED_URLS = [[/athena/i, 'https://support.athenaag.com/hc/en-us/articles/1
 let SHOW = null;
 function applyShowcase(sc) {
   SHOW = sc;
-  // fill breeder / lineage for strains the hand list doesn't know, so older code paths still find them
-  for (const x of sc.strains || []) if (!CULTIVARS[x.name]) CULTIVARS[x.name] = { breeder: x.breeder, lineage: x.cross, note: x.note };
 }
 function drawShowcase() {
   const sc = SHOW; if (!sc) { set('scLede', 'The grow log hasn’t published a showcase yet.'); return; }
@@ -662,7 +648,7 @@ function drawShowcase() {
 }
 
 // Reference tabs: key -> [view element, title, anchor prefix]
-const VIEWS = { showcase: ['showView', 'Showcase', 'g-'], nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], strains: ['strainView', 'Strains', 's-'], element47: ['e47View', 'Element 47', 'e-'] };
+const VIEWS = { showcase: ['showView', 'Showcase', 'g-'], nutrients: ['nutView', 'Nutrients', 'n-'], ipm: ['ipmView', 'IPM', 'i-'], element47: ['e47View', 'Element 47', 'e-'] };
 // old tent links (tents now live in Seed to Stash)
 const ALIASES = { veg: 'showcase', nursery: 'showcase', bloom1: 'showcase', bloom2: 'showcase' };
 function show(k) {
@@ -710,7 +696,7 @@ function drawE47() {
     nm.append(mob);
     const pc = cell('d-only', '');
     if (info) {
-      const a = document.createElement('a'); a.href = '#strains'; a.textContent = label; pc.append(a);
+      const a = document.createElement('b'); a.textContent = label; pc.append(a);
       const b = document.createElement('span'); b.className = 'lin'; b.textContent = info.breeder + (info.rank ? ` · keeper #${info.rank}` : ''); pc.append(b);
     } else pc.textContent = label;
     tr.append(cell('rk', String(i + 1)), nm, pc, cell('cx d-only', c.lineage));
@@ -718,34 +704,11 @@ function drawE47() {
   });
 }
 
-// ---- Strains reference ----
-function drawStrains() {
-  const tb = $('strainTb'); tb.replaceChildren();
-  // From Seed to Stash: ranked strains plus every strain with live plants, with where each one is now.
-  // Without the snapshot, fall back to the hand list above (no locations).
-  const rows = SHOW && SHOW.strains ? SHOW.strains.map((x) => ({ name: x.name, rank: x.rank || 0, breeder: x.breeder, lineage: x.cross, note: x.note, where: x.where || [] }))
-    : Object.entries(CULTIVARS).filter(([, c]) => !c.canonical).map(([name, c]) => ({ name, rank: c.rank || 0, breeder: c.breeder, lineage: c.lineage, note: c.note, where: [] }));
-  rows.sort((a, b) => (a.rank || 99) - (b.rank || 99) || a.name.localeCompare(b.name));
-  for (const c of rows) {
-    const tr = document.createElement('tr'); if (!c.rank) tr.className = 'unr';
-    const cell = (cls, txt) => { const d = document.createElement('td'); if (cls) d.className = cls; d.textContent = txt; return d; };
-    const nm = cell('cv', c.name);
-    if (c.note) { const n = document.createElement('span'); n.className = 'lin'; n.textContent = c.note; nm.append(n); }
-    const wc = cell('wh d-only', '');
-    if (c.where.length) for (const x of c.where) { const sp = document.createElement('span'); sp.textContent = x; wc.append(sp); } else wc.textContent = '—';
-    const mob = document.createElement('div'); mob.className = 'm-only';
-    for (const [cls, txt] of [['mb', c.breeder], ['mx', c.lineage], ...c.where.map((x) => ['mw', x])]) if (txt) { const d = document.createElement('div'); d.className = cls; d.textContent = txt; mob.append(d); }
-    nm.append(mob);
-    tr.append(cell('rk', c.rank || '–'), nm, cell('d-only', c.breeder || '—'), cell('cx d-only', c.lineage || '—'), wc);
-    tb.append(tr);
-  }
-}
-
 // ---- Start ----
 for (const [v, [, label]] of Object.entries(VIEWS)) { const a = document.createElement('a'); a.className = 'tab'; a.href = '#' + v; a.dataset.k = v; a.textContent = label.toUpperCase(); $('tabs').append(a); }
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 drawE47();
-d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); drawStrains(); show(location.hash.slice(1) || 'showcase'); });
+d3.json(SC_URL + bust()).then((sc) => { if (sc && sc.tents) applyShowcase(sc); }).catch(() => {}).finally(() => { drawShowcase(); show(location.hash.slice(1) || 'showcase'); });
 </script>
 </body>
 </html>
