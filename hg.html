@@ -554,11 +554,10 @@
 
   <div id="showView" hidden>
   <h1>Showcase</h1>
-  <p class="lede" id="scLede">Keepers, harvests and photos, straight from the Seed to Stash grow log.</p>
+  <p class="lede" id="scLede">Keepers, harvests and what's running, straight from the Seed to Stash grow log.</p>
   <section id="scKeepSec"><h2>Keepers and moms</h2><div class="scgrid" id="scKeep"></div></section>
   <section id="scRunSec"><h2>Running now</h2><div class="tblwrap"><table class="ptbl"><thead><tr><th>Tent</th><th>Stage</th><th>Plants</th><th class="d-only">Harvest</th></tr></thead><tbody id="scRun"></tbody></table></div></section>
   <section id="scHvSec" hidden><h2>Harvests</h2><div class="tblwrap"><table class="ptbl"><thead><tr><th>Cultivar</th><th>Chopped</th><th>Stage</th><th class="d-only">Rating</th></tr></thead><tbody id="scHv"></tbody></table></div></section>
-  <section id="scPhSec" hidden><h2>Photo log</h2><div class="scph" id="scPh"></div><div class="scnav"><button type="button" id="scPrev" aria-label="Earlier photos">‹</button><button type="button" id="scNext" aria-label="Later photos">›</button></div></section>
   </div>
 
   <div id="e47View" hidden>
@@ -627,9 +626,8 @@ const toMin = (s) => { const [h, m] = s.split(':').map(Number); return h * 60 + 
 const bust = () => '?t=' + Math.floor(Date.now() / 6e4);
 
 // ---- Showcase: fed by the Seed to Stash app. The app writes a public snapshot (no costs or stock);
-// a scheduled job copies it to /assets/hg/showcase.json. Photos marked "Show on /hg" in the app
-// appear when their file is in /assets/hg/photos/<id>.jpg.
-const SC_URL = '/assets/hg/showcase.json', PH_BASE = '/assets/hg/photos/';
+// a scheduled job copies it to /assets/hg/showcase.json. Photos stay in the app.
+const SC_URL = '/assets/hg/showcase.json';
 const FEED_URLS = [[/athena/i, 'https://support.athenaag.com/hc/en-us/articles/17190427112859-Pro-Line-Feed-Schedules'], [/drip/i, 'https://www.driphydro.com/wp-content/uploads/2026/06/DripHydro_FeedingSchedules_Powder_Proper_260623.pdf'], [/jack/i, 'https://cdn.shopify.com/s/files/1/0533/3847/2647/files/Jacks_Nutrient_Schedule_Jacks_321.pdf']];
 let SHOW = null;
 function applyShowcase(sc) {
@@ -640,14 +638,12 @@ function applyShowcase(sc) {
 function drawShowcase() {
   const sc = SHOW; if (!sc) { set('scLede', 'The grow log hasn’t published a showcase yet.'); return; }
   const fd = d3.timeFormat('%b %-d, %Y'), pd = (s) => (s ? fd(parseDay(s)) : '—'), el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-  const img = (a, alt) => { const i = el('img'); i.loading = 'lazy'; i.alt = alt; i.src = PH_BASE + encodeURIComponent(a) + '.jpg'; return i; };
-  set('scLede', `Keepers, harvests and photos, straight from the Seed to Stash grow log. Updated ${sc.at ? fd(new Date(sc.at)) : '—'}.`);
+  set('scLede', `Keepers, harvests and what's running, straight from the Seed to Stash grow log. Updated ${sc.at ? fd(new Date(sc.at)) : '—'}.`);
   const all = (sc.tents || []).flatMap((t) => t.plants.map((p) => ({ ...p, tn: t.name }))).concat((sc.past || []).map((p) => ({ ...p, tn: '' })));
   const keep = all.filter((p) => p.keeper || p.status === 'mother').sort((a, b) => (b.keeper - a.keeper) || a.strain.localeCompare(b.strain));
   const kg = $('scKeep'); kg.replaceChildren(); $('scKeepSec').hidden = !keep.length;
   for (const p of keep) {
-    const c = el('article', 'sck'), ph = (p.ph || []).slice().sort((x, y) => (x.d < y.d ? 1 : -1))[0];
-    if (ph) { const i = img(ph.a, p.strain); i.onerror = () => i.remove(); c.append(i); }
+    const c = el('article', 'sck');
     const b = el('div', 'b'); b.append(el('h3', null, p.strain + (p.pheno ? ' #' + p.pheno : '') + (p.keeper ? ' ★' : '')));
     b.append(el('p', 'st', `${p.status === 'mother' ? 'Mom' : ({ flower: 'In flower', veg: 'Veg', clone: 'Rooting', done: 'Harvested' })[p.status] || p.status}${p.tn ? ' · ' + p.tn : ''} · ${p.tag}`));
     if (p.breeder) b.append(el('p', null, p.breeder)); if (p.cross) b.append(el('p', null, p.cross));
@@ -663,18 +659,6 @@ function drawShowcase() {
   }
   const lots = (sc.lots || []).slice().sort((a, b) => (a.chop < b.chop ? 1 : -1)), ht = $('scHv'); ht.replaceChildren(); $('scHvSec').hidden = !lots.length;
   for (const l of lots) { const tr = el('tr'); tr.append(el('td', 'cv', l.strain), el('td', null, pd(l.chop)), el('td', null, ({ drying: 'Drying', curing: 'Curing', ready: 'In the jar' })[l.stage] || l.stage), el('td', 'd-only', l.rating ? '★'.repeat(l.rating) : '—')); ht.append(tr); }
-  const phs = [...all.flatMap((p) => (p.ph || []).map((x) => ({ ...x, who: p.strain + (p.pheno ? ' #' + p.pheno : ''), tag: p.tag }))), ...(sc.lots || []).flatMap((l) => (l.ph || []).map((x) => ({ ...x, who: l.strain + ' · harvest', tag: '' })))].sort((a, b) => (a.d < b.d ? 1 : -1));
-  const pr = $('scPh'); pr.replaceChildren(); let shown = 0;
-  for (const x of phs) {
-    const f = el('figure'), i = img(x.a, x.who); shown++;
-    i.onerror = () => { f.remove(); if (!pr.children.length) $('scPhSec').hidden = true; };
-    const cap = el('figcaption'); cap.append(el('b', null, x.who)); cap.append(document.createTextNode(pd(x.d) + (x.n ? ' · ' + x.n : '')));
-    f.append(i, cap); pr.append(f);
-  }
-  $('scPhSec').hidden = !shown;
-  const step = (dir) => pr.scrollBy({ left: dir * Math.min(pr.clientWidth, 352), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  $('scPrev').onclick = () => step(-1); $('scNext').onclick = () => step(1);
-  pr.onkeydown = (e) => { if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1); }; pr.tabIndex = 0;
 }
 
 // Reference tabs: key -> [view element, title, anchor prefix]
