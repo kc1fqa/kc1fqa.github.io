@@ -1,0 +1,208 @@
+{
+ "devices": {
+  "aci-4x2": {
+   "checked": "2026-11-16T16:42:28+00:00",
+   "lastReading": null,
+   "name": "4x2",
+   "online": false,
+   "source": "AC Infinity"
+  },
+  "bloom1": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 64.86,
+    "temp_f": 71.82,
+    "time": "2026-11-27 00:11",
+    "vpd": 0.93
+   },
+   "name": "Bloom 3x3",
+   "online": true,
+   "source": "AC Infinity"
+  },
+  "bloom1_canopy": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 58.8,
+    "temp_f": 72.68,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.13
+   },
+   "name": "Bloom 1",
+   "online": true,
+   "source": "Govee H5110"
+  },
+  "bloom1_room": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "co2": 471,
+    "rh": 55.2,
+    "temp_f": 68.54,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.07
+   },
+   "name": "Smart CO\u2082 Monitor",
+   "online": true,
+   "source": "Govee H5140"
+  },
+  "bloom2": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 55.16,
+    "temp_f": 73.35,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.25
+   },
+   "name": "4x2",
+   "online": true,
+   "source": "AC Infinity"
+  },
+  "bloom2_canopy": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 52.7,
+    "temp_f": 70.52,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.21
+   },
+   "name": "Bloom 2",
+   "online": true,
+   "source": "Govee H5110"
+  },
+  "govee-3x2-clone": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "3x2 Clone",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "govee-3x2-veg": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "3x2 Veg",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "govee-4x2-bloom-2": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "4x2 Bloom 2",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "govee-basement": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "Basement",
+   "online": false,
+   "source": "Govee H5075"
+  },
+  "govee-bloom-1": {
+   "checked": "2026-11-17T03:35:12+00:00",
+   "lastReading": {
+    "rh": 58.4,
+    "temp_f": 72.32,
+    "time": "2026-11-16 22:35",
+    "vpd": 1.13
+   },
+   "name": "Bloom 1",
+   "online": true,
+   "source": "Govee H5110"
+  },
+  "govee-bloom-2": {
+   "checked": "2026-11-17T03:35:12+00:00",
+   "lastReading": {
+    "rh": 54.6,
+    "temp_f": 66.02,
+    "time": "2026-11-16 22:35",
+    "vpd": 0.99
+   },
+   "name": "Bloom 2",
+   "online": true,
+   "source": "Govee H5110"
+  },
+  "govee-chicken-coop": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "Chicken Coop",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "govee-cure-2x2": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "Cure 2x2",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "govee-mom-tent": {
+   "checked": "2026-11-17T03:35:12+00:00",
+   "lastReading": {
+    "rh": 57.7,
+    "temp_f": 69.26,
+    "time": "2026-11-16 22:35",
+    "vpd": 1.03
+   },
+   "name": "Mom Tent",
+   "online": true,
+   "source": "Govee H5110"
+  },
+  "govee-reptiles": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": null,
+   "name": "Reptiles",
+   "online": false,
+   "source": "Govee H5075"
+  },
+  "govee-smart-co-monitor": {
+   "checked": "2026-11-17T03:35:12+00:00",
+   "lastReading": {
+    "co2": 548,
+    "rh": 51.0,
+    "temp_f": 68.0,
+    "time": "2026-11-16 22:35",
+    "vpd": 1.15
+   },
+   "name": "Smart CO\u2082 Monitor",
+   "online": true,
+   "source": "Govee H5140"
+  },
+  "govee-thermo-hygrometer": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 57.0,
+    "temp_f": 67.28,
+    "time": "2026-11-16 22:37",
+    "vpd": 0.98
+   },
+   "name": "Thermo-Hygrometer",
+   "online": false,
+   "source": "Govee H5074"
+  },
+  "veg": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 56.55,
+    "temp_f": 78.04,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.42
+   },
+   "name": "Veg",
+   "online": true,
+   "source": "AC Infinity"
+  },
+  "veg_canopy": {
+   "checked": "2026-11-27T05:11:35+00:00",
+   "lastReading": {
+    "rh": 54.0,
+    "temp_f": 76.64,
+    "time": "2026-11-27 00:11",
+    "vpd": 1.44
+   },
+   "name": "Mom Tent",
+   "online": true,
+   "source": "Govee H5110"
+  }
+ },
+ "errors": [],
+ "updated": "2026-11-27T05:11:35+00:00"
+}
